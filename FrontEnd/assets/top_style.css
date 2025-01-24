@@ -1,0 +1,52 @@
+/*------Containers------*/
+.files-container{
+    margin-left: 35px;
+}
+
+.members-container{
+    padding: 0px;
+    margin: 0px;
+    margin-right: 5px;
+    text-align: right;
+}
+
+.title-container{
+    font-size: 18px;
+    margin: 0px;
+    margin-left: 5vw;
+}
+
+/*------Fonts; Texts------*/
+.title{
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/*------Buttons------*/
+.files-button{
+    font-size: 0.9vw;
+    border: 1px solid rgba(135, 155, 226, 0.25);
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: inherit;
+    border-radius: 5px;
+    box-sizing: content-box;
+    transition: all ease .2s;
+    position: relative;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 9px 20px
+}
+
+.files-button:hover {
+	background-color: rgba(135, 155, 226, 0.04); 
+    color: #a7aed0; 
+    border-color: rgba(135, 155, 226, 0.5); 
+}
+
+/*------Inputs------*/
+
+/*------Scroll Bar Design------*/
+
+/*------Etc.------*/
