@@ -26,6 +26,7 @@
     border-radius: 5px;
     background-color: rgba(135, 155, 226, 0.04);
     border: 1px solid rgba(135, 155, 226, 0.25);
+    flex-direction: column;
 }
 
 .right-container{
