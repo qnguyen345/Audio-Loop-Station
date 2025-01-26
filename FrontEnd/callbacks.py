@@ -22,8 +22,8 @@ def button_callbacks(app):
             button className: contains the button className for css styling
         """
         if n_clicks is None or n_clicks % 2 == 0:
-            # Pulsing for clicked button
             return "record-button"
+        # Pulsing for clicked button
         else:
             return "record-button-pulsing pulse"
         
@@ -64,3 +64,33 @@ def button_callbacks(app):
             set_tempo += 1
             
         return set_tempo
+    
+    @app.callback(
+        Output("left_play_icon_button", "children"),
+        Input("left_play_icon_button", "n_clicks")
+    )
+    def toggle_mute_unmute(n_clicks):
+        play = html.I(className="fa-solid fa-play")
+        pause = html.I(className="fa-solid fa-pause")
+        
+        # Default to play or if paused button is clicked
+        if n_clicks is None or n_clicks % 2 == 0:
+            return play
+        # Pause if button is clicked
+        else:
+            return pause
+        
+    @app.callback(
+        Output("left_mute_icon_button", "children"),
+        Input("left_mute_icon_button", "n_clicks")
+    )
+    def toggle_mute_unmute(n_clicks):
+        mute = html.I(className="fa-solid fa-volume-xmark")
+        unmute = html.I(className="fa-solid fa-volume-high")
+        
+        # Default to unmute button or if unmute button is clicked
+        if n_clicks is None or n_clicks % 2 == 0:
+            return unmute
+        # Mute button if clicked
+        else:
+            return mute

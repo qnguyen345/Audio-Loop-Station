@@ -81,10 +81,117 @@ layout = html.Div(
                 html.Div(
                     className="left-container",
                     children=[
+
+                        # Loop period
+                        html.Div(
+                            className="loop-container",
+                            children=[
+
+                                # Contains loop text, pitch button
+                                html.Div(
+                                    className="left-tab-section-container",
+                                    children=[
+
+                                        # Loop text
+                                        html.Span(
+                                            className="loop-period-text",
+                                            children="Loop Period"
+                                        ),
+
+                                        html.Div(
+                                            className="left-row-container",
+                                            children=[
+                                                # Pitch button
+                                                html.Button(
+                                                    className="pitch-button",
+                                                    id="pitch_button",
+                                                    children="Pitch"
+                                                ),
+
+                                                # Trash button
+                                                html.Button(
+                                                    className="trash-button",
+                                                    id="trash_button",
+                                                    children=[
+                                                        html.I(
+                                                            className="fa-solid fa-trash"
+                                                        )
+                                                    ]
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                ),  
+                            ]
+                        ),
+                        
+                        # Track container (#1)
+                        html.Div(
+                            className="track-container",
+                            children=[
+
+                                # Contains loop text, pitch button
+                                html.Div(
+                                    className="left-tab-section-container",
+                                    children=[
+
+                                        # Loop text
+                                        html.Span(
+                                            className="track-text",
+                                            children="Track 1"
+                                        ),
+
+                                        html.Div(
+                                            className="left-row-container",
+                                            children=[
+                                                # Play icon button
+                                                html.Button(
+                                                    className="left-play-icon-button",
+                                                    id="left_play_icon_button",
+                                                    children=[
+                                                        html.I(className="fa-solid fa-play"),
+                                                        ]
+                                                ),
+                                                
+                                                # Mute/unmute icon button
+                                                html.Button(
+                                                    className="left-mute-icon-button",
+                                                    id="left_mute_icon_button",
+                                                    children=[
+                                                        html.I(className="fa-solid fa-volume-xmark"),
+                                                        ]
+                                                ),
+
+                                                # Trash button
+                                                html.Button(
+                                                    className="trash-button",
+                                                    id="trash_button",
+                                                    children=[
+                                                        html.I(
+                                                            className="fa-solid fa-trash"
+                                                        )
+                                                    ]
+                                                )
+                                            ]
+                                        ),
+                                        
+                                        # Pitch button
+                                        html.Button(
+                                            className="pitch-button",
+                                            id="pitch_button",
+                                            children="Pitch"
+                                        ),
+                                        
+                                    ]
+                                ),  
+                            ]
+                        ),
+                        
+                        
                     ]
                 ),
 
-                # Right section
+                # Bottom right section
                 html.Div(
                     className="right-container",
                     children=[
@@ -186,7 +293,7 @@ layout = html.Div(
                                 ),
                             ]
                         ),
-                        
+
                         # 3 Requirements Buttons
                         html.Div(
                             className="right-fourth-row-container",
@@ -197,17 +304,17 @@ layout = html.Div(
                                     className="auto-trim-button",
                                     id="auto_trim_button",
                                     children="Auto-Trim"
-                                    ),
-                                
+                                ),
+
                                 # TO BE WORKED ON
                                 html.Button(
                                     className="auto-trim-button",
                                     children="Req.2 Button"
-                                    ),
+                                ),
                                 html.Button(
                                     className="auto-trim-button",
                                     children="Req.3 Button"
-                                    )
+                                )
                             ]
                         ),
 
@@ -229,17 +336,16 @@ layout = html.Div(
 
                             ]
                         ),
-
-
                     ]
-                )
+                ),
             ]
         )
     ]
 )
 
+
 # Add layout to app
-app.layout= layout
+app.layout = layout
 
 # Get callbacks
 callbacks.button_callbacks(app)
