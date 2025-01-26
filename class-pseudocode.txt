@@ -1,0 +1,85 @@
+# File Structure
+#
+# Ostinato Live
+# ├── Loops (date_id_name.json)
+# │   ├── 2025-01-01T00:00:00Z_12345678.json
+# │   └── 2025-01-01T00:00:00Z-ABCDEFGH_My Loop.json
+# ├── Tracks (date_id_name.wav)
+# │   ├── 2025-01-01T00:00:00Z_12345678.wav
+# │   └── 2025-01-01T00:00:00Z_ABCDEFGH_My Track.wav
+
+class Track:
+    file_name: str
+    is_muted: bool
+
+    def load():
+        pass
+
+    def save():
+        """Save the file."""
+        pass
+
+    def play(start_position):
+        pass
+
+    def stop():
+        pass
+
+    def record():
+        pass
+
+    # def rename(name):
+    #     pass
+
+class Loop:
+    name: str
+    is_playing: bool
+    tracks: [Track]
+
+    def play():
+        """Start playback, beginning from the current playhead position."""
+        pass
+    
+    def pause():
+        """Pause playback, keeping the playhead where it is."""
+        pass
+        
+    def stop():
+        """Stop playback and reset the playhead to 0."""
+        pass
+        
+    def record():
+        """Begin recording a new track, beginning on the next beat. Continue recording to a new track each time the playhead returns to the starting beat."""
+        pass
+        
+    def stop_recording():
+        """Stop recording, and discard the currently unfinished track."""
+        pass
+        
+    def unmute_tracks(*ids):
+        """Add the specified tracks to playback, beginning on the next beat."""
+        pass
+        
+    def mute_tracks(*ids):
+        """Remove the specified tracks from playback, beginning on the next beat."""
+        pass
+
+    # def add_tracks(*ids):
+    #     pass
+
+    # def remove_tracks(*ids):
+    #     pass
+
+    # def rename():
+    #     pass
+
+class LoopMachine:
+    def load_loop(id):
+        """Load a loop by its id."""
+        pass
+
+    def save_loop(id):
+        pass
+
+    def delete_loop(id):
+        pass
