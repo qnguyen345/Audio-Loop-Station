@@ -1,11 +1,14 @@
 # track.py
 # Contains logic for audio streams and file handling
-
-# To use module, use "from track import Track"
+#
 #
 # Track() object represents a track that can be linked to an existing wav file,
 # or it can record a new wav file that is automatically linked.
- 
+#
+# To use module:
+#   "from track import Track"
+# To create a track:
+#   "track1 = Track(5000, 1)""
 
 # -------- Please run in a Python 3.11 virtual environment -------- #
  
@@ -33,13 +36,19 @@ class Track:
     _duration: int
     _is_muted: bool
     _file_loaded: bool
+    _is_playing: bool
+    
+    _stream: object
 
     def __init__(self, duration=0, channels=1):
-        """Create new Track object.
+        """Create new Track object; no audio file loaded on init.
         
         Keyword arguments:
         duration -- length of loop in milliseconds 
         channels -- 1 for mono, 2 for stereo (default 1)
+        
+        Implementation notes: 
+        Recording a mono audio feed to a stereo track doesn't work and is not handled yet.
         """
         
         if channels not in [1, 2]:
@@ -52,9 +61,8 @@ class Track:
         self._duration = duration
         self._is_muted = False
         self._file_loaded = False
+        self._is_playing = False
 
-    
-    
 
 
     def save_track(self):
@@ -64,8 +72,8 @@ class Track:
         tracks_index[self._uid] = self.__dict__
         with open('tracks/saved_tracks.json', 'w') as file:
             json.dump(tracks_index, file)
-    
-    
+
+
     def load_track(self, uid=''):
         """Load a saved track; if no UID provided, lists saved tracks.
         
@@ -89,6 +97,7 @@ class Track:
                     self._channels = tracks[uid]['_channels']
                     self._duration = tracks[uid]['_duration']
                     self._file_loaded = tracks[uid]['_file_loaded']
+                    self._is_playing = False
             except:
                 raise KeyError(f"Track UID {uid} does not exist.")
 
@@ -116,11 +125,17 @@ class Track:
         else:
             raise OSError(f"Audio file {filename} not found")
 
+
     def play(self, start_position=0):
-        """Plays the loaded audio file in a thread
+        """Plays the loaded audio file in a thread, repeating until Track.stop() is called.
         
         Keyword arguments:
         start_position -- playhead position in milliseconds (default 0)
+            Playback repeats from this position as well
+        
+        Implementation notes:
+        start_position would shorten the length of the file, unsyncing from other loops.
+        I may need to add an equal amount of time to the end.
         """
         if not self._file_loaded:
             raise AttributeError("Please record or load a file into the track before initiating playback.")
@@ -141,21 +156,27 @@ class Track:
                             channels=wf.getnchannels(),
                             rate=wf.getframerate(),
                             output=True)
+            
             print(f'Start playback of {self._filename}...')
-            while len(data := wf.readframes(self.CHUNK)):
-                stream.write(data)
+            self._is_playing = True
+            while self._is_playing:
+                while len(data := wf.readframes(self.CHUNK)):
+                    stream.write(data)
+                wf.setpos(start_position)
             print('Playback complete.')
                 
             stream.close()
             p.terminate()
 
-    def stop():
-        raise NotImplementedError("Method not yet implemented")
+    def stop(self):
+        """ Breaks the playback loop, which closes the thread """
+        self._is_playing = False
 
     def record(self):
+        """ Starts recording for track's duration """
         rec_thread = threading.Thread(target=self._record_stream, daemon=True)
         rec_thread.start()
-        self._file_loaded = True
+        
 
     def _record_stream(self):
         """helper method for record()"""
@@ -166,9 +187,8 @@ class Track:
             wf.setframerate(self.RATE)
             
             stream = p.open(format=self.FORMAT, channels=self._channels, rate=self.RATE, input=True)
+            
             print('Recording...')
-            # for chunk in range(0, self.RATE // self.CHUNK * (self._duration // 1000)):
-            #     wf.writeframes(stream.read(self.CHUNK))
             start_time = time.time()
             while True:
                 wf.writeframes(stream.read(self.CHUNK))
@@ -178,7 +198,27 @@ class Track:
             
             stream.close()
             p.terminate()
+            self._file_loaded = True
     
+    def rename(self, name:str=''):
+        """Updates the track's custom name and the filename, if a file is loaded.
+        """
+        self._custom_name = name
+        new_filename = f'{self._filename}_{name}'
+        if self._file_loaded:
+            wav_file = os.path.join('tracks', f'{self._filename}.wav')
+            wav_file_new_name = os.path.join('tracks', f'{new_filename}.wav')
+            os.rename(wav_file, wav_file_new_name)
+        self._filename = new_filename
+        print(f'Track renamed to {name}.')
+    
+    def _generate_filename(self, name=''):
+        """Generate a filename with date, time.
+        e.g., 2025-01-01T00:00:00Z.wav
+        """
+        custom_name = f'_{name}' if name != '' else ''
+        now = datetime.now()
+        return f'{now.strftime("%Y-%m-%dT%H:%M:%S")}{custom_name}'
     
     #####################
     #      GETTERS      #
@@ -204,23 +244,17 @@ class Track:
     def get_audio_file_loaded(self):
         return self.get_audio_file_loaded
     
-    
+    #####################
+    #      SETTERS      #
+    #####################
     def set_duration(self, duration:int):
         """Set track duration in milliseconds"""
         self._duration = duration
     
     
-    def rename(name):
-        raise NotImplementedError("Method not implemented")
-    
-    def _generate_filename(self, name=''):
-        """Generate a filename with date, time, alphanumeric UID, and optional custom name.
-        e.g., 2025-01-01T00:00:00Z_12345678_name.wav
-        """
-        custom_name = f'_{name}' if name != '' else ''
-        now = datetime.now()
-        return f'{now.strftime("%Y-%m-%dT%H-%M-%S")}{custom_name}'
-    
+    #####################
+    #      UTILITY      #
+    #####################
     def __str__(self):
         """print(some_track) to display track data."""
         return(f'''
@@ -244,16 +278,20 @@ if __name__ == "__main__":
     test_duration = 1000
     
     new_track = Track(test_duration)
-    print(new_track._filename)
     new_track.record()
-    debug_timer(test_duration)
-    
-    new_track.play()
-    debug_timer(test_duration)
-    
-    new_track.save_track()
-    
-    new_track.load_track()
-    new_track.load_track('uveGSSfHBTqK')
-    new_track.load_audio_file()
     print(new_track)
+    new_track.rename('new_name')
+    
+    # new_track.record()
+    # debug_timer(test_duration)
+    
+    # new_track.play()
+    # debug_timer(test_duration)
+    
+    # new_track.save_track()
+    
+    # new_track.load_track()
+    # new_track.load_track('uveGSSfHBTqK')
+    # new_track.load_audio_file()
+    print(new_track)
+    pass
