@@ -322,7 +322,18 @@ layout = html.Div(
                         html.Div(
                             className="right-fifth-row-container",
                             children=[
-
+                                
+                                 # Save button to save loop
+                                 html.Button(
+                                     className="delete-loop-button",
+                                     id="delete_loop_button",
+                                     children=[
+                                         html.Span(className="delete-loop-text",
+                                                   children="Delete Loop"
+                                                   )
+                                     ]
+                                 ),
+                                 
                                 # Save button to save loop
                                 html.Button(
                                     className="save-button",
