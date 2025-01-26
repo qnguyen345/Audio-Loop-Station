@@ -48,7 +48,7 @@
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 20vh;
+    margin-top: 10vh;
 }
 
 .tempo-container{
@@ -69,6 +69,10 @@
 
 /*------Fonts; Texts------*/
 .auto-trim-text {
+    color: #f0f0f3;
+}
+
+.delete-loop-text {
     color: #f0f0f3;
 }
 
@@ -127,6 +131,21 @@
 
 .auto-trim-button:hover .auto-trim-text {
     color: #a7aed0; 
+}
+
+.delete-loop-button {
+    font-size: 0.9vw;
+    width: 8vw;
+    height: 2vw;
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5vw;
 }
 
 .pause-button {
