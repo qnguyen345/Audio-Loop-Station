@@ -1,4 +1,15 @@
 /*------Containers------*/
+.add-track-button-container{
+    height: 100px;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 16px;
+    position: relative;
+}
+
 .left-loop-tab-section-container {
     margin: 0px;
     width: 120px;
@@ -57,7 +68,7 @@
 
 .track-container {
     overflow-y: auto; 
-    max-height: calc(90vh - 75px); /*bottom container height - loop container height*/
+    max-height: calc(820px - 75px); /*bottom container height - loop container height*/
 }
 
 .track-tabs-container {
@@ -89,6 +100,21 @@
 }
 
 /*------Buttons------*/
+.add-track-button {
+    width: 300px; 
+    height: 70px;
+    background: none; 
+    border: none; 
+    padding: 0; 
+    margin: 0; 
+    font: inherit; 
+    color: inherit; 
+    cursor: pointer; 
+    font-weight: bolder;
+    color: #344079;
+    font-size: 22px;
+}
+
 .left-play-icon-button {
     font-size: 12px; 
     width: 25px; 
@@ -129,8 +155,8 @@
 
 .pitch-button {
     font-size: 14px;
-    width: 60px;
-    height: 30px;
+    width: 50px;
+    height: 25px;
     color: #f0f0f3;
     background-color: #344079;
     border: 1px solid #435199;

@@ -21,7 +21,7 @@
 
 .left-container{
     width: 88%;
-    height: 90vh;
+    height: 820px;
     margin: 0.8vw;
     border-radius: 5px;
     background-color: rgba(135, 155, 226, 0.04);
@@ -32,7 +32,7 @@
 
 .right-container{
     width: 15%;
-    height: 90vh;
+    height: 820px;
     margin: 0.8vw;
     margin-left: 0px;
     border-radius: 5px;
