@@ -1,13 +1,13 @@
 /*------Containers------*/
 .right-first-second-row-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; 
-    grid-template-rows: 1fr 1fr; 
-    gap: 1vw; 
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px; 
     box-sizing: border-box;
     justify-content: center;
     align-items: center;
-    height: auto; 
+    height: auto;
     margin: 10px;
     margin-top: 20px;
 }
@@ -20,7 +20,7 @@
     justify-self: start; /* Align 2nd column to the left */
 }
 
-.right-third-row-container{
+.right-third-row-container {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -28,33 +28,33 @@
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 3vh;
+    margin-top: 30px; 
 }
 
-.right-fourth-row-container{
+.right-fourth-row-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 5vh;
+    margin-top: 50px; 
 }
 
-.right-fifth-row-container{
+.right-fifth-row-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 10vh;
+    margin-top: 100px; 
 }
 
-.tempo-container{
+.tempo-container {
     display: flex;
     flex-direction: column;
-    width: 11vw;
+    width: 176px; 
     background-color: #344079;
     border: 1px solid #435199;
     color: #f0f0f3;
@@ -78,17 +78,17 @@
 
 .pause-text {
     color: #f0f0f3;
-    margin-left: 5px; 
+    margin-left: 5px;
 }
 
 .play-text {
     color: #404353;
-    margin-left: 5px; 
+    margin-left: 5px;
 }
 
 .record-text {
     color: #f0f0f3;
-    margin-left: 5px; 
+    margin-left: 5px;
 }
 
 .save-text {
@@ -98,22 +98,22 @@
 
 .stop-text {
     color: #f0f0f3;
-    margin-left: 5px; 
+    margin-left: 5px;
 }
 
-.tempo-text{
-    font-size: 0.9vw;
+.tempo-text {
+    font-size: 14px; 
     display: block;
     color: #f0f0f3;
     font-family: Arial, Helvetica, sans-serif;
-    margin-bottom: 0.5vw;
+    margin-bottom: 8px; 
 }
 
 /*------Buttons------*/
 .auto-trim-button {
-    font-size: 0.9vw;
-    width: 11vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 176px; 
+    height: 32px; 
     color: #f0f0f3;
     background-color: #344079;
     border: 1px solid #435199;
@@ -122,21 +122,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 3vh;
+    margin-top: 30px; 
 }
 
 .auto-trim-button:hover {
-    background-color: #283367; 
+    background-color: #283367;
 }
 
 .auto-trim-button:hover .auto-trim-text {
-    color: #a7aed0; 
+    color: #a7aed0;
 }
 
 .delete-loop-button {
-    font-size: 0.9vw;
-    width: 8vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 128px; 
+    height: 32px; 
     color: #f0f0f3;
     background-color: #344079;
     border: 1px solid #435199;
@@ -145,13 +145,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 5vw;
+    margin-bottom: 80px; 
 }
 
 .pause-button {
-    font-size: 0.9vw;
-    width: 5vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
     color: #f0f0f3;
     background-color: #344079;
     border: 1px solid #435199;
@@ -163,21 +163,21 @@
 }
 
 .pause-button:hover {
-    background-color: #283367; 
+    background-color: #283367;
 }
 
 .pause-button:hover .pause-text {
-    color: #a7aed0; 
+    color: #a7aed0;
 }
 
 .play-button {
-    font-size: 0.9vw;
-    width: 5vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px;
     color: #404353;
     font-family: Arial, Helvetica, sans-serif;
     background-color: #a7aed0;
-    border: 1px solid #b0b8e4; 
+    border: 1px solid #b0b8e4;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -187,17 +187,17 @@
 
 .play-button:hover {
     background-color: #9095af;
-    color: #292a33; 
+    color: #292a33;
 }
 
 .play-button:hover .play-text {
-    color: #292a33; 
+    color: #292a33;
 }
 
 .record-button {
-    font-size: 0.9vw;
-    width: 5vw;
-    height: 2vw;
+    font-size: 14px;
+    width: 80px;
+    height: 32px; 
     color: #f0f0f3;
     background-color: #cc0000;
     border: 1px solid #e60101;
@@ -209,23 +209,23 @@
 }
 
 .record-button:hover {
-    background-color: #ad0202; 
+    background-color: #ad0202;
 }
 
 .record-button:hover .record-text {
-    color: #e7b6b6; 
+    color: #e7b6b6;
 }
 
-.record-button:hover i { 
+.record-button:hover i {
     color: #e7b6b6;
 }
 
 .record-button-pulsing {
-    font-size: 0.9vw;
-    width: 5vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
     background-color: #cc0000;
-    border: 1px solid #cc0000; 
+    border: 1px solid #cc0000;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
@@ -238,27 +238,26 @@
     background-color: #ad0202;
 }
 
-
 .record-button-pulsing:focus {
     outline: none;
 }
 
 .record-button-pulsing:hover .record-text {
-    color: #e7b6b6; 
+    color: #e7b6b6;
 }
 
-.record-button-pulsing:hover i { 
+.record-button-pulsing:hover i {
     color: #e7b6b6;
 }
 
 .save-button {
-    font-size: 0.9vw;
-    width: 6vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 96px; 
+    height: 32px; 
     color: #404353;
     font-family: Arial, Helvetica, sans-serif;
     background-color: #a7aed0;
-    border: 1px solid #b0b8e4; 
+    border: 1px solid #b0b8e4;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -271,13 +270,13 @@
 }
 
 .save-button:hover .save-text {
-    color: #292a33; 
+    color: #292a33;
 }
 
 .stop-button {
-    font-size: 0.9vw;
-    width: 5vw;
-    height: 2vw;
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
     color: #f0f0f3;
     background-color: #344079;
     border: 1px solid #435199;
@@ -289,66 +288,67 @@
 }
 
 .stop-button:hover {
-    background-color: #283367; 
+    background-color: #283367;
 }
 
 .stop-button:hover .stop-text {
-    color: #a7aed0; 
+    color: #a7aed0;
 }
 
-.tempo-button{
-    font-size: 1vw;
-    width: 1.5vw;
-    height: 1.5vw;
+.tempo-button {
+    font-size: 16px; 
+    width: 24px;
+    height: 24px; 
     background-color: #a7aed0;
-    border: 1px solid #b0b8e4; 
-    border-radius: 50%; 
-    color: #404353; 
-    cursor: pointer; 
+    border: 1px solid #b0b8e4;
+    border-radius: 50%;
+    color: #404353;
+    cursor: pointer;
     align-items: center;
     justify-content: center;
-    margin: 0vw 0.5vw;
+    margin: 0px 8px; 
 }
 
 @-webkit-keyframes pulse {
-    0% { 
+    0% {
         color: #f0f0f3;
         background-color: #cc0000;
-        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.5); 
+        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.5);
     }
     50% {
         color: #f0f0f3;
         background-color: rgba(255, 51, 51, 0.9);
-        box-shadow: 0 0 0 2px rgba(255, 51, 51, 0.5);  
+        box-shadow: 0 0 0 2px rgba(255, 51, 51, 0.5);
     }
     100% {
         color: #f0f0f3;
-        background-color: #cc0000;  
-        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);  
+        background-color: #cc0000;
+        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
     }
 }
 
 /*------Inputs------*/
-.tempo-input{
-    font-size: 0.9vw;
-    width: 2.2vw;
-    height: 1.5vw;
+.tempo-input {
+    font-size: 14px; 
+    width: 35px; 
+    height: 24px; 
     background-color: #f0f0f3;
-    border: 1px solid #404353; 
-    border-radius: 1px; 
-    color: #404353; 
+    border: 1px solid #404353;
+    border-radius: 1px;
+    color: #404353;
 }
 
 /*------Scroll Bar Design------*/
 
 /*------Etc.------*/
 
-/*Hides up/down arrow in tempo input field */
+/* Hides up/down arrow in tempo input field */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
 input[type="number"] {
     -moz-appearance: textfield;
 }

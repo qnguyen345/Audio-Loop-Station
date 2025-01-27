@@ -2,36 +2,37 @@
 .app-container{
     display: flex;
     flex-direction: column;
-    width: 100vw;
+    width: 100% ;
     height: 100vh;
     background-color: #0e0f16;
 }
 
-.bottom-container{
+.bottom-container {
     display: flex;
     flex: 1;
     flex-direction: row;
     justify-content: center;
     width: 100%;
+    box-sizing: border-box;
     margin: 0px;
-    margin-bottom: 25px;
     padding: 0px;
     background-color: #0e0f16;
 }
 
 .left-container{
     width: 88%;
-    height: 100%;
+    height: 90vh;
     margin: 0.8vw;
     border-radius: 5px;
     background-color: rgba(135, 155, 226, 0.04);
     border: 1px solid rgba(135, 155, 226, 0.25);
     flex-direction: column;
+    overflow: hidden
 }
 
 .right-container{
     width: 15%;
-    height: 100%;
+    height: 90vh;
     margin: 0.8vw;
     margin-left: 0px;
     border-radius: 5px;
@@ -39,15 +40,16 @@
     border: 1px solid rgba(135, 155, 226, 0.25);
 }
 
-.top-container{
+.top-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 8%;
+    height: 60px;
     background-color: rgba(135, 155, 226, 0.04);
     border-bottom: 1px solid rgba(135, 155, 226, 0.25);
+    flex-shrink: 0; 
 }
 
 
@@ -77,10 +79,11 @@ h5{
 /*------Etc.------*/
 *{
     box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
 }
 
-body{
- 
-    margin: 0px
-}
-
+html, body {
+    margin: 0px;
+    padding: 0px;
+} 
