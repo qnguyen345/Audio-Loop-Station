@@ -11,3 +11,5 @@ Hides updown arrow in tempo input field: https://stackoverflow.com/questions/379
 2 x 2 container: https://codepen.io/MattWindle/pen/perZRG
 
 font-family: Arial, Helvetica, sans-serif;
+
+checklist: https://dash.plotly.com/dash-core-components/checklist

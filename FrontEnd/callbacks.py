@@ -64,6 +64,27 @@ def button_callbacks(app):
             set_tempo += 1
 
         return set_tempo
+    
+    @app.callback(
+        Output("files_modal", "is_open"),
+        [Input("files_button", "n_clicks"),
+         Input("close_files_modal", "n_clicks")],
+        [State("files_modal", "is_open")],
+    )
+    def toggle_files_modal(n1, n2, is_open):
+        """
+        Opens a popup when files button is clicked.
+        Parameters:
+        -----------
+            n1 (int or None): number files button clicked.
+            n2 (int or None): number close button clicked.
+        Returns:
+        -------
+            files_modal (boolean): whether modal is currently open.
+        """
+        if n1 or n2:
+            return not is_open
+        return is_open
 
 
 def add_new_track_section(app):

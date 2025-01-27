@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 
 import callbacks
 
@@ -10,7 +11,8 @@ import UI_sections.top_layout as top_layout
 import UI_sections.loop_layout as loop_layout
 
 # Initialize Dash app
-app = dash.Dash(__name__)
+# Note: external stylesheet is for moal/file popup styling
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Contains the UI layout
 layout = html.Div(
