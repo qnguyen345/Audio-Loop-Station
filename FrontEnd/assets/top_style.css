@@ -13,17 +13,33 @@
 .title-container{
     font-size: 18px;
     margin: 0px;
-    margin-left: 5vw;
+    margin-left: 3vw;
 }
 
 /*------Fonts; Texts------*/
+.member-class-text {
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    font-size: 12px;
+}
+
 .title{
     color: #f0f0f3;
     font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    margin: 0px;
 }
 
+.modal-files-title{
+    font-size: 22px;
+    margin: 10px;
+    align-items: center;
+    font-weight: bold;
+}
 
 /*------Buttons------*/
+
 .files-button{
     font-size: 16px;
     border: 1px solid rgba(135, 155, 226, 0.25);
@@ -40,10 +56,53 @@
 }
 
 .files-button:hover {
-	background-color: rgba(135, 155, 226, 0.04); 
     color: #a7aed0; 
-    border-color: rgba(135, 155, 226, 0.5); 
+    border-color: rgba(135, 155, 226, 0.5);
+    background-color: rgba(135, 155, 226, 0.04);  
 }
+
+.btn-close {
+    position: absolute;
+    right: 20px; 
+    top: 17px; 
+    font-size: 16px; 
+    color: #404353;
+}
+/*------Popups------*/
+.close-files-modal.btn.btn-primary{
+    font-size: 16px;
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.close-files-modal.btn.btn-primary:hover {
+    background-color: #283367;
+}
+
+.files-modal-header {
+    display: flex;
+    flex-shrink: 0;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    border-bottom: 1px solid rgba(64, 67, 83, 0.5);
+}
+
+.modal-content {
+    position: absolute;
+    top: 49px;
+    font-size: 14px;
+    color: #404353;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #a7aed0; 
+    border-radius: 5px;
+    border: 1px solid #b0b8e4;
+    width: 100%;
+    overflow: auto;
+  }
 
 /*------Inputs------*/
 

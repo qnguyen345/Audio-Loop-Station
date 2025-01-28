@@ -129,9 +129,6 @@
     background-color: #283367;
 }
 
-.auto-trim-button:hover .auto-trim-text {
-    color: #a7aed0;
-}
 
 .delete-loop-button {
     font-size: 14px; 
@@ -166,9 +163,6 @@
     background-color: #283367;
 }
 
-.pause-button:hover .pause-text {
-    color: #a7aed0;
-}
 
 .play-button {
     font-size: 14px; 
@@ -190,10 +184,6 @@
     color: #292a33;
 }
 
-.play-button:hover .play-text {
-    color: #292a33;
-}
-
 .record-button {
     font-size: 14px;
     width: 80px;
@@ -210,14 +200,6 @@
 
 .record-button:hover {
     background-color: #ad0202;
-}
-
-.record-button:hover .record-text {
-    color: #e7b6b6;
-}
-
-.record-button:hover i {
-    color: #e7b6b6;
 }
 
 .record-button-pulsing {
@@ -269,10 +251,6 @@
     background-color: #9095af;
 }
 
-.save-button:hover .save-text {
-    color: #292a33;
-}
-
 .stop-button {
     font-size: 14px; 
     width: 80px; 
@@ -289,10 +267,6 @@
 
 .stop-button:hover {
     background-color: #283367;
-}
-
-.stop-button:hover .stop-text {
-    color: #a7aed0;
 }
 
 .tempo-button {

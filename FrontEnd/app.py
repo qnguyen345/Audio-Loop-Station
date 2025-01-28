@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 
 import callbacks
 
@@ -10,13 +11,13 @@ import UI_sections.top_layout as top_layout
 import UI_sections.loop_layout as loop_layout
 
 # Initialize Dash app
-app = dash.Dash(__name__)
+# Note: external stylesheet is for moal/file popup styling
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Contains the UI layout
 layout = html.Div(
     className="app-container",
     children=[
-
 
         # Links css style file
         html.Link(rel="stylesheet", href="./assets/main_style.css"),
@@ -29,6 +30,9 @@ layout = html.Div(
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css",
         ),
 
+
+        # Store components to keep track of the number of track sections
+        dcc.Store(id="track_index", data={"index": 6}),
 
         # Top section
         html.Div(
@@ -76,8 +80,9 @@ layout = html.Div(
 # Add layout to app
 app.layout = layout
 
-# Get callbacks
+# Get all callbacks
 callbacks.button_callbacks(app)
+callbacks.add_new_track_section(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
