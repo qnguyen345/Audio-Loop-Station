@@ -45,60 +45,82 @@ class LoopMachine:
 
     def start_recording(self):
         """Start a new loop recording."""
+        print("start_recording() called")  # Debugging
         self.is_recording = True
         self.current_recording = np.zeros((FRAMES_PER_LOOP, CHANNELS), dtype=np.int16)
         self.recording_index = len(self.loops)  # New segment
-        print("Recording started...")
+        print(f"Recording started. Loops recorded so far: {len(self.loops)}")
 
     def stop_recording(self):
         """Stop recording and discard the current incomplete segment."""
         self.is_recording = False
         self.current_recording = None
-        print("Recording stopped.")
+        print(f"Recorded Loops: {len(self.loops)}")
 
     def audio_callback(self, in_data, frame_count, time_info, status):
-        """Audio callback function for handling synchronized recording and playback."""
-        # Allocate memory for output stream
-        global_audio_out = np.zeros((frame_count, CHANNELS), dtype=np.int16)
+        """Handles both playback and recording in sync."""
 
-        # Read from input stream
+        # print(f"audio_callback called. is_recording={self.is_recording}, in_data={in_data is not None}")  # Debugging
 
+        global_audio_out = np.zeros((frame_count, 1), dtype=np.int16)  # Mono output
+
+        # Only process input data if we're recording
         if self.is_recording:
-            if in_data is None:
-                print("Warning: No input data received!")
-                # return (b'\x00' * frame_count * 2, pyaudio.paContinue)  # Return silence
-            input_audio = np.frombuffer(in_data, dtype=np.int16).reshape(-1, CHANNELS)
+            try:
+                in_data = self.input_stream.read(frame_count, exception_on_overflow=False)
+                input_audio = np.frombuffer(in_data, dtype=np.int16).reshape(-1, 1)  # Mono
+            except IOError as e:
+                print(f"Input stream read error: {e}")
+                input_audio = np.zeros((frame_count, 1), dtype=np.int16)  # Silence fallback
 
-            # Write incoming audio to the recording buffer
+            # Write input to the current recording segment
             start_idx = self.position
             end_idx = self.position + frame_count
 
+            print(f"Recording position: {start_idx} to {end_idx}")
+
             if end_idx >= FRAMES_PER_LOOP:
-                # Wrap around if we reach the end of the loop
+                # Wrap around if reaching the end
                 first_part = input_audio[:FRAMES_PER_LOOP - start_idx]
                 second_part = input_audio[FRAMES_PER_LOOP - start_idx:]
 
                 self.current_recording[start_idx:] = first_part
-                self.loops.append(self.current_recording)  # Save completed segment
+                print(f"Saving loop of length: {len(self.current_recording)}")
+                self.loops.append(self.current_recording)  # Store finished segment
 
                 # Start a new segment
-                self.current_recording = np.zeros((FRAMES_PER_LOOP, CHANNELS), dtype=np.int16)
+                self.current_recording = np.zeros((FRAMES_PER_LOOP, 1), dtype=np.int16)
                 self.current_recording[:len(second_part)] = second_part
             else:
-                # Fill the current recording segment
+                # Fill the current recording buffer
                 self.current_recording[start_idx:end_idx] = input_audio
 
-        # Mix playback audio from recorded loops
+        # Mix playback audio from existing recorded loops
         for loop in self.loops:
-            global_audio_out += loop[self.position:self.position + frame_count]
+            end_idx = self.position + frame_count
+
+            if end_idx > len(loop):
+                # Wrap around: split the read into two parts
+                first_part = loop[self.position:]  # Read until the end
+                second_part = loop[:end_idx - len(loop)]  # Read from start of loop
+                mixed_output = np.vstack((first_part, second_part))
+            else:
+                mixed_output = loop[self.position:end_idx]
+
+            # Ensure the output shape matches frame_count before mixing
+            if mixed_output.shape[0] < frame_count:
+                padding = np.zeros((frame_count - mixed_output.shape[0], 1), dtype=np.int16)
+                mixed_output = np.vstack((mixed_output, padding))  # Zero-pad to avoid shape mismatch
+
+            global_audio_out += mixed_output
 
         # Prevent clipping
         global_audio_out = np.clip(global_audio_out, -32768, 32767)
 
-        # Move forward in the loop buffer
+        # Move playback position forward
         self.position += frame_count
         if self.position >= FRAMES_PER_LOOP:
-            self.position = 0  # Wrap around to the start of the loop
+            self.position = 0  # Loop back to start
 
         return (global_audio_out.tobytes(), pyaudio.paContinue)
 
