@@ -11,6 +11,7 @@ RATE = 44100  # Sample rate
 BPM = 120  # Set your desired tempo
 BEATS_PER_LOOP = 4  # Number of beats per loop
 FRAMES_PER_LOOP = int((60 / BPM) * BEATS_PER_LOOP * RATE) # Calculate loop length in frames
+LATENCY_ADJUSTMENT_FACTOR = 0.75
 print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
 
 def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
@@ -45,7 +46,8 @@ class LoopMachine:
             channels=CHANNELS,
             rate=RATE,
             input=True,
-            frames_per_buffer=CHUNK
+            frames_per_buffer=CHUNK,
+            input_device_index=3
         )
 
         # Open output stream for playback
@@ -58,9 +60,16 @@ class LoopMachine:
             stream_callback=self.audio_callback
         )
 
+        device_index = self.p.get_default_input_device_info()["index"]
+        device_info = self.p.get_device_info_by_index(device_index)
+        print(f"Active Input Device Index: {device_index}")
+        print(f"Active Input Device Name: {device_info['name']}")
+        print(f"Active Latency: {self.input_stream.get_input_latency()} sec")
+
         input_latency = self.input_stream.get_input_latency()
         output_latency = self.output_stream.get_output_latency()
         print(f"Input Latency: {input_latency:.4f} sec, Output Latency: {output_latency:.4f} sec")
+        self.input_latency_compensation = int(input_latency * RATE * LATENCY_ADJUSTMENT_FACTOR)
 
         self.output_stream.start_stream()
 
@@ -117,7 +126,7 @@ class LoopMachine:
 
                 self.current_recording[start_idx:] = first_part
                 print(f"Saving loop of length: {len(self.current_recording)}")
-                self.loops.append(self.current_recording)  # Store finished segment
+                self.loops.append(np.roll(self.current_recording, -self.input_latency_compensation, axis=0))  # Store finished segment with latency compensation
 
                 # Start a new segment
                 self.current_recording = np.zeros((FRAMES_PER_LOOP, 1), dtype=np.int16)
