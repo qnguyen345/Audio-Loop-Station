@@ -11,6 +11,7 @@ RATE = 44100  # Sample rate
 BPM = 120  # User-defined tempo
 BEATS_PER_LOOP = 4  # User-defined beats per loop
 FRAMES_PER_LOOP = int((60 / BPM) * BEATS_PER_LOOP * RATE)  # Loop length in frames
+ADJUSTMENT_FACTOR = 0.75  # Fine-tune latency correction
 print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
 
 def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
@@ -36,17 +37,14 @@ class LoopMachine:
         self.click_track = generate_clicks()
         
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
-        print(f"Measured Input Latency: {self.input_latency:.4f} sec")
+        self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
+        print(f"Measured Input Latency: {self.input_latency:.4f} sec, Compensation: {self.latency_compensation_samples} samples")
         
         self.stream = sd.Stream(
             samplerate=RATE,
             blocksize=CHUNK,
             channels=CHANNELS,
             dtype=FORMAT,
-            extra_settings=sd.CoreAudioSettings(
-                fail_if_conversion_required=True,  # Prevents high-latency format conversions
-                conversion_quality='min'  # Reduces processing time
-            ),
             callback=self.audio_callback
         )
         self.stream.start()
@@ -58,15 +56,17 @@ class LoopMachine:
         self.current_recording = np.zeros((FRAMES_PER_LOOP, CHANNELS), dtype=np.int16)
 
     def stop_recording(self):
-        """Stop recording and store the completed segment."""
+        """Stop recording and store the completed segment with latency compensation."""
         print("Recording stopped.")
         self.is_recording = False
         if self.current_recording is not None:
-            self.loops.append(self.current_recording)
+            # Shift recording earlier while preserving full segment duration
+            adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
+            self.loops.append(adjusted_recording)
         self.current_recording = None
 
     def audio_callback(self, indata, outdata, frames, time, status):
-        """Handles real-time recording and playback."""
+        """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
         
         # Inject click track
@@ -85,15 +85,17 @@ class LoopMachine:
                 first_part = indata[:FRAMES_PER_LOOP - start_idx]
                 second_part = indata[FRAMES_PER_LOOP - start_idx:]
                 self.current_recording[start_idx:] = first_part
-                self.loops.append(self.current_recording)
+                adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
+                self.loops.append(adjusted_recording)
                 self.current_recording = np.zeros((FRAMES_PER_LOOP, 1), dtype=np.int16)
                 self.current_recording[:len(second_part)] = second_part
             else:
                 self.current_recording[start_idx:end_idx] = indata
         
-        # Playback all stored loops
+        # Playback all stored loops with compensated timing
         for loop in self.loops:
-            loop_segment = loop[self.position:self.position + frames]
+            playback_start = (self.position - self.latency_compensation_samples) % FRAMES_PER_LOOP
+            loop_segment = loop[playback_start:playback_start + frames]
             if loop_segment.shape[0] < frames:
                 padding = np.zeros((frames - loop_segment.shape[0], 1), dtype=np.int16)
                 loop_segment = np.vstack((loop_segment, padding))
@@ -106,11 +108,10 @@ class LoopMachine:
         # Move position forward
         self.position += frames
         if self.position >= FRAMES_PER_LOOP:
-            print("[LOOP]")
             self.position = 0
 
     def stop(self):
-        """Stop the loop machine and close the audio stream."""
+        """Stops the loop machine and closes the audio stream."""
         self.is_recording = False
         self.stream.stop()
         self.stream.close()
