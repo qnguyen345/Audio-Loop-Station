@@ -58,6 +58,10 @@ class LoopMachine:
             stream_callback=self.audio_callback
         )
 
+        input_latency = self.input_stream.get_input_latency()
+        output_latency = self.output_stream.get_output_latency()
+        print(f"Input Latency: {input_latency:.4f} sec, Output Latency: {output_latency:.4f} sec")
+
         self.output_stream.start_stream()
 
     def start_recording(self):
@@ -85,6 +89,8 @@ class LoopMachine:
         click_position = self.position % len(self.click_track)
         click_segment = self.click_track[click_position:click_position + frame_count]
         if click_segment.shape[0] < frame_count:
+            output_timestamp = time.time()
+            print(f"Click playing at {output_timestamp:.4f} seconds")
             padding = np.zeros((frame_count - click_segment.shape[0], 1), dtype=np.int16)
             click_segment = np.vstack((click_segment, padding))
         global_audio_out += click_segment
@@ -102,7 +108,7 @@ class LoopMachine:
             start_idx = self.position
             end_idx = self.position + frame_count
 
-            print(f"Recording position: {start_idx} to {end_idx}")
+            # print(f"Recording position: {start_idx} to {end_idx}")
 
             if end_idx >= FRAMES_PER_LOOP:
                 # Wrap around if reaching the end
@@ -146,6 +152,8 @@ class LoopMachine:
         self.position += frame_count
         if self.position >= FRAMES_PER_LOOP:
             self.position = 0  # Loop back to start
+            # record_timestamp = time.time()
+            # print(f"Recording at {record_timestamp:.4f} seconds")
 
         return (global_audio_out.tobytes(), pyaudio.paContinue)
 
