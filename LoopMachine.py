@@ -8,8 +8,24 @@ CHUNK = 1024  # Frames per buffer
 FORMAT = pyaudio.paInt16
 CHANNELS = 1  # Mono
 RATE = 44100  # Sample rate
-LOOP_DURATION_SEC = 4  # Define loop length (adjustable)
-FRAMES_PER_LOOP = RATE * LOOP_DURATION_SEC  # Number of samples in one loop
+BPM = 120  # Set your desired tempo
+BEATS_PER_LOOP = 4  # Number of beats per loop
+FRAMES_PER_LOOP = int((60 / BPM) * BEATS_PER_LOOP * RATE) # Calculate loop length in frames
+print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
+
+def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
+    """Generate a short click sound."""
+    duration_samples = int((duration_ms / 1000) * sample_rate)
+    t = np.linspace(0, duration_ms / 1000, duration_samples, False)
+    click = (np.sin(2 * np.pi * frequency * t) * 0.5 * 32767).astype(np.int16)
+    return click.reshape(-1, 1)  # Ensure mono output
+
+def generate_clicks(sample_rate=RATE, duration_ms=50, frequency=1000, beats=BEATS_PER_LOOP):
+    """Generate a sequence of click sounds for a metronome."""
+    click = generate_click(sample_rate, duration_ms, frequency)
+    silence = np.zeros((int((60 / BPM) * sample_rate) - len(click), 1), dtype=np.int16)
+    full_click_pattern = np.vstack([np.vstack((click, silence)) for _ in range(beats)])
+    return full_click_pattern
 
 class LoopMachine:
     def __init__(self):
@@ -21,6 +37,7 @@ class LoopMachine:
         self.recording_index = 0  # Which loop segment we're recording into
         self.is_recording = False  # Flag to track recording state
         self.position = 0  # Tracks the playback/recording position
+        self.click_track = generate_clicks()
 
         # Open input stream for recording
         self.input_stream = self.p.open(
@@ -59,10 +76,15 @@ class LoopMachine:
 
     def audio_callback(self, in_data, frame_count, time_info, status):
         """Handles both playback and recording in sync."""
-
-        # print(f"audio_callback called. is_recording={self.is_recording}, in_data={in_data is not None}")  # Debugging
-
         global_audio_out = np.zeros((frame_count, 1), dtype=np.int16)  # Mono output
+
+        # Inject click track
+        click_position = self.position % len(self.click_track)
+        click_segment = self.click_track[click_position:click_position + frame_count]
+        if click_segment.shape[0] < frame_count:
+            padding = np.zeros((frame_count - click_segment.shape[0], 1), dtype=np.int16)
+            click_segment = np.vstack((click_segment, padding))
+        global_audio_out += click_segment
 
         # Only process input data if we're recording
         if self.is_recording:
@@ -80,7 +102,6 @@ class LoopMachine:
             print(f"Recording position: {start_idx} to {end_idx}")
 
             if end_idx >= FRAMES_PER_LOOP:
-                # Wrap around if reaching the end
                 first_part = input_audio[:FRAMES_PER_LOOP - start_idx]
                 second_part = input_audio[FRAMES_PER_LOOP - start_idx:]
 
@@ -95,32 +116,13 @@ class LoopMachine:
                 # Fill the current recording buffer
                 self.current_recording[start_idx:end_idx] = input_audio
 
-        # Mix playback audio from existing recorded loops
-        for loop in self.loops:
-            end_idx = self.position + frame_count
-
-            if end_idx > len(loop):
-                # Wrap around: split the read into two parts
-                first_part = loop[self.position:]  # Read until the end
-                second_part = loop[:end_idx - len(loop)]  # Read from start of loop
-                mixed_output = np.vstack((first_part, second_part))
-            else:
-                mixed_output = loop[self.position:end_idx]
-
-            # Ensure the output shape matches frame_count before mixing
-            if mixed_output.shape[0] < frame_count:
-                padding = np.zeros((frame_count - mixed_output.shape[0], 1), dtype=np.int16)
-                mixed_output = np.vstack((mixed_output, padding))  # Zero-pad to avoid shape mismatch
-
-            global_audio_out += mixed_output
-
         # Prevent clipping
         global_audio_out = np.clip(global_audio_out, -32768, 32767)
 
         # Move playback position forward
         self.position += frame_count
         if self.position >= FRAMES_PER_LOOP:
-            self.position = 0  # Loop back to start
+            self.position = 0
 
         return (global_audio_out.tobytes(), pyaudio.paContinue)
 
@@ -133,10 +135,8 @@ class LoopMachine:
         self.input_stream.close()
         self.p.terminate()
 
-# Run the loop machine
 if __name__ == "__main__":
     loop_machine = LoopMachine()
-
     try:
         while True:
             cmd = input("Enter 'r' to start recording, 's' to stop recording, 'q' to quit: ").strip().lower()
