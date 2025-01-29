@@ -1,46 +1,63 @@
 from track import Track
 import threading
 import time
-
-# Notes
-# - Metronome
+import sys
 
 class Loop:
-    def __init__(self, name):
+    def __init__(self, name, tempo, beats):
         self.name = name
-        self.is_playing = False
+        self.tempo = tempo  # Beats per minute
+        self.beats = beats  # Number of beats in the loop
+        self.loop_duration = (beats * 60) / tempo  # Loop duration in seconds
         self.tracks = []
-        self.playhead_position = 0
-        self.lock = threading.Lock()
+        self.is_playing = False
+        self.start_time = None
+        self.track_threads = []  # To keep track of active track threads
 
     def play(self):
-        """Start playback, beginning from the current playhead position."""
         if self.is_playing:
-            print("Playback is already running.")
+            print("Loop is already playing.")
             return
 
         self.is_playing = True
-        play_thread = threading.Thread(target=self._play_tracks, daemon=True)
+        self.start_time = time.perf_counter()
+        print(f"Playback started. Loop duration: {self.loop_duration:.2f} seconds.")
+        self._start_tracks()
+        play_thread = threading.Thread(target=self._manage_playback, daemon=True)
         play_thread.start()
 
-    def _play_tracks(self):
-        while self.is_playing:
-            with self.lock:
-                for track in self.tracks:
-                    if not track.get_muted():
-                        track.play(self.playhead_position)
-            time.sleep(0.1)  # Allow for thread context switching
+    def _start_tracks(self):
+        """Ensure all tracks are started and playing in sync."""
+        for track in self.tracks:
+            if not track.get_muted():
+                thread = threading.Thread(target=track.play, args=(0,), daemon=True)
+                self.track_threads.append(thread)
+                thread.start()
 
-    def pause(self):
-        """Pause playback, keeping the playhead where it is."""
-        self.is_playing = False
-        print("Playback paused.")
+    def _manage_playback(self):
+        while self.is_playing:
+            current_time = time.perf_counter()
+            elapsed_time = current_time - self.start_time
+            playhead_position = elapsed_time % self.loop_duration  # Cyclical position
+
+            print(f"Playhead position: {playhead_position:.2f} seconds")
+            
+            # Reset playhead for all tracks at the start of each loop
+            if abs(playhead_position) < 0.01:  # Small tolerance for alignment
+                with threading.Lock():
+                    for track in self.tracks:
+                        if not track.get_muted():
+                            track.set_playhead(0)  # Reset playhead to start
+            
+            time.sleep(0.01)  # Polling interval to reduce CPU usage
 
     def stop(self):
-        """Stop playback and reset the playhead to 0."""
         self.is_playing = False
-        self.playhead_position = 0
-        print("Playback stopped and playhead reset.")
+        self.start_time = None
+        for track in self.tracks:
+            if not track.get_muted():
+                track.stop()  # Ensure all tracks stop playing
+        print("Playback stopped.")
 
     def record(self, duration, channels=1):
         """Begin recording a new track."""
@@ -59,7 +76,7 @@ class Loop:
 
     def unmute_tracks(self, *ids):
         """Add the specified tracks to playback."""
-        with self.lock:
+        with threading.Lock():
             for track_id in ids:
                 for track in self.tracks:
                     if track.get_uid() == track_id:
@@ -68,7 +85,7 @@ class Loop:
 
     def mute_tracks(self, *ids):
         """Remove the specified tracks from playback."""
-        with self.lock:
+        with threading.Lock():
             for track_id in ids:
                 for track in self.tracks:
                     if track.get_uid() == track_id:
@@ -93,11 +110,11 @@ class Loop:
         print(f"Loop renamed to {new_name}.")
 
 if __name__ == "__main__":
-    loop = Loop("My First Loop")
-    loop.record(5000)
-    time.sleep(6)
+    loop = Loop("My First Loop", tempo=120, beats=4)
+    loop.add_tracks(Track(5000, 1))  # Example track
     loop.play()
-    time.sleep(5)
-    loop.pause()
-    loop.rename("My Renamed Loop")
+
+    print("Press any key to stop playback...")
+    input()  # Wait for user input to stop playback
+
     loop.stop()

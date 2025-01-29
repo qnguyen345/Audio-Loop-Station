@@ -281,11 +281,11 @@ if __name__ == "__main__":
     print(new_track)
     new_track.rename('new_name')
 
-    # new_track.record()
-    # debug_timer(test_duration)
+    new_track.record()
+    debug_timer(test_duration)
 
-    # new_track.play()
-    # debug_timer(test_duration)
+    new_track.play()
+    debug_timer(test_duration)
 
     # new_track.save_track()
 
