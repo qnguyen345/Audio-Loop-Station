@@ -20,6 +20,13 @@ def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
     click = (np.sin(2 * np.pi * frequency * t) * 0.5 * 32767).astype(np.int16)
     return click.reshape(-1, 1)  # Ensure mono output
 
+def generate_clicks(sample_rate=RATE, duration_ms=50, frequency=1000, beats=BEATS_PER_LOOP):
+    """Generate a sequence of click sounds for a metronome."""
+    click = generate_click(sample_rate, duration_ms, frequency)
+    silence = np.zeros((int((60 / BPM) * sample_rate) - len(click), 1), dtype=np.int16)
+    full_click_pattern = np.vstack([np.vstack((click, silence)) for _ in range(beats)])
+    return full_click_pattern
+
 class LoopMachine:
     def __init__(self):
         self.p = pyaudio.PyAudio()
@@ -30,6 +37,7 @@ class LoopMachine:
         self.recording_index = 0  # Which loop segment we're recording into
         self.is_recording = False  # Flag to track recording state
         self.position = 0  # Tracks the playback/recording position
+        self.click_track = generate_clicks()
 
         # Open input stream for recording
         self.input_stream = self.p.open(
@@ -72,6 +80,14 @@ class LoopMachine:
         # print(f"audio_callback called. is_recording={self.is_recording}, in_data={in_data is not None}")  # Debugging
 
         global_audio_out = np.zeros((frame_count, 1), dtype=np.int16)  # Mono output
+
+        # Inject click track
+        click_position = self.position % len(self.click_track)
+        click_segment = self.click_track[click_position:click_position + frame_count]
+        if click_segment.shape[0] < frame_count:
+            padding = np.zeros((frame_count - click_segment.shape[0], 1), dtype=np.int16)
+            click_segment = np.vstack((click_segment, padding))
+        global_audio_out += click_segment
 
         # Only process input data if we're recording
         if self.is_recording:
