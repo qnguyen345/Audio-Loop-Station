@@ -1,4 +1,20 @@
 /*------Containers------*/
+.duration-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px; 
+    width: 176px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px; 
+}
+
 .right-first-second-row-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -48,7 +64,7 @@
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 100px; 
+    margin-top: 50px; 
 }
 
 .tempo-container {
@@ -74,6 +90,11 @@
 
 .delete-loop-text {
     color: #f0f0f3;
+}
+
+.duration-text {
+    color: #f0f0f3;
+    margin-right: 5px;
 }
 
 .pause-text {
@@ -122,7 +143,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 30px; 
+    margin-top: 20px; 
 }
 
 .auto-trim-button:hover {
@@ -302,6 +323,17 @@
 }
 
 /*------Inputs------*/
+.duration-input{
+    font-size: 14px; 
+    width: 60px; 
+    height: 24px; 
+    background-color: #f0f0f3;
+    border: 1px solid #404353;
+    border-radius: 1px;
+    color: #404353;
+    border: 1px solid #435199;
+}
+
 .tempo-input {
     font-size: 14px; 
     width: 35px; 

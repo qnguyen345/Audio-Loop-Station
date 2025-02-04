@@ -1,3 +1,4 @@
+import os
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -5,39 +6,45 @@ import dash_bootstrap_components as dbc
 
 import callbacks
 
-import UI_sections.tracks_layout as tracks_layout
-import UI_sections.right_tab_layout as right_tab_layout
-import UI_sections.top_layout as top_layout
-import UI_sections.loop_layout as loop_layout
+from assets.layout import Layout
+from track import Track
 
 # Initialize Dash app
 # Note: external stylesheet is for moal/file popup styling
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__,
+                external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# Inital tempo and duration
+tempo = 5000
+duration = 120
 
 # Contains the UI layout
-layout = html.Div(
+app_layout = html.Div(
     className="app-container",
     children=[
 
         # Links css style file
-        html.Link(rel="stylesheet", href="./assets/main_style.css"),
-        html.Link(rel="stylesheet", href="./assets/top_style.css"),
-        html.Link(rel="stylesheet", href="./assets/bottom_right_style.css"),
-        html.Link(rel="stylesheet", href="./assets/bottom_left_style.css"),
+        html.Link(rel="stylesheet", href=os.path.join("assets", "main_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join("assets", "top_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join("assets", "bottom_right_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join("assets", "bottom_left_style.css")),
         # Link font awesome file to use icons
         html.Link(
             rel="stylesheet",
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css",
         ),
 
-
-        # Store components to keep track of the number of track sections
-        dcc.Store(id="track_index", data={"index": 6}),
-
+        # Store duration and tempo
+        dcc.Store(id="stored_duration", data=duration),
+        dcc.Store(id="stored_tempo", data=tempo),
+        
+        # Initialize and store track list
+        dcc.Store(id="stored_track_list", data=["Dummy_1"]), #Initialize to 'Dummy'
+        
         # Top section
         html.Div(
             className="top-container",
-            children=top_layout.get_top_layout()
+            children=Layout.get_top_layout()
         ),
 
 
@@ -54,13 +61,18 @@ layout = html.Div(
                         # Contains loop text, pitch button
                         html.Div(
                             className="loop-container",
-                            children=loop_layout.get_loop_layout()
+                            children=Layout.get_loop_layout()
                         ),
 
                         # Get track layout
                         html.Div(
                             className="track-container",
-                            children=tracks_layout.get_track_layout()
+                            children=[
+                                Layout.get_add_track_layout(),
+                                html.Div(
+                                    id="track_section",
+                                    )
+                                ]
                         )
 
                     ]
@@ -69,7 +81,7 @@ layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=right_tab_layout.get_right_tab_layout()
+                    children=Layout(tempo, duration).get_right_tab_layout()
                 ),
             ]
         )
@@ -78,11 +90,11 @@ layout = html.Div(
 
 
 # Add layout to app
-app.layout = layout
+app.layout = app_layout
 
 # Get all callbacks
 callbacks.button_callbacks(app)
-callbacks.add_new_track_section(app)
+callbacks.update_layout_callbacks(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
