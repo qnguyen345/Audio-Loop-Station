@@ -12,6 +12,7 @@ BPM = 120  # User-defined tempo
 BEATS_PER_LOOP = 4  # User-defined beats per loop
 FRAMES_PER_LOOP = int((60 / BPM) * BEATS_PER_LOOP * RATE)  # Loop length in frames
 ADJUSTMENT_FACTOR = 0.75  # Fine-tune latency correction
+
 print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
 
 def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
@@ -27,11 +28,16 @@ def generate_clicks():
     silence = np.zeros((int((60 / BPM) * RATE) - len(click), 1), dtype=np.int16)
     return np.vstack([np.vstack((click, silence)) for _ in range(BEATS_PER_LOOP)])
 
+class Track:
+    def __init__(self, buffer, isMuted=False):
+        self.buffer = buffer
+        self.isMuted = isMuted
+
 class LoopMachine:
     def __init__(self):
         # Allocate memory for multiple loop layers
-        self.loops = []  # List of recorded buffers
         self.current_recording = None  # Active buffer being recorded
+        self.tracks = []  # List of recorded tracks
         self.is_recording = False
         self.position = 0  # Playback and recording position
         self.click_track = generate_clicks()
@@ -62,8 +68,15 @@ class LoopMachine:
         if self.current_recording is not None:
             # Shift recording earlier while preserving full segment duration
             adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
-            self.loops.append(adjusted_recording)
+            self.tracks.append(Track(adjusted_recording))
         self.current_recording = None
+
+    def toggle_mute(self, track_index):
+        """Toggle mute for a specific track."""
+        if 0 <= track_index < len(self.tracks):
+            self.tracks[track_index].isMuted = not self.tracks[track_index].isMuted
+            status = "muted" if self.tracks[track_index].isMuted else "unmuted"
+            print(f"Track {track_index} is now {status}.")
 
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
@@ -86,20 +99,20 @@ class LoopMachine:
                 second_part = indata[FRAMES_PER_LOOP - start_idx:]
                 self.current_recording[start_idx:] = first_part
                 adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
-                self.loops.append(adjusted_recording)
+                self.tracks.append(Track(adjusted_recording))
                 self.current_recording = np.zeros((FRAMES_PER_LOOP, 1), dtype=np.int16)
                 self.current_recording[:len(second_part)] = second_part
             else:
                 self.current_recording[start_idx:end_idx] = indata
         
-        # Playback all stored loops with compensated timing
-        for loop in self.loops:
-            playback_start = (self.position - self.latency_compensation_samples) % FRAMES_PER_LOOP
-            loop_segment = loop[playback_start:playback_start + frames]
-            if loop_segment.shape[0] < frames:
-                padding = np.zeros((frames - loop_segment.shape[0], 1), dtype=np.int16)
-                loop_segment = np.vstack((loop_segment, padding))
-            global_audio_out += loop_segment
+        for track in self.tracks:
+            if not track.isMuted:
+                playback_start = (self.position - self.latency_compensation_samples) % FRAMES_PER_LOOP
+                loop_segment = track.buffer[playback_start:playback_start + frames]
+                if loop_segment.shape[0] < frames:
+                    padding = np.zeros((frames - loop_segment.shape[0], 1), dtype=np.int16)
+                    loop_segment = np.vstack((loop_segment, padding))
+                global_audio_out += loop_segment
         
         # Prevent clipping
         global_audio_out = np.clip(global_audio_out, -32768, 32767)
