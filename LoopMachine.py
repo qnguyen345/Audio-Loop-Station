@@ -1,3 +1,4 @@
+import copy
 import librosa
 import numpy as np
 import sounddevice as sd
@@ -43,8 +44,8 @@ class Track:
             self.buffer = self.raw_buffer
         else:
             buffer_float = self.raw_buffer.astype(np.float32) / 32767.0  # Normalize to [-1,1]
-            shifted = librosa.effects.pitch_shift(buffer_float.flatten(), RATE, n_steps=self.pitch_shift)
-            self.buffer = (np.clip(shifted, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
+            buffer_shifted = librosa.effects.pitch_shift(buffer_float.flatten(), sr=RATE, n_steps=self.pitch_shift)
+            self.buffer = (np.clip(buffer_shifted, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
 
     def __str__(self):
         elements = []
@@ -104,15 +105,6 @@ class LoopMachine:
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
         
-        # Inject click track
-        if not self.click_is_muted:
-            click_position = self.position % len(self.click_track)
-            click_segment = self.click_track[click_position:click_position + frames]
-            if click_segment.shape[0] < frames:
-                padding = np.zeros((frames - click_segment.shape[0], 1), dtype=np.int16)
-                click_segment = np.vstack((click_segment, padding))
-            global_audio_out += click_segment
-        
         # Record audio if recording is active
         if self.is_recording:
             start_idx = self.position
@@ -128,6 +120,16 @@ class LoopMachine:
             else:
                 self.current_recording[start_idx:end_idx] = indata
         
+        # Inject click track
+        if not self.click_is_muted:
+            click_position = self.position % len(self.click_track)
+            click_segment = self.click_track[click_position:click_position + frames]
+            if click_segment.shape[0] < frames:
+                padding = np.zeros((frames - click_segment.shape[0], 1), dtype=np.int16)
+                click_segment = np.vstack((click_segment, padding))
+            global_audio_out += click_segment
+        
+        # Inject tracks
         for track in self.tracks:
             if not track.is_muted:
                 playback_start = (self.position - self.latency_compensation_samples) % FRAMES_PER_LOOP
@@ -180,6 +182,8 @@ p <i>       set pitch shift for track by index
 q           quit
 r           start recording
 s           stop recording
+y <i>       copy track by index
+yy          copy the most recent track
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
             elif cmd == 'c':
@@ -213,5 +217,14 @@ s           stop recording
                 track = loop_machine.tracks[track_index]
                 track.pitch_shift = pitch_shift
                 track.apply_pitch_shift()
+            elif cmd == 'yy':
+                track_index = -1
+                track = loop_machine.tracks[track_index]
+                loop_machine.tracks.append(copy.copy(track))
+            elif cmd.startswith('y'):
+                track_index = int(args[1])
+                track = loop_machine.tracks[track_index]
+                loop_machine.tracks.append(copy.copy(track))
+                
     except KeyboardInterrupt:
         loop_machine.stop()
