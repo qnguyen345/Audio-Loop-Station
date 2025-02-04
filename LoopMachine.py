@@ -138,6 +138,10 @@ if __name__ == "__main__":
                 loop_machine.start_recording()
             elif cmd == 's':
                 loop_machine.stop_recording()
+            elif cmd.startswith('mute') or cmd.startswith('unmute'):
+                track_index = int(cmd.split()[-1])
+                track = loop_machine.tracks[track_index]
+                track.isMuted = cmd.startswith('mute')
             elif cmd == 'q':
                 loop_machine.stop()
                 break
