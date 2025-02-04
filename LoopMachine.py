@@ -102,13 +102,6 @@ class LoopMachine:
             self.tracks.append(Track(adjusted_recording))
         self.current_recording = None
 
-    def toggle_mute(self, track_index):
-        """Toggle mute for a specific track."""
-        if 0 <= track_index < len(self.tracks):
-            self.tracks[track_index].is_muted = not self.tracks[track_index].is_muted
-            status = "muted" if self.tracks[track_index].is_muted else "unmuted"
-            print(f"Track {track_index} is now {status}.")
-
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
@@ -180,6 +173,7 @@ if __name__ == "__main__":
 
 c           toggle click track
 d <i>       delete track by index
+dd          delete the most recent track
 i           info
 h           help
 m/u <i>     mute/unmute track by index
@@ -192,6 +186,8 @@ s           stop recording
                 print(help_text)
             elif cmd == 'c':
                 loop_machine.click_is_muted = not loop_machine.click_is_muted
+            elif cmd == 'dd':
+                loop_machine.tracks.pop()
             elif cmd.startswith('d'):
                 track_index = int(args[-1])
                 loop_machine.tracks.pop(track_index)
