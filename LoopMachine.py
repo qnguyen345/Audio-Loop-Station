@@ -48,11 +48,9 @@ class Track:
 
     def __str__(self):
         elements = []
-        if self.name:
-            elements.append(self.name)
-        else:
-            elements.append("Untitled")
-            
+
+        elements.append(self.name or "Untitled")
+
         if self.is_muted:
             elements.append("M")
 
