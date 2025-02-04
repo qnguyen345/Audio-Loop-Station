@@ -29,9 +29,22 @@ def generate_clicks():
     return np.vstack([np.vstack((click, silence)) for _ in range(BEATS_PER_LOOP)])
 
 class Track:
-    def __init__(self, buffer, isMuted=False):
+    def __init__(self, buffer):
         self.buffer = buffer
-        self.isMuted = isMuted
+        self.name = None
+        self.isMuted = False
+        self.isSolo = False
+
+    def __str__(self):
+        elements = []
+        if self.name:
+            elements.append(self.name)
+        else:
+            elements.append("Untitled")
+            
+        if self.isMuted:
+            elements.append("M")
+        return "<" + " ".join(elements) + ">"
 
 class LoopMachine:
     def __init__(self):
@@ -129,12 +142,20 @@ class LoopMachine:
         self.stream.stop()
         self.stream.close()
 
+    def __str__(self):
+        result = f"Tracks ({len(self.tracks)}):"
+        for i, track in enumerate(self.tracks):
+            result += f"\n  {i}: {track}"
+        return result
+
 if __name__ == "__main__":
     loop_machine = LoopMachine()
     try:
         while True:
-            cmd = input("Enter 'r' to start recording, 's' to stop recording, 'q' to quit: ").strip().lower()
-            if cmd == 'r':
+            cmd = input("Enter 'r' to start recording, 's' to stop recording, 'i' for info, 'q' to quit: ").strip().lower()
+            if cmd == 'i':
+                print(loop_machine)
+            elif cmd == 'r':
                 loop_machine.start_recording()
             elif cmd == 's':
                 loop_machine.stop_recording()
