@@ -1,13 +1,11 @@
 /*------Containers------*/
 .add-track-button-container{
-    height: 100px;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-right: 16px;
     position: relative;
+    flex-direction: row;
+    border-bottom: 1px solid rgba(135, 155, 226, 0.05);
 }
 
 .left-loop-tab-section-container {
@@ -21,7 +19,6 @@
     justify-content: center;
     text-align: center;
     border-right: 1px solid rgba(135, 155, 226, 0.25);
-    border-bottom: 1px solid rgba(135, 155, 226, 0.25);
 }
 
 .left-loop-row-container {
@@ -36,7 +33,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     margin: 8px;
 }
 
@@ -52,6 +49,7 @@
     text-align: center;
     border-right: 1px solid rgba(135, 155, 226, 0.25);
     border-bottom: 1px solid rgba(135, 155, 226, 0.25);
+    border-top: 1px solid rgba(135, 155, 226, 0.25);
 }
 
 .loop-container {
@@ -61,11 +59,20 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding-right: 16px;
+    padding-right: 10px;
     border-bottom: 1px solid rgba(135, 155, 226, 0.25);
     position: relative;
 }
 
+.pitch-container{
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+}
 .track-container {
     overflow-y: auto; 
     max-height: calc(820px - 75px); /*bottom container height - loop container height*/
@@ -78,12 +85,34 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding-right: 16px;
+    padding-right: 10px;
     border-bottom: 1px solid rgba(135, 155, 226, 0.05);
     position: relative;
 }
 
 /*------Fonts; Texts------*/
+.decrease-pitch-button{
+    color: #f0f0f3;
+    background: transparent;
+    border: transparent;
+    margin-right: 2px;
+}
+
+.decrease-pitch-button:hover{
+    color: #f0f0f3a6;
+}
+
+.increase-pitch-button{
+    color: #f0f0f3;
+    background: transparent;
+    border: transparent;
+    margin-left: 2px;
+}
+
+.increase-pitch-button:hover{
+    color: #f0f0f3a6;
+}
+
 .loop-period-text {
     font-size: 14px;
     color: #f0f0f3;
@@ -91,7 +120,7 @@
 
 .pitch-text {
     font-size: 14px;
-    color: #404353;
+    color: #f0f0f3;
 }
 
 .track-text {
@@ -101,28 +130,24 @@
 
 /*------Buttons------*/
 .add-track-button {
-    width: 300px; 
-    height: 70px;
-    background: none; 
-    border: none; 
+    width: 100%; 
+    background: transparent;  
+    border: transparent;
     padding: 0; 
-    margin: 0; 
+    margin: 2px; 
     font: inherit; 
-    color: inherit; 
     cursor: pointer; 
-    font-weight: bolder;
-    color: #344079;
-    font-size: 22px;
+    color: #f0f0f3;
+    font-size: 14px;
 }
 
 .left-play-icon-button {
-    font-size: 12px; 
+    font-size: 13px;
     width: 25px; 
     height: 25px;
-    color: #404353;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #a7aed0;
-    border: 1px solid #b0b8e4;
+    color: #a7aed0;
+    border: transparent;
+    background: transparent;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -131,17 +156,16 @@
 }
 
 .left-play-icon-button:hover {
-    background-color: #9095af;
-    color: #292a33;
+    background-color: #283367;
 }
 
 .left-mute-icon-button {
-    font-size: 12px;
+    font-size: 13px;
     width: 25px; 
     height: 25px;
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
+    color: #a7aed0;
+    border: transparent;
+    background: transparent;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -153,20 +177,6 @@
     background-color: #283367;
 }
 
-.pitch-button {
-    font-size: 14px;
-    width: 50px;
-    height: 25px;
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .pitch-button:hover {
     background-color: #283367;
 }
@@ -176,12 +186,12 @@
 }
 
 .trash-button {
-    font-size: 12px;
+    font-size: 13px;
     width: 25px; 
     height: 25px;
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
+    color: #a7aed0;
+    border: transparent;
+    background: transparent;
     border-radius: 4px;
     cursor: pointer;
     display: flex;
@@ -190,7 +200,8 @@
 }
 
 .trash-button:hover {
-    background-color: #283367;
+    background-color: #cc0000;
+    color: #f0f0f3;
 }
 /*------Inputs------*/
 

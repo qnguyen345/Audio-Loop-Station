@@ -13,3 +13,7 @@ Hides updown arrow in tempo input field: https://stackoverflow.com/questions/379
 font-family: Arial, Helvetica, sans-serif;
 
 checklist: https://dash.plotly.com/dash-core-components/checklist
+
+Plotting audio waves: https://librosa.org/doc/0.8.1/generated/librosa.load.html
+
+Handling duplicate callback outputs: https://dash.plotly.com/duplicate-callback-outputs
