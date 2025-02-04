@@ -39,7 +39,7 @@ class Track:
 
     def apply_pitch_shift(self):
         """Applies pitch shifting to the track buffer."""
-        if self.pitch_shift == 0 or not self.raw_buffer:
+        if self.pitch_shift == 0:
             self.buffer = self.raw_buffer
         else:
             buffer_float = self.raw_buffer.astype(np.float32) / 32767.0  # Normalize to [-1,1]
@@ -55,6 +55,11 @@ class Track:
             
         if self.is_muted:
             elements.append("M")
+
+        if self.pitch_shift > 0:
+            elements.append("+" + str(self.pitch_shift))
+        elif self.pitch_shift < 0:
+            elements.append(self.pitch_shift)
 
         return "<" + " ".join(elements) + ">"
 
@@ -173,21 +178,23 @@ if __name__ == "__main__":
                 help_text = """-----------------------------------------------------------------------------------------------------------------------
 == LoopMachine ==
 
-c - toggle click track
-r - start recording
-s - stop recording
-i - info
-h - help
-
-m/u <i> - mute/unmute track by index
-n - set name for track by index
-p <i> - set pitch shift for track by index
-
-q - quit
+c           toggle click track
+d <i>       delete track by index
+i           info
+h           help
+m/u <i>     mute/unmute track by index
+n <i>       set name for track by index
+p <i>       set pitch shift for track by index
+q           quit
+r           start recording
+s           stop recording
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
             elif cmd == 'c':
                 loop_machine.click_is_muted = not loop_machine.click_is_muted
+            elif cmd.startswith('d'):
+                track_index = int(args[-1])
+                loop_machine.tracks.pop(track_index)
             elif cmd == 'i':
                 print(loop_machine)
             elif cmd.startswith('m') or cmd.startswith('u'):
