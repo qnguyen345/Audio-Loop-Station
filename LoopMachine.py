@@ -101,7 +101,6 @@ class LoopMachine:
             adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
             self.tracks.append(Track(adjusted_recording))
         self.current_recording = None
-        self.click_is_muted = True
 
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
