@@ -70,7 +70,7 @@ class LoopMachine:
         self.is_recording = False
         self.position = 0  # Playback and recording position
         self.click_track = generate_clicks()
-        self.click_is_muted = False
+        self.click_is_muted = True # Mute click when app initially starts
         
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
@@ -90,7 +90,8 @@ class LoopMachine:
         print("Recording started...")
         self.is_recording = True
         self.current_recording = np.zeros((FRAMES_PER_LOOP, CHANNELS), dtype=np.int16)
-
+        self.click_is_muted = False
+        
     def stop_recording(self):
         """Stop recording and store the completed segment with latency compensation."""
         print("Recording stopped.")
@@ -100,6 +101,7 @@ class LoopMachine:
             adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
             self.tracks.append(Track(adjusted_recording))
         self.current_recording = None
+        self.click_is_muted = True
 
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
@@ -159,7 +161,7 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
-
+    
 if __name__ == "__main__":
     loop_machine = LoopMachine()
     print("== LoopMachine ==")

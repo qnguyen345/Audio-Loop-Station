@@ -2,8 +2,6 @@ from track import Track
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
-import sys
-sys.path.append("../")
 
 
 class Layout:
@@ -428,7 +426,7 @@ class Layout:
                 ]
             )
         ]
-        
+
         return dummy_track_layout
 
     def update_track_section(self, track_list):
@@ -499,7 +497,7 @@ class Layout:
 
             # Add track section to list
             all_tracks_list.append(track_section)
-        
+
         # Make it so that the newest track is on the top and oldest track
         # is on the bottom. Reverse the list
         return list(reversed(all_tracks_list)), updated_tracks_list
@@ -526,18 +524,19 @@ class Layout:
         length_uid = len(uid_list)
         dummy_list = [track for track in track_list if track.startswith("Dummy_")]
         length_dummy = len(dummy_list)
-        
+       
         # Make an updated track list where the uid replaces the dummy variable
         # Excess dummy variables will be temporarily kept
         if length_dummy > length_uid:
             updated_tracks_list = uid_list + dummy_list[length_uid:]
         else:
-            updated_tracks_list = uid_list
+            updated_tracks_list = uid_list+ dummy_list[length_dummy:]
         
         # Make a track dictionary that maps uid/Dummy to a track number
         for index, track in enumerate(updated_tracks_list):
-            track_dict[track] = index + 1 #Track 1 is the initial track
-        # print("track_list", track_list)###DEBUG_PRINT
-        # print("track_dict", track_dict) ###DEBUG_PRINT
-        # print("updated_tracks_list", updated_tracks_list) ###DEBUG_PRINT
+            track_dict[track] = index + 1   # Track 1 is the initial track
+            
+        # print("track_list", track_list)  # DEBUG_PRINT
+        # print("track_dict", track_dict)  # DEBUG_PRINT
+        # print("updated_tracks_list", updated_tracks_list)  # DEBUG_PRINT
         return track_dict, updated_tracks_list
