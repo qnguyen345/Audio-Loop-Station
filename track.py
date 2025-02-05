@@ -66,10 +66,10 @@ class Track:
 
     def save_track(self):
         """Save the track object data to tracks/saved_tracks.json."""
-        with open('tracks/saved_tracks.json', 'r') as file:
+        with open(os.path.join('tracks','saved_tracks.json'), 'r') as file:
             tracks_index = json.load(file)
         tracks_index[self._uid] = self.__dict__
-        with open('tracks/saved_tracks.json', 'w') as file:
+        with open(os.path.join('tracks','saved_tracks.json'), 'w') as file:
             json.dump(tracks_index, file)
 
     def load_track(self, uid=''):
@@ -79,7 +79,7 @@ class Track:
         uid -- string (default='')"""
         if uid == '':
             print("Saved Tracks:")
-            with open('tracks/saved_tracks.json', 'r') as file:
+            with open(os.path.join('tracks','saved_tracks.json'), 'r') as file:
                 saved_tracks = json.load(file)
                 for track in saved_tracks:
                     print(
@@ -115,7 +115,7 @@ class Track:
         elif filename in files:
             self._filename = filename[0:-4]
             self._file_loaded = True
-            with wave.open(f'tracks/{filename}') as wf:
+            with wave.open(os.path.join("tracks", f'{filename}')) as wf:
                 self._channels = wf.getnchannels()
                 frames = wf.getnframes()
                 self._duration = (frames // self.RATE) * 1000
@@ -147,7 +147,7 @@ class Track:
 
     def _play_stream(self, start_position):
         """Helper method for play()"""
-        with wave.open(f'tracks/{self._filename}.wav') as wf:
+        with wave.open(os.path.join("tracks", f'{self._filename}.wav')) as wf:
             wf.setpos(start_position)
             p = pyaudio.PyAudio()
 
@@ -178,7 +178,7 @@ class Track:
 
     def _record_stream(self):
         """helper method for record()"""
-        with wave.open(f'tracks/{self._filename}.wav', 'wb') as wf:
+        with wave.open(os.path.join("tracks", f'{self._filename}.wav'), 'wb') as wf:
             p = pyaudio.PyAudio()
             wf.setnchannels(self._channels)
             wf.setsampwidth(p.get_sample_size(self.FORMAT))
