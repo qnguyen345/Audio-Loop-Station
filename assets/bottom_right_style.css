@@ -98,12 +98,17 @@
 }
 
 .pause-text {
-    color: #f0f0f3;
+    color: #404353;
     margin-left: 5px;
 }
 
 .play-text {
     color: #404353;
+    margin-left: 5px;
+}
+
+.mute-unmute-click-text {
+    color: #f0f0f3;
     margin-left: 5px;
 }
 
@@ -166,26 +171,7 @@
     margin-bottom: 80px; 
 }
 
-.pause-button {
-    font-size: 14px; 
-    width: 80px; 
-    height: 32px; 
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pause-button:hover {
-    background-color: #283367;
-}
-
-
-.play-button {
+.play-pause-button {
     font-size: 14px; 
     width: 80px; 
     height: 32px;
@@ -200,9 +186,8 @@
     justify-content: center;
 }
 
-.play-button:hover {
+.play-pause-button:hover {
     background-color: #9095af;
-    color: #292a33;
 }
 
 .record-button {
@@ -217,6 +202,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.mute-unmute-click-button {
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mute-unmute-button:hover {
+    background-color: #283367;
 }
 
 .record-button:hover {

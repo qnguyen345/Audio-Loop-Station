@@ -5,7 +5,7 @@ import dash
 
 
 class Layout:
-    def __init__(self, duration, tempo):
+    def __init__(self, duration=5000, tempo=120):
         self.duration = duration
         self.tempo = tempo
 
@@ -195,25 +195,25 @@ class Layout:
                         ]
                     ),
 
-                    # Play Button and Text
+                    # Play/Pause Button and Text
                     html.Button(
-                        className="play-button",
-                        id="play_button",
+                        className="play-pause-button",
+                        id="play_pause_button",
                         children=[
-                            html.I(className="fa-solid fa-play"),
-                            html.Span(children="Play",
-                                      className="play-text")
+                            html.I(className="fa-solid fa-pause"),
+                            html.Span(children="Pause",
+                                      className="pause-text")
                         ]
                     ),
 
-                    # Pause Button and Text
+                    # Mute/Unmute Button and Text
                     html.Button(
-                        className="pause-button",
-                        id="pause_button",
+                        className="mute-unmute-click-button",
+                        id="mute_unmute_click_button",
                         children=[
-                            html.I(className="fa-solid fa-pause"),
-                            html.Span(className="pause-text",
-                                      children="Pause")
+                            html.I(className="fa-solid fa-volume-xmark"),
+                            html.Span(children="Click",
+                                      className="mute-unmute-click-text")
                         ]
                     ),
 
@@ -393,7 +393,7 @@ class Layout:
                                     html.Button(
                                         className="left-play-icon-button",
                                         children=[
-                                            html.I(className="fa-solid fa-play")],
+                                            html.I(className="fa-solid fa-pause")],
                                     ),
                                     # Mute/unmute icon button
                                     html.Button(
@@ -432,7 +432,8 @@ class Layout:
     def update_track_section(self, track_list):
         """
         Updates the track section for track layout.
-        Also updates the track list.
+        Also updates the track list to store as a State variable for later
+        access.
         """
 
         # All track section list
@@ -443,6 +444,7 @@ class Layout:
 
         # Generate track section for each track in track_list
         for track_uid, track_num in track_dict.items():
+            print("track_num",track_num)
             # track section outline
             track_section = html.Div(
                 className="track-tabs-container",
@@ -458,22 +460,25 @@ class Layout:
                                     # Play icon button
                                     html.Button(
                                         className="left-play-icon-button",
-                                        id=f"left_play_icon_button_{track_num}",
+                                        id={"type": "left_play_icon_button",
+                                            "index": track_num},
                                         children=[
-                                            html.I(className="fa-solid fa-play")],
+                                            html.I(className="fa-solid fa-pause")],
                                     ),
                                     # Mute/unmute icon button
                                     html.Button(
                                         className="left-mute-icon-button",
-                                        id=f"left_mute_icon_button_{track_num}",
-                                        children=[
+                                        id={"type": "left_mute_icon_button",
+                                            "index": track_num},
+                                        children = [
                                             html.I(className="fa-solid fa-volume-xmark")],
                                     ),
                                     # Trash button
                                     html.Button(
                                         className="trash-button",
-                                        id=f"trash_button_{track_num}",
-                                        children=[
+                                        id={"type": "trash_button",
+                                            "index": track_num},
+                                        children = [
                                             html.I(className="fa-solid fa-trash")],
                                     )
                                 ]
@@ -497,9 +502,9 @@ class Layout:
 
             # Add track section to list
             all_tracks_list.append(track_section)
-
+        
         # Make it so that the newest track is on the top and oldest track
-        # is on the bottom. Reverse the list
+        # section is on the bottom. Reverse the list to do this.
         return list(reversed(all_tracks_list)), updated_tracks_list
 
     def map_tracks(self, track_list):
@@ -507,7 +512,8 @@ class Layout:
         Maps track uid to a track number. If there is a "Dummy" value in the
         track_list, then assign it to a uid and then map that to a track number.
         Example:
-            track_list = ['Dummy_1', 'Dummy_2', 'Dummy_3', '2389hdiujasd', '9821hkjdasd']
+            track_list = ['Dummy_1', 'Dummy_2',
+                'Dummy_3', '2389hdiujasd', '9821hkjdasd']
             updated_track_list = ['2389hdiujasd', '9821hkjdasd', 'Dummy_3']
             track_dict = {
                 '2389hdiujasd': 1,
@@ -518,25 +524,29 @@ class Layout:
 
         # track number keys with track uid values
         track_dict = {}
-        
+
         # Get lists of uid and Dummy_ variables
-        uid_list = [track for track in track_list if not track.startswith("Dummy_")]
-        length_uid = len(uid_list)
-        dummy_list = [track for track in track_list if track.startswith("Dummy_")]
-        length_dummy = len(dummy_list)
-       
-        # Make an updated track list where the uid replaces the dummy variable
-        # Excess dummy variables will be temporarily kept
-        if length_dummy > length_uid:
-            updated_tracks_list = uid_list + dummy_list[length_uid:]
-        else:
-            updated_tracks_list = uid_list+ dummy_list[length_dummy:]
-        
+        uid_list = [
+            track for track in track_list if not track.startswith("Dummy_")]
+        dummy_list = [
+            track for track in track_list if track.startswith("Dummy_")]
+
+        updated_tracks_list = []
+        # Create updated track lists where uid are listed first then
+        # Dummy_ variables after
+        for i in range(len(track_list)):
+            if i < len(uid_list):
+                updated_tracks_list.append(uid_list[i])
+            elif i < len(dummy_list):
+                updated_tracks_list.append(dummy_list[i])
+
         # Make a track dictionary that maps uid/Dummy to a track number
         for index, track in enumerate(updated_tracks_list):
             track_dict[track] = index + 1   # Track 1 is the initial track
-            
-        # print("track_list", track_list)  # DEBUG_PRINT
-        # print("track_dict", track_dict)  # DEBUG_PRINT
-        # print("updated_tracks_list", updated_tracks_list)  # DEBUG_PRINT
+
+        print("track_list", track_list)  # DEBUG_PRINT
+        print("uid_list", uid_list)  # DEBUG_PRINT
+        print("dummy_list", dummy_list)  # DEBUG_PRINT
+        print("track_dict", track_dict)  # DEBUG_PRINT
+        print("updated_tracks_list", updated_tracks_list)  # DEBUG_PRI
         return track_dict, updated_tracks_list
