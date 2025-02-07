@@ -1,0 +1,360 @@
+/*------Containers------*/
+.duration-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px; 
+    width: 176px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px; 
+}
+
+.right-first-second-row-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px; 
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    margin: 10px;
+    margin-top: 20px;
+}
+
+.right-first-second-row-container > :nth-child(odd) {
+    justify-self: end; /* Align first column to the right */
+}
+
+.right-first-second-row-container > :nth-child(even) {
+    justify-self: start; /* Align 2nd column to the left */
+}
+
+.right-third-row-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    height: auto;
+    margin: 10px;
+    margin-top: 30px; 
+}
+
+.right-fourth-row-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    height: auto;
+    margin: 10px;
+    margin-top: 50px; 
+}
+
+.right-fifth-row-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    height: auto;
+    margin: 10px;
+    margin-top: 50px; 
+}
+
+.tempo-container {
+    display: flex;
+    flex-direction: column;
+    width: 176px; 
+    background-color: #344079;
+    border: 1px solid #435199;
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 5px;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 9px 0px;
+}
+
+/*------Fonts; Texts------*/
+.auto-trim-text {
+    color: #f0f0f3;
+}
+
+.delete-loop-text {
+    color: #f0f0f3;
+}
+
+.duration-text {
+    color: #f0f0f3;
+    margin-right: 5px;
+}
+
+.pause-text {
+    color: #f0f0f3;
+    margin-left: 5px;
+}
+
+.play-text {
+    color: #404353;
+    margin-left: 5px;
+}
+
+.record-text {
+    color: #f0f0f3;
+    margin-left: 5px;
+}
+
+.save-text {
+    color: #404353;
+    font-weight: bolder;
+}
+
+.stop-text {
+    color: #f0f0f3;
+    margin-left: 5px;
+}
+
+.tempo-text {
+    font-size: 14px; 
+    display: block;
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 8px; 
+}
+
+/*------Buttons------*/
+.auto-trim-button {
+    font-size: 14px; 
+    width: 176px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px; 
+}
+
+.auto-trim-button:hover {
+    background-color: #283367;
+}
+
+
+.delete-loop-button {
+    font-size: 14px; 
+    width: 128px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 80px; 
+}
+
+.pause-button {
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pause-button:hover {
+    background-color: #283367;
+}
+
+
+.play-button {
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px;
+    color: #404353;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #a7aed0;
+    border: 1px solid #b0b8e4;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.play-button:hover {
+    background-color: #9095af;
+    color: #292a33;
+}
+
+.record-button {
+    font-size: 14px;
+    width: 80px;
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #cc0000;
+    border: 1px solid #e60101;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.record-button:hover {
+    background-color: #ad0202;
+}
+
+.record-button-pulsing {
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
+    background-color: #cc0000;
+    border: 1px solid #cc0000;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-animation: pulse 1.5s infinite;
+}
+
+.record-button-pulsing:hover {
+    background-color: #ad0202;
+}
+
+.record-button-pulsing:focus {
+    outline: none;
+}
+
+.record-button-pulsing:hover .record-text {
+    color: #e7b6b6;
+}
+
+.record-button-pulsing:hover i {
+    color: #e7b6b6;
+}
+
+.save-button {
+    font-size: 14px; 
+    width: 96px; 
+    height: 32px; 
+    color: #404353;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #a7aed0;
+    border: 1px solid #b0b8e4;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-button:hover {
+    background-color: #9095af;
+}
+
+.stop-button {
+    font-size: 14px; 
+    width: 80px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stop-button:hover {
+    background-color: #283367;
+}
+
+.tempo-button {
+    font-size: 16px; 
+    width: 24px;
+    height: 24px; 
+    background-color: #a7aed0;
+    border: 1px solid #b0b8e4;
+    border-radius: 50%;
+    color: #404353;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    margin: 0px 8px; 
+}
+
+@-webkit-keyframes pulse {
+    0% {
+        color: #f0f0f3;
+        background-color: #cc0000;
+        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.5);
+    }
+    50% {
+        color: #f0f0f3;
+        background-color: rgba(255, 51, 51, 0.9);
+        box-shadow: 0 0 0 2px rgba(255, 51, 51, 0.5);
+    }
+    100% {
+        color: #f0f0f3;
+        background-color: #cc0000;
+        box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
+    }
+}
+
+/*------Inputs------*/
+.duration-input{
+    font-size: 14px; 
+    width: 60px; 
+    height: 24px; 
+    background-color: #f0f0f3;
+    border: 1px solid #404353;
+    border-radius: 1px;
+    color: #404353;
+    border: 1px solid #435199;
+}
+
+.tempo-input {
+    font-size: 14px; 
+    width: 35px; 
+    height: 24px; 
+    background-color: #f0f0f3;
+    border: 1px solid #404353;
+    border-radius: 1px;
+    color: #404353;
+}
+
+/*------Scroll Bar Design------*/
+
+/*------Etc.------*/
+
+/* Hides up/down arrow in tempo input field */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}

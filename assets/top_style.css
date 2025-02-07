@@ -1,0 +1,144 @@
+/*------Containers------*/
+.checklist-container{
+    flex-direction: column;
+}
+
+.files-container{
+    margin-left: 35px;
+}
+
+.members-container{
+    padding: 0px;
+    margin: 0px;
+    margin-right: 5px;
+    text-align: right;
+}
+
+.text-refresh-container{
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+    gap: 5px;
+}
+
+.title-container{
+    font-size: 18px;
+    margin: 0px;
+    margin-left: 3vw;
+}
+
+/*------Fonts; Texts------*/
+.title{
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    margin: 0px;
+}
+
+.member-class-text {
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    font-size: 12px;
+}
+
+.modal-files-title{
+    font-size: 22px;
+    margin: 10px;
+    align-items: center;
+    font-weight: bold;
+}
+
+.refresh-text{
+    margin-left: 5px;
+    margin-right: 5px
+}
+
+/*------Buttons------*/
+.btn-close {
+    position: absolute;
+    right: 20px; 
+    top: 17px; 
+    font-size: 16px; 
+    color: #404353;
+}
+
+.fa-solid.fa-arrows-rotate{
+    margin-left: 5px
+}
+
+.files-button{
+    font-size: 16px;
+    border: 1px solid rgba(135, 155, 226, 0.25);
+    color: #f0f0f3;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: inherit;
+    border-radius: 5px;
+    box-sizing: content-box;
+    transition: all ease .2s;
+    position: relative;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 9px 20px
+}
+
+.files-button:hover {
+    color: #a7aed0; 
+    border-color: rgba(135, 155, 226, 0.5);
+    background-color: rgba(135, 155, 226, 0.04);  
+}
+
+.refresh-button{
+    font-size: 14px;
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.refresh-button:hover {
+    background-color: #283367;
+}
+
+/*------Popups------*/
+.close-files-modal.btn.btn-primary{
+    font-size: 16px;
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.close-files-modal.btn.btn-primary:hover {
+    background-color: #283367;
+}
+
+.files-modal-header {
+    display: flex;
+    flex-shrink: 0;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    border-bottom: 1px solid rgba(64, 67, 83, 0.5);
+}
+
+.modal-content {
+    position: absolute;
+    top: 49px;
+    font-size: 14px;
+    color: #404353;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #a7aed0; 
+    border-radius: 5px;
+    border: 1px solid #b0b8e4;
+    width: 100%;
+    overflow: auto;
+  }
+
+/*------Inputs------*/
+
+/*------Scroll Bar Design------*/
+
+/*------Etc.------*/
