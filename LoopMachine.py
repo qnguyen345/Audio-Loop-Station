@@ -1,7 +1,12 @@
 import copy
+import dill as pickle
+from datetime import datetime
 import librosa
 import numpy as np
+import os
 import sounddevice as sd
+import random
+import string
 import threading
 import time
 
@@ -71,6 +76,8 @@ class LoopMachine:
         self.position = 0  # Playback and recording position
         self.click_track = generate_clicks()
         self.click_is_muted = True # Mute click when app initially starts
+        self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
+        self.name = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
@@ -155,6 +162,44 @@ class LoopMachine:
         self.stream.stop()
         self.stream.close()
 
+    def save(self):
+        """Saves the loop as a Pickle, includes any linked Track objects."""
+        self.stop()
+        self.stream = None
+        time.sleep(0.1)
+        
+        filename = f'{self.name}-{self.uid}.pkl'
+        with open(os.path.join('loops', filename), 'wb') as file:
+            pickle.dump(self, file)
+            
+        self.stream = sd.Stream(
+            samplerate=RATE,
+            blocksize=CHUNK,
+            channels=CHANNELS,
+            dtype=FORMAT,
+            callback=self.audio_callback
+        )
+        self.stream.start()
+        
+    @classmethod    
+    def load(cls, filename: str):
+        """Loads a saved loop object using the filename"""
+        try:
+            with open(os.path.join('loops', filename), 'rb') as file:
+                
+                loaded = pickle.load(file)
+                loaded.stream = sd.Stream(
+                    samplerate=RATE,
+                    blocksize=CHUNK,
+                    channels=CHANNELS,
+                    dtype=FORMAT,
+                    callback=loaded.audio_callback
+                )
+                loaded.stream.start()
+                return loaded
+        except FileNotFoundError:
+            print(f'{filename} was not found.')
+
     def __str__(self):
         result = f"Tracks ({len(self.tracks)}):"
         for i, track in enumerate(self.tracks):
@@ -185,6 +230,8 @@ r           start recording
 s           stop recording
 y <i>       copy track by index
 yy          copy the most recent track
+save        save the loop machine object
+load <f>    load a loop machine object with a filename
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
             elif cmd == 'c':
@@ -226,6 +273,11 @@ yy          copy the most recent track
                 track_index = int(args[1])
                 track = loop_machine.tracks[track_index]
                 loop_machine.tracks.append(copy.copy(track))
+            elif cmd.startswith('save'):
+                loop_machine.save()
+            elif cmd.startswith('load'):
+                loop_machine = LoopMachine.load(args[1])
+                print(loop_machine)
                 
     except KeyboardInterrupt:
         loop_machine.stop()

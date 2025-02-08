@@ -3,3 +3,5 @@ venv/
 venv311/
 tracks/*.wav
 .DS_Store
+loops/*
+!loops/example.pkg
