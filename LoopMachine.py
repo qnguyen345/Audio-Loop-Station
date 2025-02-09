@@ -77,7 +77,7 @@ class LoopMachine:
         self.click_track = generate_clicks()
         self.click_is_muted = True # Mute click when app initially starts
         self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
-        self.name = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
+        self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
@@ -164,13 +164,19 @@ class LoopMachine:
 
     def save(self):
         """Saves the loop as a Pickle, includes any linked Track objects."""
+        # safely close the stream:
         self.stop()
+        
+        # Pickling is unable to process some C-type objects
+        # prevents TypeError: cannot pickle '_cffi_backend.__CDataOwnGC' object
         self.stream = None
         
-        filename = f'{self.name}-{self.uid}.pkl'
+        # date-time-uid.pkl:
+        filename = f'{self.time}-{self.uid}.pkl'
         with open(os.path.join('loops', filename), 'wb') as file:
             pickle.dump(self, file)
             
+        # reinitialize the stream:
         self.stream = sd.Stream(
             samplerate=RATE,
             blocksize=CHUNK,
