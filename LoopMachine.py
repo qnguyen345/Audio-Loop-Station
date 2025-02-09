@@ -1,7 +1,6 @@
 import copy
 import dill as pickle
 from datetime import datetime
-import gc
 import librosa
 import numpy as np
 import os
@@ -207,6 +206,17 @@ class LoopMachine:
         except FileNotFoundError:
             print(f'{filename} was not found.')
 
+    def repr_log(self):
+        with open('repr_log.txt', 'a') as log:
+            log.write('\n')
+            log.write('___________________\n')
+            log.write(f'{self.__class__.__name__}: \n')
+            for key in self.__dict__:
+                log.write(f'{key}: {self.__dict__[key]} \n')
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.__dict__}'
+
     def __str__(self):
         result = f"Tracks ({len(self.tracks)}):"
         for i, track in enumerate(self.tracks):
@@ -239,6 +249,7 @@ y <i>       copy track by index
 yy          copy the most recent track
 save        save the loop machine object
 load <f><l> load a loop machine object with filename <f>; close currently loaded loop <l> (optional) 
+repr        print a dictionary representation of the loop
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
             elif cmd == 'c':
@@ -285,6 +296,9 @@ load <f><l> load a loop machine object with filename <f>; close currently loaded
             elif cmd.startswith('load'):
                 loop_machine = LoopMachine.load(args[1], loop_machine)
                 print(loop_machine)
+            elif cmd == 'repr':
+                loop_machine.repr_log()
+                print(repr(loop_machine))
                 
     except KeyboardInterrupt:
         loop_machine.stop()

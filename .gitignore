@@ -5,3 +5,4 @@ tracks/*.wav
 .DS_Store
 loops/*
 !loops/example.pkl
+repr_log.txt
