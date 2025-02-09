@@ -1,6 +1,7 @@
 import copy
 import dill as pickle
 from datetime import datetime
+import gc
 import librosa
 import numpy as np
 import os
@@ -166,7 +167,6 @@ class LoopMachine:
         """Saves the loop as a Pickle, includes any linked Track objects."""
         self.stop()
         self.stream = None
-        time.sleep(0.1)
         
         filename = f'{self.name}-{self.uid}.pkl'
         with open(os.path.join('loops', filename), 'wb') as file:
@@ -182,11 +182,18 @@ class LoopMachine:
         self.stream.start()
         
     @classmethod    
-    def load(cls, filename: str):
-        """Loads a saved loop object using the filename"""
+    def load(cls, filename: str, close_loop=None):
+        """Loads a saved loop object using the filename
+        
+        Keyword arguments:
+        filename -- example: "2025-02-08-T15-44-20-CxilTDgH.pkl"
+        close_loop -- include an existing loop object to close its stream
+        """ 
+        if close_loop:
+            close_loop.stop()
+        
         try:
             with open(os.path.join('loops', filename), 'rb') as file:
-                
                 loaded = pickle.load(file)
                 loaded.stream = sd.Stream(
                     samplerate=RATE,
@@ -231,7 +238,7 @@ s           stop recording
 y <i>       copy track by index
 yy          copy the most recent track
 save        save the loop machine object
-load <f>    load a loop machine object with a filename
+load <f><l> load a loop machine object with filename <f>; close currently loaded loop <l> (optional) 
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
             elif cmd == 'c':
@@ -276,7 +283,7 @@ load <f>    load a loop machine object with a filename
             elif cmd.startswith('save'):
                 loop_machine.save()
             elif cmd.startswith('load'):
-                loop_machine = LoopMachine.load(args[1])
+                loop_machine = LoopMachine.load(args[1], loop_machine)
                 print(loop_machine)
                 
     except KeyboardInterrupt:
