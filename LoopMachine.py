@@ -54,14 +54,21 @@ class Track:
         self.name = None
         self.is_recording = False
 
-    def apply_pitch_shift(self):
-        """Applies pitch shifting to the track buffer."""
-        if self.pitch_shift == 0:
-            self.buffer = self.raw_buffer
-        else:
-            buffer_float = self.raw_buffer.astype(np.float32) / 32767.0  # Normalize to [-1,1]
-            buffer_shifted = librosa.effects.pitch_shift(buffer_float.flatten(), sr=RATE, n_steps=self.pitch_shift)
-            self.buffer = (np.clip(buffer_shifted, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
+    def apply_pitch_shift_async(self):
+        """Offload pitch shifting to a background thread and update immediately when done."""
+        def worker():
+            if self.pitch_shift == 0:
+                # No pitch shift needed; just copy the raw buffer.
+                pending = self.raw_buffer.copy()
+            else:
+                # Normalize and perform pitch shifting.
+                buffer_float = self.raw_buffer.astype(np.float32) / 32767.0  # Normalize to [-1, 1]
+                buffer_shifted = librosa.effects.pitch_shift(
+                    buffer_float.flatten(), sr=RATE, n_steps=self.pitch_shift
+                )
+                self.buffer = (np.clip(buffer_shifted, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
+
+        threading.Thread(target=worker, daemon=True).start()
 
     def __str__(self):
         elements = []
@@ -102,6 +109,7 @@ class LoopMachine:
             callback=self.audio_callback
         )
         self.stream.start()
+        self._prewarm()
 
     def start_recording(self):
         """Start recording into a new buffer."""
@@ -190,6 +198,13 @@ class LoopMachine:
         self.stream.stop()
         self.stream.close()
 
+    def _prewarm(self):
+        def worker():
+            dummy_buffer = np.zeros(RATE, dtype=np.float32)
+            _ = librosa.effects.pitch_shift(dummy_buffer, sr=RATE, n_steps=1)
+
+        threading.Thread(target=worker, daemon=True).start()
+
     def __str__(self):
         result = f"Tracks ({len(self.tracks)}):"
         for i, track in enumerate(self.tracks):
@@ -257,7 +272,7 @@ yy          copy the most recent track
                 pitch_shift = int(args[2])
                 track = loop_machine.tracks[track_index]
                 track.pitch_shift = pitch_shift
-                track.apply_pitch_shift()
+                track.apply_pitch_shift_async()
             elif cmd == 'yy':
                 track_index = -1
                 track = loop_machine.tracks[track_index]
