@@ -17,7 +17,10 @@ ADJUSTMENT_FACTOR = 0.75  # Fine-tune latency correction
 
 print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
 
-def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
+FIRST_CLICK_FREQ = 1500  # Frequency (Hz) for the first beat’s click
+REGULAR_CLICK_FREQ = 1000  # Frequency (Hz) for the rest of the clicks
+
+def generate_click(sample_rate=RATE, duration_ms=50, *, frequency):
     """Generate a short click sound for the metronome."""
     duration_samples = int((duration_ms / 1000) * sample_rate)
     t = np.linspace(0, duration_ms / 1000, duration_samples, False)
@@ -25,10 +28,22 @@ def generate_click(sample_rate=RATE, duration_ms=50, frequency=1000):
     return click.reshape(-1, 1)  # Ensure mono output
 
 def generate_clicks():
-    """Generate a full click track matching the loop length."""
-    click = generate_click()
-    silence = np.zeros((int((60 / BPM) * RATE) - len(click), 1), dtype=np.int16)
-    return np.vstack([np.vstack((click, silence)) for _ in range(BEATS_PER_LOOP)])
+    """Generate a full click track matching the loop length, with the first click pitched differently."""
+    samples_per_beat = int((60 / BPM) * RATE)
+    
+    # Generate the first click using a different frequency.
+    first_click = generate_click(frequency=FIRST_CLICK_FREQ)
+    first_silence = np.zeros((samples_per_beat - len(first_click), 1), dtype=np.int16)
+    first_segment = np.vstack((first_click, first_silence))
+    
+    # Generate the regular click for the other beats.
+    regular_click = generate_click(frequency=REGULAR_CLICK_FREQ)
+    regular_silence = np.zeros((samples_per_beat - len(regular_click), 1), dtype=np.int16)
+    regular_segment = np.vstack((regular_click, regular_silence))
+    
+    # Build the full click track: first beat is first_segment; remaining beats use regular_segment.
+    segments = [first_segment] + [regular_segment for _ in range(BEATS_PER_LOOP - 1)]
+    return np.vstack(segments)
 
 class Track:
     def __init__(self, raw_buffer, is_muted=False, pitch_shift=0):
