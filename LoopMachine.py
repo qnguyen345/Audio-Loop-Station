@@ -74,7 +74,7 @@ class Track:
         if self.pitch_shift > 0:
             elements.append("+" + str(self.pitch_shift))
         elif self.pitch_shift < 0:
-            elements.append(self.pitch_shift)
+            elements.append(str(self.pitch_shift))
 
         return "<" + " ".join(elements) + ">"
 
