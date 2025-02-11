@@ -46,12 +46,13 @@ def generate_clicks():
     return np.vstack(segments)
 
 class Track:
-    def __init__(self, raw_buffer, is_muted=False, pitch_shift=0):
-        self.raw_buffer = raw_buffer
-        self.is_muted = is_muted
-        self.pitch_shift = pitch_shift
+    def __init__(self):
+        self.raw_buffer = np.zeros((FRAMES_PER_LOOP, CHANNELS), dtype=np.int16)
+        self.buffer = self.raw_buffer
+        self.is_muted = False
+        self.pitch_shift = 0
         self.name = None
-        self.apply_pitch_shift()
+        self.is_recording = False
 
     def apply_pitch_shift(self):
         """Applies pitch shifting to the track buffer."""
@@ -80,12 +81,14 @@ class Track:
 class LoopMachine:
     def __init__(self):
         # Allocate memory for multiple loop layers
-        self.current_recording = None  # Active buffer being recorded
+        self.current_track = None  # Active buffer being recorded
         self.tracks = []  # List of recorded tracks
-        self.is_recording = False
+        # self.is_recording = False
         self.position = 0  # Playback and recording position
+        self.checkpoint_position = 0
+        self.checkpoint_action = None # Action to perform on reaching checkpoint
         self.click_track = generate_clicks()
-        self.click_is_muted = True # Mute click when app initially starts
+        self.click_is_muted = False
         
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
@@ -103,38 +106,55 @@ class LoopMachine:
     def start_recording(self):
         """Start recording into a new buffer."""
         print("Recording started...")
-        self.is_recording = True
-        self.current_recording = np.zeros((FRAMES_PER_LOOP, CHANNELS), dtype=np.int16)
-        self.click_is_muted = False
+        self._set_checkpoint_now()
+        self.checkpoint_action = "NEW"
         
     def stop_recording(self):
         """Stop recording and store the completed segment with latency compensation."""
         print("Recording stopped.")
-        self.is_recording = False
-        if self.current_recording is not None:
-            # Shift recording earlier while preserving full segment duration
-            adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
-            self.tracks.append(Track(adjusted_recording))
-        self.current_recording = None
+        self._set_checkpoint_now()
+        self.checkpoint_action = "STOP"
+
+    def _set_checkpoint_now(self):
+        self.checkpoint_position = (self.position + self.latency_compensation_samples) % FRAMES_PER_LOOP
 
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
         
+        # Handle checkpoint
+        start = self.position
+        end = (self.position + frames) % FRAMES_PER_LOOP
+        if start < end:
+            checkpoint_reached = (start <= self.checkpoint_position < end)
+        else:
+            checkpoint_reached = (self.checkpoint_position >= start or self.checkpoint_position < end)
+        if checkpoint_reached:
+            if self.checkpoint_action in ("STOP", "NEW"):
+                if self.current_track:
+                    self.current_track.is_recording = False
+                    self.current_track = None
+            if self.checkpoint_action == "NEW":
+                new_track = Track()
+                new_track.is_recording = True
+                self.current_track = new_track
+                self.tracks.append(new_track)
+            self.checkpoint_action = None
+
         # Record audio if recording is active
-        if self.is_recording:
+        if self.current_track:
             start_idx = self.position
             end_idx = self.position + frames
-            if end_idx >= FRAMES_PER_LOOP:
-                first_part = indata[:FRAMES_PER_LOOP - start_idx]
-                second_part = indata[FRAMES_PER_LOOP - start_idx:]
-                self.current_recording[start_idx:] = first_part
-                adjusted_recording = np.roll(self.current_recording, -self.latency_compensation_samples, axis=0)
-                self.tracks.append(Track(adjusted_recording))
-                self.current_recording = np.zeros((FRAMES_PER_LOOP, 1), dtype=np.int16)
-                self.current_recording[:len(second_part)] = second_part
+            if end_idx > FRAMES_PER_LOOP:
+                # Calculate how many samples can be written before reaching the end.
+                samples_until_end = FRAMES_PER_LOOP - start_idx
+                # Write the first part into the end of the buffer.
+                self.current_track.raw_buffer[start_idx:] = indata[:samples_until_end]
+                # Write the remaining samples at the beginning of the buffer.
+                remaining_samples = frames - samples_until_end
+                self.current_track.raw_buffer[:remaining_samples] = indata[samples_until_end:]
             else:
-                self.current_recording[start_idx:end_idx] = indata
+                self.current_track.raw_buffer[start_idx:end_idx] = indata
         
         # Inject click track
         if not self.click_is_muted:
@@ -147,8 +167,8 @@ class LoopMachine:
         
         # Inject tracks
         for track in self.tracks:
-            if not track.is_muted:
-                playback_start = (self.position - self.latency_compensation_samples) % FRAMES_PER_LOOP
+            if not track.is_muted and not track.is_recording:
+                playback_start = (self.position + self.latency_compensation_samples) % FRAMES_PER_LOOP
                 loop_segment = track.buffer[playback_start:playback_start + frames]
                 if loop_segment.shape[0] < frames:
                     padding = np.zeros((frames - loop_segment.shape[0], 1), dtype=np.int16)
@@ -190,11 +210,12 @@ if __name__ == "__main__":
 c           toggle click track
 d <i>       delete track by index
 dd          delete the most recent track
-i           info
 h           help
+l           list tracks
+la <FLOAT>  set latency samples (seconds)
 m/u <i>     mute/unmute track by index
 n <i>       set name for track by index
-p <i>       set pitch shift for track by index
+p <i> <INT> set pitch shift for track by index
 q           quit
 r           start recording
 s           stop recording
@@ -209,8 +230,12 @@ yy          copy the most recent track
             elif cmd.startswith('d'):
                 track_index = int(args[-1])
                 loop_machine.tracks.pop(track_index)
-            elif cmd == 'i':
+            elif cmd == 'l':
                 print(loop_machine)
+            elif cmd.startswith('la'):
+                new_latency = int(float(args[-1]) * RATE)
+                print(f"Setting latency to {new_latency}...")
+                loop_machine.latency_compensation_samples = new_latency
             elif cmd.startswith('m') or cmd.startswith('u'):
                 track_index = int(args[-1])
                 track = loop_machine.tracks[track_index]
