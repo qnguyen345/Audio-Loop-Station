@@ -7,7 +7,6 @@ import dash_bootstrap_components as dbc
 import callbacks
 
 from assets.layout import Layout
-from track import Track
 
 # Initialize Dash app
 # Note: external stylesheet is for moal/file popup styling

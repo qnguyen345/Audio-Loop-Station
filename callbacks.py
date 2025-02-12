@@ -7,7 +7,6 @@ import glob
 from dash.exceptions import PreventUpdate
 import json
 
-from track import Track
 from LoopMachine import LoopMachine
 from assets.layout import Layout
 
@@ -48,11 +47,10 @@ def button_callbacks(app):
             return "record-button", dash.no_update, dash.no_update
         else:
             # Start recording
-            loop_machine.start_recording()
+            uid = loop_machine.start_recording()
 
-            recording_track = Track(duration)
             # Add uid of recording track to track list
-            track_list.append(recording_track.get_uid())
+            track_list.append(uid)
             # Update the tracks section after recorded track
             updated_track_section, updated_track_list = Layout(
                 duration, tempo).update_track_section(track_list)
