@@ -1,7 +1,12 @@
 import copy
+import dill as pickle
+from datetime import datetime
 import librosa
 import numpy as np
+import os
 import sounddevice as sd
+import random
+import string
 import threading
 import time
 
@@ -71,6 +76,8 @@ class LoopMachine:
         self.position = 0  # Playback and recording position
         self.click_track = generate_clicks()
         self.click_is_muted = True # Mute click when app initially starts
+        self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
+        self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
@@ -155,6 +162,67 @@ class LoopMachine:
         self.stream.stop()
         self.stream.close()
 
+    def save(self):
+        """Saves the loop as a Pickle, includes any linked Track objects."""
+        # safely close the stream:
+        self.stop()
+        
+        # Pickling is unable to process some C-type objects
+        # prevents TypeError: cannot pickle '_cffi_backend.__CDataOwnGC' object
+        self.stream = None
+        
+        # date-time-uid.pkl:
+        filename = f'{self.time}-{self.uid}.pkl'
+        with open(os.path.join('loops', filename), 'wb') as file:
+            pickle.dump(self, file)
+            
+        # reinitialize the stream:
+        self.stream = sd.Stream(
+            samplerate=RATE,
+            blocksize=CHUNK,
+            channels=CHANNELS,
+            dtype=FORMAT,
+            callback=self.audio_callback
+        )
+        self.stream.start()
+        
+    @classmethod    
+    def load(cls, filename: str, close_loop=None):
+        """Loads a saved loop object using the filename
+        
+        Keyword arguments:
+        filename -- example: "2025-02-08-T15-44-20-CxilTDgH.pkl"
+        close_loop -- include an existing loop object to close its stream
+        """ 
+        if close_loop:
+            close_loop.stop()
+        
+        try:
+            with open(os.path.join('loops', filename), 'rb') as file:
+                loaded = pickle.load(file)
+                loaded.stream = sd.Stream(
+                    samplerate=RATE,
+                    blocksize=CHUNK,
+                    channels=CHANNELS,
+                    dtype=FORMAT,
+                    callback=loaded.audio_callback
+                )
+                loaded.stream.start()
+                return loaded
+        except FileNotFoundError:
+            print(f'{filename} was not found.')
+
+    def repr_log(self):
+        with open('repr_log.txt', 'a') as log:
+            log.write('\n')
+            log.write('___________________\n')
+            log.write(f'{self.__class__.__name__}: \n')
+            for key in self.__dict__:
+                log.write(f'{key}: {self.__dict__[key]} \n')
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.__dict__}'
+
     def __str__(self):
         result = f"Tracks ({len(self.tracks)}):"
         for i, track in enumerate(self.tracks):
@@ -185,6 +253,9 @@ r           start recording
 s           stop recording
 y <i>       copy track by index
 yy          copy the most recent track
+save        save the loop machine object
+load <f><l> load a loop machine object with filename <f>; close currently loaded loop <l> (optional) 
+repr        print a dictionary representation of the loop
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
             elif cmd == 'c':
@@ -226,6 +297,14 @@ yy          copy the most recent track
                 track_index = int(args[1])
                 track = loop_machine.tracks[track_index]
                 loop_machine.tracks.append(copy.copy(track))
+            elif cmd.startswith('save'):
+                loop_machine.save()
+            elif cmd.startswith('load'):
+                loop_machine = LoopMachine.load(args[1], loop_machine)
+                print(loop_machine)
+            elif cmd == 'repr':
+                loop_machine.repr_log()
+                print(repr(loop_machine))
                 
     except KeyboardInterrupt:
         loop_machine.stop()
