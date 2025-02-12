@@ -211,7 +211,7 @@ class Layout:
                         className="mute-unmute-click-button",
                         id="mute_unmute_click_button",
                         children=[
-                            html.I(className="fa-solid fa-volume-xmark"),
+                            html.I(className="fa-solid fa-volume-high"),
                             html.Span(children="Click",
                                       className="mute-unmute-click-text")
                         ]

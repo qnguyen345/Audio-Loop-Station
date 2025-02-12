@@ -242,26 +242,50 @@ def button_callbacks(app):
     def mute_unmute_click(n_clicks):
         """
         Toggles between mute and unmute buttons for clicks.
-        Mute click if mute button is clicked.
-        Unmute click if unmute button is clicked
         """
-        # Even clicks or initial click is mute
+        # Even clicks or initial click is unmute
         if n_clicks is None or n_clicks % 2 == 0:
-            mute = [
-                html.I(className="fa-solid fa-volume-xmark"),
-                html.Span(children="Click",
-                          className="mute-unmute-click-text")
-            ]
-            return mute
-
-        # Odd clicks are unmute
-        else:
             unmute = [
                 html.I(className="fa-solid fa-volume-high"),
                 html.Span(children="Click",
                           className="mute-unmute-click-text")
             ]
+            loop_machine.click_is_muted = not loop_machine.click_is_muted
             return unmute
+
+        # Odd clicks are mute
+        else:
+            mute = [
+                html.I(className="fa-solid fa-volume-xmark"),
+                html.Span(children="Click",
+                          className="mute-unmute-click-text")
+            ]
+            loop_machine.click_is_muted = not loop_machine.click_is_muted
+            return mute
+
+    @app.callback(
+        Input("stop_button", "n_clicks"),
+        prevent_initial_call=True
+    )
+    def stop(n_clicks):
+        """
+        Stops the application if stop button is pressed.
+        """
+        if n_clicks:
+            loop_machine.stop()
+
+    @app.callback(
+        [Output("track_section", "children", allow_duplicate=True),
+         Output("stored_track_list", "data", allow_duplicate=True)],
+        Input("delete_loop_button", "n_clicks"),
+        State("stored_track_list", "data"),
+        prevent_initial_call=True
+    )
+    def delete_loop(n_clicks, track_list):
+        if n_clicks:
+            track_list.clear()
+            updated_track_section, updated_track_list = Layout().update_track_section(track_list)
+            return updated_track_section, updated_track_list
 
 
 def update_layout_callbacks(app):
