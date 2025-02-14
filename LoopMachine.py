@@ -212,53 +212,41 @@ class LoopMachine:
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state['stream'] = None
+        return state
+
     def save(self):
         """Saves the loop as a Pickle, includes any linked Track objects."""
-        # safely close the stream:
-        self.stop()
-        
-        # Pickling is unable to process some C-type objects
-        # prevents TypeError: cannot pickle '_cffi_backend.__CDataOwnGC' object
-        self.stream = None
-        
+
         # date-time-uid.pkl:
         filename = f'{self.time}-{self.uid}.pkl'
         with open(os.path.join('loops', filename), 'wb') as file:
             pickle.dump(self, file)
-            
-        # reinitialize the stream:
-        self.stream = sd.Stream(
-            samplerate=RATE,
-            blocksize=CHUNK,
-            channels=CHANNELS,
-            dtype=FORMAT,
-            callback=self.audio_callback
-        )
-        self.stream.start()
+                   
+                    
+    def load(self, filename: str):
+        """Loads a saved loop object using the filename.
         
-    @classmethod    
-    def load(cls, filename: str, close_loop=None):
-        """Loads a saved loop object using the filename
+        Waits until end of loop to complete load
+        Keeps stream open and replaces the list of tracks, and some other info
+        Ignores loaded file's click status
         
         Keyword arguments:
         filename -- example: "2025-02-08-T15-44-20-CxilTDgH.pkl"
-        close_loop -- include an existing loop object to close its stream
         """ 
-        if close_loop:
-            close_loop.stop()
-        
         try:
             with open(os.path.join('loops', filename), 'rb') as file:
                 loaded = pickle.load(file)
-                loaded.stream = sd.Stream(
-                    samplerate=RATE,
-                    blocksize=CHUNK,
-                    channels=CHANNELS,
-                    dtype=FORMAT,
-                    callback=loaded.audio_callback
-                )
-                loaded.stream.start()
-                return loaded
+                loaded.__dict__.pop('stream')
+                loaded.__dict__.pop('click_is_muted')
+                while self.position > 0:
+                    continue
+                loaded.position = 0
+                self.__dict__ = loaded.__dict__
+                pass
+
         except FileNotFoundError:
             print(f'{filename} was not found.')
 
@@ -305,7 +293,7 @@ s           stop recording
 y <i>       copy track by index
 yy          copy the most recent track
 save        save the loop machine object
-load <f><l> load a loop machine object with filename <f>; close currently loaded loop <l> (optional) 
+load <f>    load a loop machine object with filename <f> 
 repr        print a dictionary representation of the loop
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
@@ -355,7 +343,7 @@ repr        print a dictionary representation of the loop
             elif cmd.startswith('save'):
                 loop_machine.save()
             elif cmd.startswith('load'):
-                loop_machine = LoopMachine.load(args[1], loop_machine)
+                loop_machine.load(args[1])
                 print(loop_machine)
             elif cmd == 'repr':
                 loop_machine.repr_log()
