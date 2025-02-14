@@ -242,13 +242,14 @@ class LoopMachine:
         try:
             with open(os.path.join('loops', filename), 'rb') as file:
                 loaded = pickle.load(file)
-                loaded.__dict__.pop('stream')
-                loaded.__dict__.pop('click_is_muted')
+                # adjust while current loop is finishing
+                loaded.__dict__['click_is_muted'] = self.click_is_muted
+                loaded.__dict__['stream'] = self.stream
+                loaded.position = 0
                 while self.position > 0:
                     continue
-                loaded.position = 0
-                for each in loaded.__dict__:
-                    self.__dict__[each] = loaded.__dict__[each]
+                # O(1):
+                self.__dict__ = loaded.__dict__
 
         except FileNotFoundError:
             print(f'{filename} was not found.')
