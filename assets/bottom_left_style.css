@@ -1,12 +1,4 @@
 /*------Containers------*/
-.add-track-button-container{
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-    display: flex;
-    position: relative;
-    flex-direction: row;
-    border-bottom: 1px solid rgba(135, 155, 226, 0.05);
-}
 
 .left-loop-tab-section-container {
     margin: 0px;
@@ -34,13 +26,14 @@
     flex-direction: row;
     align-items: center;
     gap: 4px;
-    margin: 8px;
+    margin: 4px;
+    margin-top: 2px;
 }
 
 .left-tab-section-container {
     margin: 0px;
     width: 120px;
-    height: 100px;
+    height: 120px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -79,7 +72,7 @@
 }
 
 .track-tabs-container {
-    height: 100px;
+    height: 120px;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
@@ -129,19 +122,8 @@
 }
 
 /*------Buttons------*/
-.add-track-button {
-    width: 100%; 
-    background: transparent;  
-    border: transparent;
-    padding: 0; 
-    margin: 2px; 
-    font: inherit; 
-    cursor: pointer; 
-    color: #f0f0f3;
-    font-size: 14px;
-}
 
-.left-play-icon-button {
+.copy-button {
     font-size: 13px;
     width: 25px; 
     height: 25px;
@@ -155,7 +137,7 @@
     justify-content: center;
 }
 
-.left-play-icon-button:hover {
+.copy-button:hover {
     background-color: #283367;
 }
 
@@ -204,7 +186,14 @@
     color: #f0f0f3;
 }
 /*------Inputs------*/
-
-
+.track-name-input{
+    width: 120px;
+    height: 14px;
+    background-color: transparent;
+    font-size: 12px;
+    color: #404353;
+    text-align: center;
+    border: 1px rgba(135, 155, 226, 0.04);
+}
 /*------Etc.------*/
 

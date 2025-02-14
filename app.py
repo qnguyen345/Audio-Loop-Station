@@ -37,9 +37,6 @@ app_layout = html.Div(
         dcc.Store(id="stored_duration", data=duration),
         dcc.Store(id="stored_tempo", data=tempo),
         
-        # Initialize and store track list
-        dcc.Store(id="stored_track_list", data=["Dummy_1"]), #Initialize to 'Dummy'
-        
         # Top section
         html.Div(
             className="top-container",
@@ -67,7 +64,6 @@ app_layout = html.Div(
                         html.Div(
                             className="track-container",
                             children=[
-                                Layout.get_add_track_layout(),
                                 html.Div(
                                     id="track_section",
                                     )
@@ -93,7 +89,6 @@ app.layout = app_layout
 
 # Get all callbacks
 callbacks.button_callbacks(app)
-callbacks.update_layout_callbacks(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
