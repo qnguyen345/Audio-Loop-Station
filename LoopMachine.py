@@ -213,19 +213,22 @@ class LoopMachine:
         threading.Thread(target=worker, daemon=True).start()
 
     def __getstate__(self):
+        # Pickle uses this dunder method to access object data
         state = self.__dict__.copy()
         state['stream'] = None
         return state
 
     def save(self):
-        """Saves the loop as a Pickle, includes any linked Track objects."""
+        """Saves the loop as a Pickle, includes any linked Track objects.
+
+        Ignores the stream to prevent need to close stream
+        """
 
         # date-time-uid.pkl:
         filename = f'{self.time}-{self.uid}.pkl'
         with open(os.path.join('loops', filename), 'wb') as file:
             pickle.dump(self, file)
-                   
-                    
+            
     def load(self, filename: str):
         """Loads a saved loop object using the filename.
         
@@ -244,8 +247,8 @@ class LoopMachine:
                 while self.position > 0:
                     continue
                 loaded.position = 0
-                self.__dict__ = loaded.__dict__
-                pass
+                for each in loaded.__dict__:
+                    self.__dict__[each] = loaded.__dict__[each]
 
         except FileNotFoundError:
             print(f'{filename} was not found.')
