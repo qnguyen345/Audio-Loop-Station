@@ -9,6 +9,7 @@ import random
 import string
 import threading
 import time
+import uuid
 
 # Constants
 CHUNK = 1024  # Frames per buffer
@@ -59,6 +60,7 @@ class Track:
         self.pitch_shift = 0
         self.name = None
         self.is_recording = False
+        self.track_uid = uuid.uuid4()
 
     def apply_pitch_shift_async(self):
         """Offload pitch shifting to a background thread and update immediately when done."""
@@ -105,7 +107,7 @@ class LoopMachine:
         self.checkpoint_action = None # Action to perform on reaching checkpoint
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
         self.click_is_muted = True
-        self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
+        self.uid = uuid.uuid4()
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         self.is_playing= True
      
