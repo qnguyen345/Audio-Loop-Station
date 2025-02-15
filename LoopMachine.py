@@ -65,7 +65,7 @@ class Track:
         def worker():
             if self.pitch_shift == 0:
                 # No pitch shift needed; just copy the raw buffer.
-                pending = self.raw_buffer.copy()
+                self.buffer = self.raw_buffer.copy()
             else:
                 # Normalize and perform pitch shifting.
                 buffer_float = self.raw_buffer.astype(np.float32) / 32767.0  # Normalize to [-1, 1]
@@ -97,7 +97,6 @@ class LoopMachine:
         self.bpm = bpm
         self.beats_per_loop = beats_per_loop
         self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames
-        
         self.current_track = None  # Active buffer being recorded
         self.tracks = []  # List of recorded tracks
         # self.is_recording = False
@@ -105,11 +104,11 @@ class LoopMachine:
         self.checkpoint_position = 0
         self.checkpoint_action = None # Action to perform on reaching checkpoint
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
-        self.click_is_muted = False
+        self.click_is_muted = True
         self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
-        
-        
+        self.is_playing= True
+     
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
         print(f"Measured Input Latency: {self.input_latency:.4f} sec, Compensation: {self.latency_compensation_samples} samples")
@@ -129,6 +128,7 @@ class LoopMachine:
         print("Recording started...")
         self._set_checkpoint_now()
         self.checkpoint_action = "NEW"
+        self.click_is_muted = False
         
     def stop_recording(self):
         """Stop recording and store the completed segment with latency compensation."""
@@ -142,7 +142,10 @@ class LoopMachine:
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
-        
+        # If paused, return nothing
+        if not self.is_playing:  
+            outdata[:] = global_audio_out
+            return
         # Handle checkpoint
         start = self.position
         end = (self.position + frames) % self.frames_per_loop
@@ -204,7 +207,7 @@ class LoopMachine:
         self.position += frames
         if self.position >= self.frames_per_loop:
             self.position = 0
-
+    
     def stop(self):
         """Stops the loop machine and closes the audio stream."""
         self.is_recording = False

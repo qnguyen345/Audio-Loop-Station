@@ -17,3 +17,5 @@ checklist: https://dash.plotly.com/dash-core-components/checklist
 Plotting audio waves: https://librosa.org/doc/0.8.1/generated/librosa.load.html
 
 Handling duplicate callback outputs: https://dash.plotly.com/duplicate-callback-outputs
+
+Matching indices: https://dash.plotly.com/pattern-matching-callbacks

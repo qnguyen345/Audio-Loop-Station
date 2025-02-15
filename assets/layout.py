@@ -1,11 +1,14 @@
-from track import Track
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
 
+from LoopMachine import LoopMachine
+tempo = 120
+beats = 5
+loop_machine = LoopMachine(tempo, beats)
 
 class Layout:
-    def __init__(self, duration, tempo):
+    def __init__(self, duration=beats, tempo=tempo):
         self.duration = duration
         self.tempo = tempo
 
@@ -139,24 +142,11 @@ class Layout:
                     html.Div(
                         className="left-loop-row-container",
                         children=[
-                            # Pitch button
-                            # Pitch buttons
-                            html.Div(
-                                className="pitch-container",
-                                children=[
-                                    html.Button(className="decrease-pitch-button",
-                                                children="▼"),
-                                    html.Span(className="pitch-text",
-                                              children="Pitch"),
-                                    html.Button(className="increase-pitch-button",
-                                                children="▲"),
-                                ]
-                            ),
 
                             # Trash button
                             html.Button(
                                 className="trash-button",
-                                id="trash_button_0",
+                                id="delete_loop_trash_button",
                                 children=[
                                     html.I(
                                         className="fa-solid fa-trash"
@@ -195,25 +185,25 @@ class Layout:
                         ]
                     ),
 
-                    # Play Button and Text
+                    # Play/Pause Button and Text
                     html.Button(
-                        className="play-button",
-                        id="play_button",
+                        className="play-pause-button",
+                        id="play_pause_button",
                         children=[
-                            html.I(className="fa-solid fa-play"),
-                            html.Span(children="Play",
-                                      className="play-text")
+                            html.I(className="fa-solid fa-pause"),
+                            html.Span(children="Pause",
+                                      className="pause-text")
                         ]
                     ),
 
-                    # Pause Button and Text
+                    # Mute/Unmute Button and Text
                     html.Button(
-                        className="pause-button",
-                        id="pause_button",
+                        className="mute-unmute-click-button",
+                        id="mute_unmute_click_button",
                         children=[
-                            html.I(className="fa-solid fa-pause"),
-                            html.Span(className="pause-text",
-                                      children="Pause")
+                            html.I(className="fa-solid fa-volume-high"),
+                            html.Span(children="Click",
+                                      className="mute-unmute-click-text")
                         ]
                     ),
 
@@ -350,99 +340,21 @@ class Layout:
 
         return right_layout
 
-    @staticmethod
-    def get_add_track_layout():
-        """
-        Generates the add track layout with the "+ Track" button.
-        """
-        add_track_layout = html.Div(
-            className="add-track-button-container",
-            children=[
-                html.Button(
-                    className="add-track-button",
-                    id="add_track_button",
-                    children=[
-                        html.I(className="fa-solid fa-plus"),
-                        "  Track"
-                    ],
-                )
-            ]
-        )
-        return add_track_layout
-
-    def generate_dummy_track_layout(self, track_num):
-        """
-        Generates a single dummy track layout when add track is pressed.
-        Also generate an initial dummy track of 'Track 1' when app
-        is initially launched. These dummy track will later be assigned a track
-        UID when a track is recorded.
-        """
-        dummy_track_layout = [
-            html.Div(
-                className="track-tabs-container",
-                children=[
-                    html.Div(
-                        className="left-tab-section-container",
-                        children=[
-                            html.Span(className="track-text",
-                                      children=f"Track {track_num}"),
-                            html.Div(
-                                className="left-row-container",
-                                children=[
-                                    # Play icon button
-                                    html.Button(
-                                        className="left-play-icon-button",
-                                        children=[
-                                            html.I(className="fa-solid fa-play")],
-                                    ),
-                                    # Mute/unmute icon button
-                                    html.Button(
-                                        className="left-mute-icon-button",
-                                        children=[
-                                            html.I(className="fa-solid fa-volume-xmark")],
-                                    ),
-                                    # Trash button
-                                    html.Button(
-                                        className="trash-button",
-                                        children=[
-                                            html.I(className="fa-solid fa-trash")],
-                                    )
-                                ]
-                            ),
-                            # Pitch buttons
-                            html.Div(
-                                className="pitch-container",
-                                children=[
-                                    html.Button(
-                                        className="decrease-pitch-button", children="▼"),
-                                    html.Span(className="pitch-text",
-                                              children="Pitch"),
-                                    html.Button(
-                                        className="increase-pitch-button", children="▲"),
-                                ]
-                            )
-                        ]
-                    )
-                ]
-            )
-        ]
-
-        return dummy_track_layout
-
     def update_track_section(self, track_list):
         """
         Updates the track section for track layout.
-        Also updates the track list.
         """
-
+        
         # All track section list
         all_tracks_list = []
 
         # Get mapping of tracks
-        track_dict, updated_tracks_list = self.map_tracks(track_list)
+        track_dict= self.map_tracks(track_list)
 
         # Generate track section for each track in track_list
-        for track_uid, track_num in track_dict.items():
+        for track_index, track in track_dict.items():
+            track_name = track["track_name"]
+            pitch_shift = track["pitch_shift"]
             # track section outline
             track_section = html.Div(
                 className="track-tabs-container",
@@ -451,29 +363,43 @@ class Layout:
                         className="left-tab-section-container",
                         children=[
                             html.Span(className="track-text",
-                                      children=f"Track {track_num}"),
+                                      children=f"Track {track_index}:"),
+                            # Edit track name 
+                            dcc.Input(
+                                className="track-name-input",
+                                id={"type": "track_name_input",
+                                    "index": track_index}, 
+                                # Default to original <Untitled> track name
+                                value= f"{track_name}", 
+                                type="text",
+                                debounce=True,
+                                autoComplete="off"
+                            ),
                             html.Div(
                                 className="left-row-container",
                                 children=[
-                                    # Play icon button
-                                    html.Button(
-                                        className="left-play-icon-button",
-                                        id=f"left_play_icon_button_{track_num}",
-                                        children=[
-                                            html.I(className="fa-solid fa-play")],
-                                    ),
                                     # Mute/unmute icon button
                                     html.Button(
                                         className="left-mute-icon-button",
-                                        id=f"left_mute_icon_button_{track_num}",
-                                        children=[
+                                        id={"type": "left_mute_icon_button",
+                                            "index": track_index},
+                                        children = [
                                             html.I(className="fa-solid fa-volume-xmark")],
+                                    ),
+                                    # Copy icon button
+                                    html.Button(
+                                        className="copy-button",
+                                        id={"type": "copy_button",
+                                            "index": track_index},
+                                        children=[
+                                            html.I(className="fa-solid fa-copy")],
                                     ),
                                     # Trash button
                                     html.Button(
                                         className="trash-button",
-                                        id=f"trash_button_{track_num}",
-                                        children=[
+                                        id={"type": "trash_button",
+                                            "index": track_index},
+                                        children = [
                                             html.I(className="fa-solid fa-trash")],
                                     )
                                 ]
@@ -483,11 +409,21 @@ class Layout:
                                 className="pitch-container",
                                 children=[
                                     html.Button(
-                                        className="decrease-pitch-button", children="▼"),
-                                    html.Span(className="pitch-text",
-                                              children="Pitch"),
+                                        className="decrease-pitch-button",
+                                        id={"type": "decrease_track_pitch_button",
+                                            "index": track_index},
+                                        children="▼"),
+                                    html.Span(
+                                        className="pitch-text",
+                                        id={"type": "pitch_track_text",
+                                            "index": track_index},  
+                                        children=f"Pitch {pitch_shift}"  
+                                    ),
                                     html.Button(
-                                        className="increase-pitch-button", children="▲"),
+                                        className="increase-pitch-button",
+                                        id={"type": "increase_track_pitch_button",
+                                            "index": track_index},
+                                        children="▲"),
                                 ]
                             )
                         ]
@@ -497,46 +433,26 @@ class Layout:
 
             # Add track section to list
             all_tracks_list.append(track_section)
-
+        
         # Make it so that the newest track is on the top and oldest track
-        # is on the bottom. Reverse the list
-        return list(reversed(all_tracks_list)), updated_tracks_list
+        # section is on the bottom. Reverse the list to do this.
+        return list(reversed(all_tracks_list))
 
     def map_tracks(self, track_list):
         """
-        Maps track uid to a track number. If there is a "Dummy" value in the
-        track_list, then assign it to a uid and then map that to a track number.
-        Example:
-            track_list = ['Dummy_1', 'Dummy_2', 'Dummy_3', '2389hdiujasd', '9821hkjdasd']
-            updated_track_list = ['2389hdiujasd', '9821hkjdasd', 'Dummy_3']
-            track_dict = {
-                '2389hdiujasd': 1,
-                '9821hkjdasd': 2,
-                'Dummy_3': 3
-            }
+        Maps track to a track index/number.
         """
 
-        # track number keys with track uid values
+        # track number keys with track values
         track_dict = {}
-        
-        # Get lists of uid and Dummy_ variables
-        uid_list = [track for track in track_list if not track.startswith("Dummy_")]
-        length_uid = len(uid_list)
-        dummy_list = [track for track in track_list if track.startswith("Dummy_")]
-        length_dummy = len(dummy_list)
-       
-        # Make an updated track list where the uid replaces the dummy variable
-        # Excess dummy variables will be temporarily kept
-        if length_dummy > length_uid:
-            updated_tracks_list = uid_list + dummy_list[length_uid:]
-        else:
-            updated_tracks_list = uid_list+ dummy_list[length_dummy:]
-        
-        # Make a track dictionary that maps uid/Dummy to a track number
-        for index, track in enumerate(updated_tracks_list):
-            track_dict[track] = index + 1   # Track 1 is the initial track
-            
+
+        # Make a track dictionary that maps the track to a track number and pitch
+        for index, track in enumerate(track_list):
+            track_dict[index] = {
+            'track_name': track,
+            'pitch_shift': track.pitch_shift
+        }
+
         # print("track_list", track_list)  # DEBUG_PRINT
         # print("track_dict", track_dict)  # DEBUG_PRINT
-        # print("updated_tracks_list", updated_tracks_list)  # DEBUG_PRINT
-        return track_dict, updated_tracks_list
+        return track_dict
