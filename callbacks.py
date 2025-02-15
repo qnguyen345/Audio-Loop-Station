@@ -186,14 +186,14 @@ def button_callbacks(app):
         if n_clicks % 2 != 0:
             track.is_muted = True
             mute = [
-                html.I(className="fa-solid fa-volume-xmark")
+                html.I(className="fa-solid fa-volume-high")
             ]           
             return mute
         else:
             # even clicks are unmutes
             track.is_muted = False
             unmute = [
-                html.I(className="fa-solid fa-volume-high"),
+                html.I(className="fa-solid fa-volume-xmark"),
             ]
             return unmute
 

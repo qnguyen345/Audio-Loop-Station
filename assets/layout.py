@@ -384,7 +384,7 @@ class Layout:
                                         id={"type": "left_mute_icon_button",
                                             "index": track_index},
                                         children = [
-                                            html.I(className="fa-solid fa-volume-high")],
+                                            html.I(className="fa-solid fa-volume-xmark")],
                                     ),
                                     # Copy icon button
                                     html.Button(
