@@ -103,6 +103,7 @@ class LoopMachine:
         self.click_is_muted = True
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
+        self.is_playing= True
 
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
         self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
@@ -137,7 +138,10 @@ class LoopMachine:
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
-        
+        # If paused
+        if not self.is_playing:  
+            outdata[:] = global_audio_out
+            return
         # Handle checkpoint
         start = self.position
         end = (self.position + frames) % FRAMES_PER_LOOP

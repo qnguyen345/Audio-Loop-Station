@@ -145,7 +145,7 @@ class Layout:
                             # Trash button
                             html.Button(
                                 className="trash-button",
-                                id="delete_loop_button",
+                                id="delete_loop_trash_button",
                                 children=[
                                     html.I(
                                         className="fa-solid fa-trash"
@@ -383,7 +383,7 @@ class Layout:
                                         id={"type": "left_mute_icon_button",
                                             "index": track_index},
                                         children = [
-                                            html.I(className="fa-solid fa-volume-xmark")],
+                                            html.I(className="fa-solid fa-volume-high")],
                                     ),
                                     # Copy icon button
                                     html.Button(

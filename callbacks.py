@@ -6,6 +6,7 @@ import os
 import glob
 from dash.exceptions import PreventUpdate
 import json
+import copy
 
 from LoopMachine import LoopMachine
 from assets.layout import Layout
@@ -23,7 +24,7 @@ loop_machine = LoopMachine()
 def get_track_index_button_id():
     """Gets the index and button_id from a triggered dash callback that are indexed."""
     triggered_prop_id = dash.callback_context.triggered[0]["prop_id"]
-
+    #print(triggered_prop_id)
     # Make into dict
     button_id = triggered_prop_id.split(".")[0] 
     button_id_dict = json.loads(button_id.replace("'", '"')) 
@@ -118,14 +119,14 @@ def button_callbacks(app):
         Output("checklist_container", "children"),
         Input("refresh_button", "n_clicks")
     )
-    def generate_wav_files_checklist(n_clicks):
+    def generate_pkl_files_checklist(n_clicks):
         """
         Generates a checlist with a list of audio files in the tracks
         directory when the refresh button is clicked.
         """
-        loop_file_path = "tracks"
-        # Get a list of .wav files
-        wave_files_list = glob.glob(os.path.join(loop_file_path, "*.wav"))
+        loop_file_path = "loops"
+        # Get a list of .pkl files
+        wave_files_list = glob.glob(os.path.join(loop_file_path, "*.pkl"))
 
         # Get file names of audio files without path
         filenames = [os.path.basename(file) for file in wave_files_list]
@@ -146,13 +147,14 @@ def button_callbacks(app):
     )
     def pause_play_loop(n_clicks):
         """
-        Toggles between pause and play buttons for LOOP.
+        Toggles between pause and play buttons for the LOOP.
         Pause loop if pause button is clicked.
         Play loop if play button is clicked.
         """
 
         # Initial and even clicks are pause
         if n_clicks is None or n_clicks % 2 == 0:
+            loop_machine.is_playing = not loop_machine.is_playing
             pause = [
                 html.I(className="fa-solid fa-pause"),
                 html.Span(children="Pause", className="pause-text")
@@ -160,6 +162,7 @@ def button_callbacks(app):
             return pause
         else:
             # Odd clicks are play
+            loop_machine.is_playing = not loop_machine.is_playing
             play = [
                 html.I(className="fa-solid fa-play"),
                 html.Span(children="Play",
@@ -178,20 +181,41 @@ def button_callbacks(app):
         Mutes track if mute button is clicked.
         Unmutes track if unmute button is clicked.
         """
-        # Initial and even clicks are mutes
-        if n_clicks is None or n_clicks % 2 == 0:
+        track_index, _ = get_track_index_button_id()
+        track = loop_machine.tracks[track_index]
+        # odd clicks are mutes
+        if n_clicks % 2 != 0:
+            track.is_muted = True
             mute = [
                 html.I(className="fa-solid fa-volume-xmark")
-            ]
+            ]           
             return mute
         else:
-            # Odd clicks are unmutes
+            # even clicks are unmutes
+            track.is_muted = False
             unmute = [
                 html.I(className="fa-solid fa-volume-high"),
             ]
             return unmute
 
-    # VARYING TEMPO/DURATION??????
+    @app.callback(
+        Output("track_section", "children", allow_duplicate=True),
+        Input({"type": "copy_button", "index": ALL}, "n_clicks"),
+        prevent_initial_call=True
+    )
+    def copy_track(n_clicks):
+        """Copies the track to the latest track section."""
+        if not any(n_clicks):
+            raise PreventUpdate
+        track_index, _ = get_track_index_button_id()
+        track_list = loop_machine.tracks
+        track = track_list[track_index]
+        # copy track
+        track_list.append(copy.copy(track))
+        # Update the track sections
+        updated_track_section= Layout().update_track_section(track_list)
+        return updated_track_section
+
     @app.callback(
         Output("track_section", "children", allow_duplicate=True),
         Input({"type": "trash_button", "index": ALL}, "n_clicks"),
@@ -301,12 +325,14 @@ def button_callbacks(app):
      
     @app.callback(
         Output("track_section", "children", allow_duplicate=True),
-        Input("delete_loop_button", "n_clicks"),
+        [Input("delete_loop_trash_button", "n_clicks"),
+        Input("delete_loop_button", "n_clicks")],
         prevent_initial_call=True
     )
-    def delete_loop(n_clicks):
+    def delete_loop(trash_icon_clicks, delete_button_clicks):
         """Deletes the current loop."""
-        if "delete_loop_button" == get_button_id():
+        button_id = get_button_id()
+        if "delete_loop_trash_button" == button_id or "delete_loop_button" == button_id:
             track_list = loop_machine.tracks
             track_list.clear()
             updated_track_section = Layout().update_track_section(track_list)
