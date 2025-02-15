@@ -13,10 +13,6 @@ from assets.layout import Layout
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# Inital tempo and duration
-tempo = 5000
-duration = 120
-
 # Contains the UI layout
 app_layout = html.Div(
     className="app-container",
@@ -32,10 +28,6 @@ app_layout = html.Div(
             rel="stylesheet",
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css",
         ),
-
-        # Store duration and tempo
-        dcc.Store(id="stored_duration", data=duration),
-        dcc.Store(id="stored_tempo", data=tempo),
         
         # Top section
         html.Div(
@@ -76,7 +68,7 @@ app_layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=Layout(tempo, duration).get_right_tab_layout()
+                    children=Layout().get_right_tab_layout()
                 ),
             ]
         )

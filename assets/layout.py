@@ -2,12 +2,13 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
 
-
 from LoopMachine import LoopMachine
-loop_machine = LoopMachine()
+tempo = 120
+beats = 5
+loop_machine = LoopMachine(tempo, beats)
 
 class Layout:
-    def __init__(self, duration=5000, tempo=120):
+    def __init__(self, duration=beats, tempo=tempo):
         self.duration = duration
         self.tempo = tempo
 

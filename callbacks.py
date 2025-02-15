@@ -19,7 +19,9 @@ from assets.layout import Layout
 #     def call_back_function(Input, State):
 #         return Output
 
-loop_machine = LoopMachine()
+tempo = 120
+beats = 5
+loop_machine = LoopMachine(tempo, beats)
 
 def get_track_index_button_id():
     """Gets the index and button_id from a triggered dash callback that are indexed."""
@@ -47,11 +49,9 @@ def button_callbacks(app):
         [Output("record_button", "className"),
          Output("track_section", "children", allow_duplicate=True)],
         Input("record_button", "n_clicks"),
-        [State("stored_duration", "data"),
-         State("stored_tempo", "data")],
         prevent_initial_call=True
     )
-    def record_pulse(n_clicks, duration, tempo):
+    def record_pulse(n_clicks):
         """
         Makes the record buttons pulsing red to indicate recording.
         Also stores the track uid in state after recording.
@@ -65,8 +65,7 @@ def button_callbacks(app):
             track_list = loop_machine.tracks
             print(track_list)
             # Update the tracks section after recorded track
-            updated_track_section = Layout(
-                duration, tempo).update_track_section(track_list)
+            updated_track_section = Layout().update_track_section(track_list)
             return "record-button", updated_track_section
         else:
             # Start recording
@@ -253,31 +252,47 @@ def button_callbacks(app):
 
     @app.callback(
         Output("mute_unmute_click_button", "children"),
-        Input("mute_unmute_click_button", "n_clicks"),
+        [Input("mute_unmute_click_button", "n_clicks"),
+        Input("record_button", "n_clicks")],
         prevent_initial_call=True
     )
-    def mute_unmute_click(n_clicks):
+    def mute_unmute_click(mute_unmute_n_clicks, record_n_clicks):
         """
         Toggles between mute and unmute buttons for clicks.
         """
-        # Even clicks or initial click is unmute
-        if n_clicks is None or n_clicks % 2 == 0:
+        button_id = get_button_id()
+        # For recording, clicking is on by default
+        # Change this behavior to follow the mute/unmute button
+        if button_id == "record_button" and record_n_clicks > 0:
+            if mute_unmute_n_clicks is None or mute_unmute_n_clicks % 2 == 0:
+                unmute = [
+                    html.I(className="fa-solid fa-volume-high"),
+                    html.Span(children="Click", className="mute-unmute-click-text")
+                ]
+                loop_machine.click_is_muted = False 
+                return unmute
+            else:
+                mute = [
+                    html.I(className="fa-solid fa-volume-xmark"),
+                    html.Span(children="Click", className="mute-unmute-click-text")
+                ]
+                loop_machine.click_is_muted = True  # Keep muted
+                return mute
+
+        # Toggle unmute/mute if not recording
+        if mute_unmute_n_clicks is None or mute_unmute_n_clicks % 2 == 0:
             unmute = [
                 html.I(className="fa-solid fa-volume-high"),
-                html.Span(children="Click",
-                          className="mute-unmute-click-text")
+                html.Span(children="Click", className="mute-unmute-click-text")
             ]
-            loop_machine.click_is_muted = not loop_machine.click_is_muted
+            loop_machine.click_is_muted = False 
             return unmute
-
-        # Odd clicks are mute
         else:
             mute = [
                 html.I(className="fa-solid fa-volume-xmark"),
-                html.Span(children="Click",
-                          className="mute-unmute-click-text")
+                html.Span(children="Click", className="mute-unmute-click-text")
             ]
-            loop_machine.click_is_muted = not loop_machine.click_is_muted
+            loop_machine.click_is_muted = True  
             return mute
 
     @app.callback(
