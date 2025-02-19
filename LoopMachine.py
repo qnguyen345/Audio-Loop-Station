@@ -5,10 +5,9 @@ import librosa
 import numpy as np
 import os
 import sounddevice as sd
-import random
-import string
+import shlex
 import threading
-import time
+import uuid
 
 # Constants
 CHUNK = 1024  # Frames per buffer
@@ -59,6 +58,7 @@ class Track:
         self.pitch_shift = 0
         self.name = None
         self.is_recording = False
+        self.track_uid = uuid.uuid4()
 
     def apply_pitch_shift_async(self):
         """Offload pitch shifting to a background thread and update immediately when done."""
@@ -105,7 +105,7 @@ class LoopMachine:
         self.checkpoint_action = None # Action to perform on reaching checkpoint
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
         self.click_is_muted = True
-        self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
+        self.uid = uuid.uuid4()
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         self.is_playing= True
      
@@ -227,14 +227,16 @@ class LoopMachine:
         state['stream'] = None
         return state
 
-    def save(self):
+    def save(self, loop_name:str=''):
         """Saves the loop as a Pickle, includes any linked Track objects.
 
         Ignores the stream to prevent need to close stream
         """
 
-        # date-time-uid.pkl:
-        filename = f'{self.time}-{self.uid}.pkl'
+        # date-time-uid-loopname.pkl:
+        if loop_name:
+            loop_name = f'_{loop_name}'
+        filename = f'{self.time}-{self.uid}{loop_name}.pkl'
         with open(os.path.join('loops', filename), 'wb') as file:
             pickle.dump(self, file)
             
@@ -308,7 +310,7 @@ r           start recording
 s           stop recording
 y <i>       copy track by index
 yy          copy the most recent track
-save        save the loop machine object
+save <n>    save the loop machine object with optional name <n>
 load <f>    load a loop machine object with filename <f> 
 repr        print a dictionary representation of the loop
 -----------------------------------------------------------------------------------------------------------------------"""
@@ -357,7 +359,11 @@ repr        print a dictionary representation of the loop
                 track = loop_machine.tracks[track_index]
                 loop_machine.tracks.append(copy.copy(track))
             elif cmd.startswith('save'):
-                loop_machine.save()
+                args = shlex.split(cmd)
+                if len(args) == 1:
+                    loop_machine.save()
+                elif len(args) == 2:
+                    loop_machine.save(args[1])
             elif cmd.startswith('load'):
                 loop_machine.load(args[1])
                 print(loop_machine)
