@@ -91,9 +91,14 @@ class Track:
             elements.append("M")
 
         if self.pitch_shift > 0:
-            elements.append("+" + str(self.pitch_shift))
+            elements.append("p+" + str(self.pitch_shift))
         elif self.pitch_shift < 0:
-            elements.append(str(self.pitch_shift))
+            elements.append("p" + str(self.pitch_shift))
+
+        if self.offset_beats > 0:
+            elements.append("o+" + str(self.offset_beats))
+        elif self.offset_beats < 0:
+            elements.append("o" + str(self.offset_beats))
 
         return "<" + " ".join(elements) + ">"
 
