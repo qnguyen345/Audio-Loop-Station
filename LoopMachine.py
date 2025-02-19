@@ -48,8 +48,6 @@ def generate_clicks(bpm: int, beats_per_loop: int):
 
 class Waveform:
     def __init__(self, track: object):
-        self.track = track
-        
         self.audio_data = track.raw_buffer
         self.time = np.linspace(0, len(self.audio_data), len(self.audio_data))
         
@@ -61,13 +59,15 @@ class Waveform:
                 showgrid=False,
                 showticklabels=False,
                 zeroline=False,
-                title=''
+                title_text='',
+                visible=False
             ),
             yaxis=dict(
                 showgrid=False,
                 showticklabels=False,
                 zeroline=False,
-                title=''
+                title_text='',
+                visible=False
             ),
             showlegend=False,
             paper_bgcolor='#212529',
