@@ -172,8 +172,7 @@ class LoopMachine:
         """Stop recording and store the completed segment with latency compensation."""
         print("Recording stopped.")
         self._set_checkpoint_now()
-        self.checkpoint_action = "STOP"
-        
+        self.checkpoint_action = "STOP"        
 
     def _set_checkpoint_now(self):
         self.checkpoint_position = (self.position + self.latency_compensation_samples) % self.frames_per_loop
@@ -303,11 +302,7 @@ class LoopMachine:
                 self.__dict__ = loaded.__dict__
 
         except FileNotFoundError:
-            print(f'{filename} was not found.')
-            
-        
-    def generate_waveform(self, track):
-        return Waveform(track)
+            print(f'{filename} was not found.')        
 
     def repr_log(self):
         with open('repr_log.txt', 'a') as log:
@@ -325,9 +320,6 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
-
-
-
 
 
 if __name__ == "__main__":
