@@ -4,6 +4,8 @@ from datetime import datetime
 import librosa
 import numpy as np
 import os
+import pandas as pd
+import plotly.express as px
 import sounddevice as sd
 import shlex
 import threading
@@ -14,12 +16,7 @@ CHUNK = 1024  # Frames per buffer
 FORMAT = "int16"
 CHANNELS = 1  # Mono
 RATE = 44100  # Sample rate
-# BPM = 120  # User-defined tempo
-# BEATS_PER_LOOP = 4  # User-defined beats per loop
-# FRAMES_PER_LOOP = int((60 / BPM) * BEATS_PER_LOOP * RATE)  # Loop length in frames
 ADJUSTMENT_FACTOR = 0.75  # Fine-tune latency correction
-
-# print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
 
 FIRST_CLICK_FREQ = 1500  # Frequency (Hz) for the first beat’s click
 REGULAR_CLICK_FREQ = 1000  # Frequency (Hz) for the rest of the clicks
@@ -49,6 +46,41 @@ def generate_clicks(bpm: int, beats_per_loop: int):
     segments = [first_segment] + [regular_segment for _ in range(beats_per_loop - 1)]
     return np.vstack(segments)
 
+class Waveform:
+    def __init__(self, track: object):
+        self.track = track
+        
+        self.audio_data = track.raw_buffer
+        self.time = np.linspace(0, len(self.audio_data), len(self.audio_data))
+        
+        df = pd.DataFrame({"Time": self.time, "Amplitude": self.audio_data.flatten()})
+        self.fig = px.line(df, x="Time", y="Amplitude")
+        
+        self.fig.update_layout(
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title=''
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title=''
+            ),
+            showlegend=False,
+            paper_bgcolor='#212529',
+            plot_bgcolor='#313539',
+            dragmode=False,
+            margin=dict(l=0,r=0,t=0,b=0),
+            hovermode=False,
+        )
+        
+    def show(self):
+        self.fig.show(config={"displayModeBar": False})
+
+
 class Track:
     def __init__(self, frames_per_loop: int):
         self.frames_per_loop = frames_per_loop
@@ -59,6 +91,7 @@ class Track:
         self.name = None
         self.is_recording = False
         self.track_uid = uuid.uuid4()
+        self.waveform = None
 
     def apply_pitch_shift_async(self):
         """Offload pitch shifting to a background thread and update immediately when done."""
@@ -74,6 +107,11 @@ class Track:
                 )
                 self.buffer = (np.clip(buffer_shifted, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
 
+        threading.Thread(target=worker, daemon=True).start()
+        
+    def create_waveform(self):
+        def worker():
+            self.waveform = Waveform(self)
         threading.Thread(target=worker, daemon=True).start()
 
     def __str__(self):
@@ -135,6 +173,7 @@ class LoopMachine:
         print("Recording stopped.")
         self._set_checkpoint_now()
         self.checkpoint_action = "STOP"
+        
 
     def _set_checkpoint_now(self):
         self.checkpoint_position = (self.position + self.latency_compensation_samples) % self.frames_per_loop
@@ -157,6 +196,7 @@ class LoopMachine:
             if self.checkpoint_action in ("STOP", "NEW"):
                 if self.current_track:
                     self.current_track.is_recording = False
+                    self.current_track.create_waveform()
                     self.current_track = None
             if self.checkpoint_action == "NEW":
                 new_track = Track(self.frames_per_loop)
@@ -264,6 +304,10 @@ class LoopMachine:
 
         except FileNotFoundError:
             print(f'{filename} was not found.')
+            
+        
+    def generate_waveform(self, track):
+        return Waveform(track)
 
     def repr_log(self):
         with open('repr_log.txt', 'a') as log:
@@ -281,7 +325,11 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
-    
+
+
+
+
+
 if __name__ == "__main__":
     tempo = int(input('Tempo: '))
     beats = int(input('Beats per Loop: '))
@@ -370,6 +418,11 @@ repr        print a dictionary representation of the loop
             elif cmd == 'repr':
                 loop_machine.repr_log()
                 print(repr(loop_machine))
+                
+            elif cmd == 'ww':
+                for track in loop_machine.tracks:
+                    track.waveform.show()
+                    
                 
     except KeyboardInterrupt:
         loop_machine.stop()
