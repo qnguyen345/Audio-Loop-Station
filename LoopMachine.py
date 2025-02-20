@@ -46,41 +46,6 @@ def generate_clicks(bpm: int, beats_per_loop: int):
     segments = [first_segment] + [regular_segment for _ in range(beats_per_loop - 1)]
     return np.vstack(segments)
 
-class Waveform:
-    def __init__(self, track: object):
-        self.audio_data = track.raw_buffer
-        self.time = np.linspace(0, len(self.audio_data), len(self.audio_data))
-        
-        df = pd.DataFrame({"Time": self.time, "Amplitude": self.audio_data.flatten()})
-        self.fig = px.line(df, x="Time", y="Amplitude")
-        
-        self.fig.update_layout(
-            xaxis=dict(
-                showgrid=False,
-                showticklabels=False,
-                zeroline=False,
-                title_text='',
-                visible=False
-            ),
-            yaxis=dict(
-                showgrid=False,
-                showticklabels=False,
-                zeroline=False,
-                title_text='',
-                visible=False
-            ),
-            showlegend=False,
-            paper_bgcolor='#212529',
-            plot_bgcolor='#313539',
-            dragmode=False,
-            margin=dict(l=0,r=0,t=0,b=0),
-            hovermode=False,
-        )
-        
-    def show(self):
-        self.fig.show(config={"displayModeBar": False})
-
-
 class Track:
     def __init__(self, frames_per_loop: int):
         self.frames_per_loop = frames_per_loop
@@ -148,7 +113,8 @@ class LoopMachine:
         self.is_playing= True
      
         self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
-        self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
+        # self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
+        self.latency_compensation_samples = int(0.18 * RATE)
         print(f"Measured Input Latency: {self.input_latency:.4f} sec, Compensation: {self.latency_compensation_samples} samples")
         
         self.stream = sd.Stream(
@@ -320,6 +286,40 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
+
+class Waveform:
+    def __init__(self, track: object):
+        self.audio_data = track.raw_buffer
+        self.time = np.linspace(0, len(self.audio_data), len(self.audio_data))
+        
+        df = pd.DataFrame({"Time": self.time, "Amplitude": self.audio_data.flatten()})
+        self.fig = px.line(df, x="Time", y="Amplitude")
+        
+        self.fig.update_layout(
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            showlegend=False,
+            paper_bgcolor='#212529',
+            plot_bgcolor='#313539',
+            dragmode=False,
+            margin=dict(l=0,r=0,t=0,b=0),
+            hovermode=False,
+        )
+        
+    def show(self):
+        self.fig.show(config={"displayModeBar": False})
 
 
 if __name__ == "__main__":

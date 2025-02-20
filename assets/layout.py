@@ -1,6 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
+import time
 
 from LoopMachine import LoopMachine
 tempo = 120
@@ -355,7 +356,7 @@ class Layout:
         for track_index, track in track_dict.items():
             track_name = track["track_name"]
             pitch_shift = track["pitch_shift"]
-            # track section outline
+            waveform_div = self.get_waveform(track_name, track_index)
             track_section = html.Div(
                 className="track-tabs-container",
                 children=[
@@ -427,7 +428,9 @@ class Layout:
                                 ]
                             )
                         ]
-                    )
+                    ),
+                    # waveform placement:
+                    waveform_div
                 ]
             )
 
@@ -456,3 +459,17 @@ class Layout:
         # print("track_list", track_list)  # DEBUG_PRINT
         # print("track_dict", track_dict)  # DEBUG_PRINT
         return track_dict
+
+    def get_waveform(self, track, track_index):
+        # I think this needs to be reworked.
+        while True:
+            time.sleep(.05)
+            if track.waveform is not None:
+                div = html.Div([
+                    dcc.Graph(id=f"waveform-{track_index}",
+                              figure=track.waveform.fig,
+                              style={"height": "100%", "width": "100%"},
+                              config={"displayModeBar": False})
+                    ], id=f"waveform-div-{track_index}", className='track-waveform')
+                break
+        return div
