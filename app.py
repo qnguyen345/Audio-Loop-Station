@@ -7,6 +7,9 @@ import dash_bootstrap_components as dbc
 import callbacks
 
 from assets.layout import Layout
+tempo = 120
+beats = 5
+layout = Layout(tempo, beats)
 
 # Initialize Dash app
 # Note: external stylesheet is for moal/file popup styling
@@ -32,7 +35,7 @@ app_layout = html.Div(
         # Top section
         html.Div(
             className="top-container",
-            children=Layout.get_top_layout()
+            children=layout.get_top_layout()
         ),
 
 
@@ -49,7 +52,7 @@ app_layout = html.Div(
                         # Contains loop text, pitch button
                         html.Div(
                             className="loop-container",
-                            children=Layout.get_loop_layout()
+                            children=layout.get_loop_layout()
                         ),
 
                         # Get track layout
@@ -68,7 +71,7 @@ app_layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=Layout().get_right_tab_layout()
+                    children=layout.get_right_tab_layout()
                 ),
             ]
         )

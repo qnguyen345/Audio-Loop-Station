@@ -22,6 +22,7 @@ from assets.layout import Layout
 tempo = 120
 beats = 5
 loop_machine = LoopMachine(tempo, beats)
+layout = Layout(tempo, beats)
 
 def get_track_index_button_id():
     """Gets the index and button_id from a triggered dash callback that are indexed."""
@@ -65,7 +66,7 @@ def button_callbacks(app):
             track_list = loop_machine.tracks
             print(track_list)
             # Update the tracks section after recorded track
-            updated_track_section = Layout().update_track_section(track_list)
+            updated_track_section = layout.update_track_section(track_list)
             return "record-button", updated_track_section
         else:
             # Start recording
@@ -212,7 +213,7 @@ def button_callbacks(app):
         # copy track
         track_list.append(copy.copy(track))
         # Update the track sections
-        updated_track_section= Layout().update_track_section(track_list)
+        updated_track_section= layout.update_track_section(track_list)
         return updated_track_section
 
     @app.callback(
@@ -231,7 +232,7 @@ def button_callbacks(app):
         # Remove the track from track_list
         track_list.pop(track_index)
         # Update the track sections
-        updated_track_section= Layout().update_track_section(track_list)
+        updated_track_section= layout.update_track_section(track_list)
         return updated_track_section
 
     @app.callback(
@@ -350,6 +351,6 @@ def button_callbacks(app):
         if "delete_loop_trash_button" == button_id or "delete_loop_button" == button_id:
             track_list = loop_machine.tracks
             track_list.clear()
-            updated_track_section = Layout().update_track_section(track_list)
+            updated_track_section = layout.update_track_section(track_list)
             return updated_track_section
     

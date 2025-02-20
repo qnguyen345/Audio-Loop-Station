@@ -2,18 +2,63 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
 
-from LoopMachine import LoopMachine
-tempo = 120
-beats = 5
-loop_machine = LoopMachine(tempo, beats)
 
 class Layout:
-    def __init__(self, duration=beats, tempo=tempo):
-        self.duration = duration
+    def __init__(self, tempo, beats):
+        self.beats = beats
         self.tempo = tempo
 
-    @staticmethod
-    def get_top_layout():
+    def generate_icon_button(self, classname, callback_id, icon, index=False):
+        """Generates a button with an icon.
+        Index is defaulted to False; otherwise, index is need for pattern matching
+        callbacks."""
+        if index:
+            button_id = {"type": str(callback_id), "index": index}
+        else:
+            button_id = str(callback_id)
+        button = html.Button(
+            className=str(classname),
+            id=button_id,
+            children=[html.I(className=str(icon))]
+        )
+        return button
+    
+    def generate_text_button(self, classname, callback_id, text, text_classname=False, index=False):
+        """Generates a button with text. 
+        text_classname is defaulted to False; otherwise, add a text_classname for
+        specific css styling to text.
+        Index is defaulted to False; otherwise, index is need for pattern matching
+        callbacks."""
+        if text_classname:
+            text_section = html.Span(children=str(text), className=str(text_classname))
+        else:
+            text_section = html.Span(children=str(text))
+        if index:
+            button_id = {"type": str(callback_id), "index": index}
+        else:
+            button_id = str(callback_id)
+
+        button = html.Button(
+            className=str(classname),
+            id=button_id,
+            children=[text_section])
+        return button
+    
+    def generate_icon_and_text_button(self, classname, callback_id, icon, text, text_classname=False):
+        """Generates button with icon AND text.
+        text_classname is defaulted to False; otherwise, add a text_classname for
+        specific css styling to text."""
+        if text_classname:
+            text_section = html.Span(children=str(text), className=str(text_classname))
+        else:
+            text_section = html.Span(children=str(text)) 
+        button = html.Button(
+                className=str(classname),
+                id=str(callback_id),
+                children=[html.I(className=str(icon)),text_section])
+        return button
+
+    def get_top_layout(self):
         """
         Generates the top section/header of the app.
         This section has the files popup, title, and members/classes info.
@@ -25,12 +70,7 @@ class Layout:
             html.Div(
                 className="files-container",
                 children=[
-                    html.Button(
-                        className="files-button",
-                        id="files_button",
-                        children="Files",
-                        n_clicks=0,
-                    ),
+                    self.generate_text_button("files-button", "files_button", "Files")
                 ],
             ),
             # Modal for Files
@@ -62,17 +102,10 @@ class Layout:
                                         "Select a loop file to enable/disable:"),
                                     # Refresh Button to refresh tracks directory
                                     # to generate loop checklist
-                                    html.Button(
-                                        className="refresh-button",
-                                        id="refresh_button",
-                                        children=[
-                                            html.I(className="fa-solid fa-arrows-rotate"
-                                                   ),
-                                            html.Span(
-                                                className="refresh-text",
-                                                children="Refresh"
-                                            )
-                                        ]
+                                    self.generate_icon_and_text_button(
+                                        "refresh-button", "refresh_button",
+                                        "fa-solid fa-arrows-rotate", "refresh-text",
+                                        "Refresh"
                                     )
                                 ]
                             ),
@@ -124,8 +157,7 @@ class Layout:
 
         return top_layout
 
-    @staticmethod
-    def get_loop_layout():
+    def get_loop_layout(self):
         """
         Generates the loop layout section."""
         loop_layout = [
@@ -144,15 +176,8 @@ class Layout:
                         children=[
 
                             # Trash button
-                            html.Button(
-                                className="trash-button",
-                                id="delete_loop_trash_button",
-                                children=[
-                                    html.I(
-                                        className="fa-solid fa-trash"
-                                    )
-                                ]
-                            )
+                            self.generate_icon_button("trash-button",
+                                "delete_loop_trash_button", "fa-solid fa-trash")
                         ]
                     )
                 ]
@@ -174,50 +199,21 @@ class Layout:
                 children=[
 
                     # Record Button and text
-                    html.Button(
-                        className="record-button",
-                        id="record_button",
-                        children=[
-                            html.I(
-                                className="fa-solid fa-microphone"),
-                            html.Span(children="Record",
-                                      className="record-text")
-                        ]
-                    ),
-
+                    self.generate_icon_and_text_button(
+                        "record-button", "record_button",
+                        "fa-solid fa-microphone", "Record", "record-text"),
                     # Play/Pause Button and Text
-                    html.Button(
-                        className="play-pause-button",
-                        id="play_pause_button",
-                        children=[
-                            html.I(className="fa-solid fa-pause"),
-                            html.Span(children="Pause",
-                                      className="pause-text")
-                        ]
-                    ),
-
+                    self.generate_icon_and_text_button(
+                        "play-pause-button", "play_pause_button",
+                        "fa-solid fa-pause", "Pause", "pause-text"),
                     # Mute/Unmute Button and Text
-                    html.Button(
-                        className="mute-unmute-click-button",
-                        id="mute_unmute_click_button",
-                        children=[
-                            html.I(className="fa-solid fa-volume-high"),
-                            html.Span(children="Click",
-                                      className="mute-unmute-click-text")
-                        ]
-                    ),
-
+                    self.generate_icon_and_text_button(
+                        "mute-unmute-click-button", "mute_unmute_click_button",
+                        "fa-solid fa-volume-high", "Click", "mute-unmute-click-text"),
                     # Stop Button and Text
-                    html.Button(
-                        className="stop-button",
-                        id="stop_button",
-                        children=[
-                            html.I(className="fa-solid fa-stop"),
-                            html.Span(children="Stop",
-                                      className="stop-text")
-                        ]
-                    ),
-
+                    self.generate_icon_and_text_button(
+                        "stop-button", "stop_button",
+                        "fa-solid fa-stop", "Stop", "stop-text")
                 ]
             ),
 
@@ -242,22 +238,14 @@ class Layout:
 
                             html.Div(
                                 children=[
-                                    html.Button(
-                                        className="tempo-button",
-                                        id="tempo-",
-                                        children="-"
-                                    ),
+                                    self.generate_text_button("tempo-button", "tempo-", "-"),
                                     dcc.Input(
                                         className="tempo-input",
                                         id="tempo_input",
                                         type="number",
                                         value=self.tempo, step=None
                                     ),
-                                    html.Button(
-                                        className="tempo-button",
-                                        id="tempo+",
-                                        children="+"
-                                    ),
+                                    self.generate_text_button("tempo-button", "tempo+", "+")
                                 ]
                             )
                         ]
@@ -270,40 +258,31 @@ class Layout:
                 className="right-fourth-row-container",
                 children=[
 
-                    # Duration Input
+                    # beats Input
                     html.Div(
-                        className="duration-container",
+                        className="beats-container",
                         children=[
-                            # Duration text
-                            html.Span(className="duration-text",
-                                      children="Duration (ms): "),
-                            # Duration Input
+                            # beats text
+                            html.Span(className="beats-text",
+                                      children="Beats: "),
+                            # beats Input
                             dcc.Input(
-                                className="duration-input",
-                                id="duration_input",
+                                className="beats-input",
+                                id="beats_input",
                                 type="number",
-                                value=self.duration,
+                                value=self.beats,
                                 placeholder="Enter."),
                         ]
                     ),
 
 
+                   
                     # Auto-trimming button
-                    html.Button(
-                        className="auto-trim-button",
-                        id="auto_trim_button",
-                        children="Auto-Trim"
-                    ),
+                    self.generate_text_button("auto-trim-button", "auto_trim_button", "Auto-Trim"),
 
                     # TO BE WORKED ON
-                    html.Button(
-                        className="auto-trim-button",
-                        children="Req.2 Button"
-                    ),
-                    html.Button(
-                        className="auto-trim-button",
-                        children="Req.3 Button"
-                    )
+                    self.generate_text_button("auto-trim-button", "req2_button", "Req.2 Button"),
+                    self.generate_text_button("auto-trim-button", "req3_button", "Req.3 Button"),
                 ]
             ),
 
@@ -313,26 +292,15 @@ class Layout:
                 children=[
 
                     # Save button to save loop
-                    html.Button(
-                        className="delete-loop-button",
-                        id="delete_loop_button",
-                        children=[
-                            html.Span(className="delete-loop-text",
-                                      children="Delete Loop"
-                                      )
-                        ]
-                    ),
+                    self.generate_text_button(
+                        "delete-loop-button", "delete_loop_button",
+                        "Delete Loop", text_classname="delete-loop-text",),
 
                     # Save button to save loop
-                    html.Button(
-                        className="save-button",
-                        id="save_button",
-                        children=[
-                            html.Span(className="save-text",
-                                      children="Save Loop"
-                                      )
-                        ]
-                    ),
+                    self.generate_text_button(
+                        "save-button", "save_button",
+                        "Save Loop", text_classname="save-text",
+                    ), 
 
                 ]
             ),
@@ -352,7 +320,9 @@ class Layout:
         track_dict= self.map_tracks(track_list)
 
         # Generate track section for each track in track_list
-        for track_index, track in track_dict.items():
+        # Also reverse list here, so that the newest track is on
+        # the top and oldest track section is on the bottom.
+        for track_index, track in reversed(track_dict.items()):
             track_name = track["track_name"]
             pitch_shift = track["pitch_shift"]
             # track section outline
@@ -379,51 +349,30 @@ class Layout:
                                 className="left-row-container",
                                 children=[
                                     # Mute/unmute icon button
-                                    html.Button(
-                                        className="left-mute-icon-button",
-                                        id={"type": "left_mute_icon_button",
-                                            "index": track_index},
-                                        children = [
-                                            html.I(className="fa-solid fa-volume-xmark")],
-                                    ),
+                                    self.generate_icon_button("left-mute-icon-button", "left_mute_icon_button",
+                                                               "fa-solid fa-volume-xmark", track_index),
                                     # Copy icon button
-                                    html.Button(
-                                        className="copy-button",
-                                        id={"type": "copy_button",
-                                            "index": track_index},
-                                        children=[
-                                            html.I(className="fa-solid fa-copy")],
-                                    ),
+                                    self.generate_icon_button("copy-button", "copy_button",
+                                                               "fa-solid fa-copy", track_index),
                                     # Trash button
-                                    html.Button(
-                                        className="trash-button",
-                                        id={"type": "trash_button",
-                                            "index": track_index},
-                                        children = [
-                                            html.I(className="fa-solid fa-trash")],
-                                    )
+                                    self.generate_icon_button("trash-button", "trash_button",
+                                                               "fa-solid fa-trash", track_index)
                                 ]
                             ),
                             # Pitch buttons
                             html.Div(
                                 className="pitch-container",
                                 children=[
-                                    html.Button(
-                                        className="decrease-pitch-button",
-                                        id={"type": "decrease_track_pitch_button",
-                                            "index": track_index},
-                                        children="▼"),
+                                    self.generate_text_button("decrease-pitch-button", "decrease_track_pitch_button",
+                                                              "▼", index=track_index),
                                     html.Span(
                                         className="pitch-text",
                                         id={"type": "pitch_track_text",
                                             "index": track_index},  
                                         children=f"Pitch {pitch_shift}"  
                                     ),
-                                    html.Button(
-                                        className="increase-pitch-button",
-                                        id={"type": "increase_track_pitch_button",
-                                            "index": track_index},
-                                        children="▲"),
+                                    self.generate_text_button("increase-pitch-button", "increase_track_pitch_button",
+                                                              "▲", index=track_index),
                                 ]
                             )
                         ]
@@ -431,12 +380,10 @@ class Layout:
                 ]
             )
 
-            # Add track section to list
+            # Add track section to results list
             all_tracks_list.append(track_section)
         
-        # Make it so that the newest track is on the top and oldest track
-        # section is on the bottom. Reverse the list to do this.
-        return list(reversed(all_tracks_list))
+        return all_tracks_list
 
     def map_tracks(self, track_list):
         """
