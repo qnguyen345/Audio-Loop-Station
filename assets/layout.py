@@ -274,9 +274,7 @@ class Layout:
                                 placeholder="Enter."),
                         ]
                     ),
-
-
-                   
+               
                     # Auto-trimming button
                     self.generate_text_button("auto-trim-button", "auto_trim_button", "Auto-Trim"),
 
@@ -285,7 +283,6 @@ class Layout:
                     self.generate_text_button("auto-trim-button", "req3_button", "Req.3 Button"),
                 ]
             ),
-
 
             html.Div(
                 className="right-fifth-row-container",
