@@ -4,8 +4,6 @@ from datetime import datetime
 import librosa
 import numpy as np
 import os
-import pandas as pd
-import plotly.express as px
 import sounddevice as sd
 import shlex
 import threading

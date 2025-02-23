@@ -4,12 +4,11 @@ import dash
 import numpy as np
 import pandas as pd
 import plotly_express as px
-import time
 
 from LoopMachine import LoopMachine
 tempo = 120
 beats = 5
-# loop_machine = LoopMachine(tempo, beats)
+loop_machine = LoopMachine(tempo, beats)
 
 class Layout:
     def __init__(self, duration=beats, tempo=tempo):

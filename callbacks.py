@@ -19,8 +19,8 @@ from assets.layout import Layout
 #     def call_back_function(Input, State):
 #         return Output
 
-tempo = 100
-beats = 4
+tempo = 120
+beats = 5
 loop_machine = LoopMachine(tempo, beats)
 
 def get_track_index_button_id():
@@ -367,6 +367,5 @@ def playhead_callback(app):
                 "left": "120px"
                 }
         return {
-            "left": f"calc(120px + ({playhead_position} * (100% - 120px)))",
-            # "transition": "left 25ms linear"
+            "left": f"calc(120px + ({playhead_position} * (100% - 120px)))"
             }
