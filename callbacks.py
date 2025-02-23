@@ -19,8 +19,8 @@ from assets.layout import Layout
 #     def call_back_function(Input, State):
 #         return Output
 
-tempo = 120
-beats = 5
+tempo = 100
+beats = 4
 loop_machine = LoopMachine(tempo, beats)
 
 def get_track_index_button_id():
@@ -65,7 +65,7 @@ def button_callbacks(app):
             track_list = loop_machine.tracks
             print(track_list)
             # Update the tracks section after recorded track
-            updated_track_section = Layout().update_track_section(track_list)
+            updated_track_section = Layout().update_track_section(track_list, loop_machine.latency_compensation_samples)
             return "record-button", updated_track_section
         else:
             # Start recording
@@ -212,7 +212,7 @@ def button_callbacks(app):
         # copy track
         track_list.append(copy.copy(track))
         # Update the track sections
-        updated_track_section= Layout().update_track_section(track_list)
+        updated_track_section= Layout().update_track_section(track_list, loop_machine.latency_compensation_samples)
         return updated_track_section
 
     @app.callback(
@@ -352,17 +352,58 @@ def button_callbacks(app):
             track_list.clear()
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
-    
-    # @app.callback(
-    #     output=('waveform-display', 'children'),
-    #     input=('')
-    # )
-    # def hold_for_waveform():
-    #     pass
-    
-    # @app.callback(
-    #     output=(''),
-    #     input=('')
-    # )
-    # def get_track_waveform():
-    #     pass
+   
+def playhead_callback(app):
+    @app.callback(
+        Output('playhead', 'style'),
+        Input('playhead-interval', 'n_intervals')
+    )
+    def playhead_update(n_intervals):
+        beats = loop_machine.beats_per_loop
+        # current beat / beats per loop:
+        playhead_position = int((loop_machine.position / loop_machine.frames_per_loop) * beats) / beats
+        if playhead_position == 0:
+            return {
+                "left": "120px"
+                }
+        return {
+            "left": f"calc(120px + ({playhead_position} * (100% - 120px)))",
+            "transition": "left 25ms linear"
+            }
+
+
+    def create_waveform(self, track):
+        # grab buffered audio from track:
+        audio_data = track['track_name'].raw_buffer
+        shift_factor = .17 * 44100
+        shift_audio = np.roll(audio_data, -shift_factor)
+        # set x-axis:
+        time = np.linspace(0, len(shift_audio), len(shift_audio))
+        # create graph:
+        df = pd.DataFrame(
+            {"Time": time, "Amplitude": shift_audio.flatten()})
+        fig = px.line(df, x="Time", y="Amplitude")
+        # remove interactive features:
+        fig.update_layout(
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            showlegend=False,
+            paper_bgcolor='#212529',
+            plot_bgcolor='#313539',
+            dragmode=False,
+            margin=dict(l=0, r=0, t=0, b=0),
+            hovermode=False,
+        )
+        return fig

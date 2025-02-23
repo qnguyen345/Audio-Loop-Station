@@ -69,7 +69,26 @@
 .track-container {
     overflow-y: auto; 
     max-height: calc(820px - 75px); /*bottom container height - loop container height*/
+    position: relative;
 }
+
+div.track-waveform {
+    height: 100%;
+    width: 100%;
+}
+div#playhead {
+    height: 100%;
+    width: 2px;
+    background-color: yellow;
+    position: absolute;
+    z-index: 999;
+    top: 0px;
+    bottom: 0px;
+    left: 120px;
+    /* transition: left 5ms;
+    transition-timing-function: linear; */
+}
+
 
 .track-tabs-container {
     height: 120px;
@@ -83,10 +102,6 @@
     position: relative;
 }
 
-div.track-waveform {
-    height: 100%;
-    width: 100%;
-}
 
 /*------Fonts; Texts------*/
 .decrease-pitch-button{

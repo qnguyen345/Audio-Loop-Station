@@ -171,7 +171,6 @@ class LoopMachine:
             if self.checkpoint_action in ("STOP", "NEW"):
                 if self.current_track:
                     self.current_track.is_recording = False
-                    self.current_track.create_waveform()
                     self.current_track = None
             if self.checkpoint_action == "NEW":
                 new_track = Track(self.frames_per_loop)

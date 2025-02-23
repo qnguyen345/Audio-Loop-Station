@@ -9,7 +9,7 @@ import time
 from LoopMachine import LoopMachine
 tempo = 120
 beats = 5
-loop_machine = LoopMachine(tempo, beats)
+# loop_machine = LoopMachine(tempo, beats)
 
 class Layout:
     def __init__(self, duration=beats, tempo=tempo):
@@ -344,7 +344,7 @@ class Layout:
 
         return right_layout
 
-    def update_track_section(self, track_list):
+    def update_track_section(self, track_list, input_latency=0):
         """
         Updates the track section for track layout.
         """
@@ -359,7 +359,7 @@ class Layout:
         for track_index, track in track_dict.items():
             track_name = track["track_name"]
             pitch_shift = track["pitch_shift"]
-            waveform_fig = self.create_waveform(track)
+            waveform_fig = self.create_waveform(track, input_latency)
             track_section = html.Div(
                 className="track-tabs-container",
                 children=[
@@ -472,14 +472,15 @@ class Layout:
         return track_dict
 
     
-    def create_waveform(self, track):
+    def create_waveform(self, track, latency_comp=0):
         # grab buffered audio from track:
         audio_data = track['track_name'].raw_buffer
+        shifted_audio = np.roll(audio_data, -latency_comp + 50)
         # set x-axis:
-        time = np.linspace(0, len(audio_data), len(audio_data))
+        time = np.linspace(0, len(shifted_audio), len(shifted_audio))
         # create graph:
         df = pd.DataFrame(
-            {"Time": time, "Amplitude": audio_data.flatten()})
+            {"Time": time, "Amplitude": shifted_audio.flatten()})
         fig = px.line(df, x="Time", y="Amplitude")
         # remove interactive features:
         fig.update_layout(
