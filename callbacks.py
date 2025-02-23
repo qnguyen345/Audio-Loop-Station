@@ -353,3 +353,16 @@ def button_callbacks(app):
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
     
+    # @app.callback(
+    #     output=('waveform-display', 'children'),
+    #     input=('')
+    # )
+    # def hold_for_waveform():
+    #     pass
+    
+    # @app.callback(
+    #     output=(''),
+    #     input=('')
+    # )
+    # def get_track_waveform():
+    #     pass

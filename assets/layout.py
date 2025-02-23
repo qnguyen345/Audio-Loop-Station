@@ -1,6 +1,9 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
+import numpy as np
+import pandas as pd
+import plotly_express as px
 import time
 
 from LoopMachine import LoopMachine
@@ -356,7 +359,7 @@ class Layout:
         for track_index, track in track_dict.items():
             track_name = track["track_name"]
             pitch_shift = track["pitch_shift"]
-            waveform_div = self.get_waveform(track_name, track_index)
+            waveform_fig = self.create_waveform(track)
             track_section = html.Div(
                 className="track-tabs-container",
                 children=[
@@ -430,7 +433,15 @@ class Layout:
                         ]
                     ),
                     # waveform placement:
-                    waveform_div
+                    html.Div([
+                        dcc.Graph(id=f"waveform-{track_index}",
+                                  figure=waveform_fig,
+                                  style={"height": "100%", "width": "100%"},
+                                  config={"displayModeBar": False}
+                                  )
+                        ],
+                        className='track-waveform'
+                    )
                 ]
             )
 
@@ -460,16 +471,37 @@ class Layout:
         # print("track_dict", track_dict)  # DEBUG_PRINT
         return track_dict
 
-    def get_waveform(self, track, track_index):
-        # I think this needs to be reworked.
-        while True:
-            time.sleep(.05)
-            if track.waveform is not None:
-                div = html.Div([
-                    dcc.Graph(id=f"waveform-{track_index}",
-                              figure=track.waveform.fig,
-                              style={"height": "100%", "width": "100%"},
-                              config={"displayModeBar": False})
-                    ], id=f"waveform-div-{track_index}", className='track-waveform')
-                break
-        return div
+    
+    def create_waveform(self, track):
+        # grab buffered audio from track:
+        audio_data = track['track_name'].raw_buffer
+        # set x-axis:
+        time = np.linspace(0, len(audio_data), len(audio_data))
+        # create graph:
+        df = pd.DataFrame(
+            {"Time": time, "Amplitude": audio_data.flatten()})
+        fig = px.line(df, x="Time", y="Amplitude")
+        # remove interactive features:
+        fig.update_layout(
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            showlegend=False,
+            paper_bgcolor='#212529',
+            plot_bgcolor='#313539',
+            dragmode=False,
+            margin=dict(l=0, r=0, t=0, b=0),
+            hovermode=False,
+        )
+        return fig

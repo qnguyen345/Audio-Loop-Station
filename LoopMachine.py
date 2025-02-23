@@ -63,7 +63,6 @@ class Track:
         self.name = None
         self.is_recording = False
         self.track_uid = uuid.uuid4()
-        self.waveform = None
 
     def apply_pitch_shift_async(self):
         """Offload pitch shifting to a background thread and update immediately when done."""
@@ -304,42 +303,6 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
-
-
-class Waveform:
-    def __init__(self, track: object):
-        self.audio_data = track.raw_buffer
-        self.time = np.linspace(0, len(self.audio_data), len(self.audio_data))
-
-        df = pd.DataFrame(
-            {"Time": self.time, "Amplitude": self.audio_data.flatten()})
-        self.fig = px.line(df, x="Time", y="Amplitude")
-
-        self.fig.update_layout(
-            xaxis=dict(
-                showgrid=False,
-                showticklabels=False,
-                zeroline=False,
-                title_text='',
-                visible=False
-            ),
-            yaxis=dict(
-                showgrid=False,
-                showticklabels=False,
-                zeroline=False,
-                title_text='',
-                visible=False
-            ),
-            showlegend=False,
-            paper_bgcolor='#212529',
-            plot_bgcolor='#313539',
-            dragmode=False,
-            margin=dict(l=0, r=0, t=0, b=0),
-            hovermode=False,
-        )
-
-    def show(self):
-        self.fig.show(config={"displayModeBar": False})
 
 
 if __name__ == "__main__":
