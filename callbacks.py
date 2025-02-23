@@ -368,42 +368,5 @@ def playhead_callback(app):
                 }
         return {
             "left": f"calc(120px + ({playhead_position} * (100% - 120px)))",
-            "transition": "left 25ms linear"
+            # "transition": "left 25ms linear"
             }
-
-
-    def create_waveform(self, track):
-        # grab buffered audio from track:
-        audio_data = track['track_name'].raw_buffer
-        shift_factor = .17 * 44100
-        shift_audio = np.roll(audio_data, -shift_factor)
-        # set x-axis:
-        time = np.linspace(0, len(shift_audio), len(shift_audio))
-        # create graph:
-        df = pd.DataFrame(
-            {"Time": time, "Amplitude": shift_audio.flatten()})
-        fig = px.line(df, x="Time", y="Amplitude")
-        # remove interactive features:
-        fig.update_layout(
-            xaxis=dict(
-                showgrid=False,
-                showticklabels=False,
-                zeroline=False,
-                title_text='',
-                visible=False
-            ),
-            yaxis=dict(
-                showgrid=False,
-                showticklabels=False,
-                zeroline=False,
-                title_text='',
-                visible=False
-            ),
-            showlegend=False,
-            paper_bgcolor='#212529',
-            plot_bgcolor='#313539',
-            dragmode=False,
-            margin=dict(l=0, r=0, t=0, b=0),
-            hovermode=False,
-        )
-        return fig
