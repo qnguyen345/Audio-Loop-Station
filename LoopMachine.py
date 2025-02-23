@@ -82,10 +82,6 @@ class Track:
 
         threading.Thread(target=worker, daemon=True).start()
 
-    def create_waveform(self):
-        def worker():
-            self.waveform = Waveform(self)
-        threading.Thread(target=worker, daemon=True).start()
 
     def __str__(self):
         elements = []
