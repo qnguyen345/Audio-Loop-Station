@@ -390,9 +390,5 @@ repr        print a dictionary representation of the loop
                 loop_machine.repr_log()
                 print(repr(loop_machine))
 
-            elif cmd == 'ww':
-                for track in loop_machine.tracks:
-                    track.waveform.show()
-
     except KeyboardInterrupt:
         loop_machine.stop()
