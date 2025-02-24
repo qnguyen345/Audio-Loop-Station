@@ -5,25 +5,20 @@ import librosa
 import numpy as np
 import os
 import sounddevice as sd
-import random
-import string
+import shlex
 import threading
-import time
+import uuid
 
 # Constants
 CHUNK = 1024  # Frames per buffer
 FORMAT = "int16"
 CHANNELS = 1  # Mono
 RATE = 44100  # Sample rate
-# BPM = 120  # User-defined tempo
-# BEATS_PER_LOOP = 4  # User-defined beats per loop
-# FRAMES_PER_LOOP = int((60 / BPM) * BEATS_PER_LOOP * RATE)  # Loop length in frames
 ADJUSTMENT_FACTOR = 0.75  # Fine-tune latency correction
-
-# print(f"Loop duration: {FRAMES_PER_LOOP} samples ({BEATS_PER_LOOP} beats at {BPM} BPM)")
 
 FIRST_CLICK_FREQ = 1500  # Frequency (Hz) for the first beat’s click
 REGULAR_CLICK_FREQ = 1000  # Frequency (Hz) for the rest of the clicks
+
 
 def generate_click(sample_rate=RATE, duration_ms=50, *, frequency):
     """Generate a short click sound for the metronome."""
@@ -32,33 +27,40 @@ def generate_click(sample_rate=RATE, duration_ms=50, *, frequency):
     click = (np.sin(2 * np.pi * frequency * t) * 0.5 * 32767).astype(np.int16)
     return click.reshape(-1, 1)  # Ensure mono output
 
+
 def generate_clicks(bpm: int, beats_per_loop: int):
     """Generate a full click track matching the loop length, with the first click pitched differently."""
     samples_per_beat = int((60 / bpm) * RATE)
-    
+
     # Generate the first click using a different frequency.
     first_click = generate_click(frequency=FIRST_CLICK_FREQ)
-    first_silence = np.zeros((samples_per_beat - len(first_click), 1), dtype=np.int16)
+    first_silence = np.zeros(
+        (samples_per_beat - len(first_click), 1), dtype=np.int16)
     first_segment = np.vstack((first_click, first_silence))
-    
+
     # Generate the regular click for the other beats.
     regular_click = generate_click(frequency=REGULAR_CLICK_FREQ)
-    regular_silence = np.zeros((samples_per_beat - len(regular_click), 1), dtype=np.int16)
+    regular_silence = np.zeros(
+        (samples_per_beat - len(regular_click), 1), dtype=np.int16)
     regular_segment = np.vstack((regular_click, regular_silence))
-    
+
     # Build the full click track: first beat is first_segment; remaining beats use regular_segment.
-    segments = [first_segment] + [regular_segment for _ in range(beats_per_loop - 1)]
+    segments = [first_segment] + \
+        [regular_segment for _ in range(beats_per_loop - 1)]
     return np.vstack(segments)
+
 
 class Track:
     def __init__(self, frames_per_loop: int):
         self.frames_per_loop = frames_per_loop
-        self.raw_buffer = np.zeros((self.frames_per_loop, CHANNELS), dtype=np.int16)
+        self.raw_buffer = np.zeros(
+            (self.frames_per_loop, CHANNELS), dtype=np.int16)
         self.buffer = self.raw_buffer
         self.is_muted = False
         self.pitch_shift = 0
         self.name = None
         self.is_recording = False
+        self.track_uid = uuid.uuid4()
 
     def apply_pitch_shift_async(self):
         """Offload pitch shifting to a background thread and update immediately when done."""
@@ -68,13 +70,16 @@ class Track:
                 self.buffer = self.raw_buffer.copy()
             else:
                 # Normalize and perform pitch shifting.
-                buffer_float = self.raw_buffer.astype(np.float32) / 32767.0  # Normalize to [-1, 1]
+                buffer_float = self.raw_buffer.astype(
+                    np.float32) / 32767.0  # Normalize to [-1, 1]
                 buffer_shifted = librosa.effects.pitch_shift(
                     buffer_float.flatten(), sr=RATE, n_steps=self.pitch_shift
                 )
-                self.buffer = (np.clip(buffer_shifted, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
+                self.buffer = (np.clip(buffer_shifted, -1, 1) *
+                               32767).astype(np.int16).reshape(-1, 1)
 
         threading.Thread(target=worker, daemon=True).start()
+
 
     def __str__(self):
         elements = []
@@ -91,28 +96,33 @@ class Track:
 
         return "<" + " ".join(elements) + ">"
 
+
 class LoopMachine:
     def __init__(self, bpm: int, beats_per_loop: int):
         # Allocate memory for multiple loop layers
         self.bpm = bpm
         self.beats_per_loop = beats_per_loop
-        self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames
+        self.frames_per_loop = int(
+            (60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames
         self.current_track = None  # Active buffer being recorded
         self.tracks = []  # List of recorded tracks
         # self.is_recording = False
         self.position = 0  # Playback and recording position
         self.checkpoint_position = 0
-        self.checkpoint_action = None # Action to perform on reaching checkpoint
+        self.checkpoint_action = None  # Action to perform on reaching checkpoint
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
         self.click_is_muted = True
-        self.uid = ''.join(random.choices((string.ascii_letters + string.digits), k=8))
+        self.uid = uuid.uuid4()
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
-        self.is_playing= True
-     
-        self.input_latency = sd.query_devices(kind='input')['default_low_input_latency']  # Cache latency
-        self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
-        print(f"Measured Input Latency: {self.input_latency:.4f} sec, Compensation: {self.latency_compensation_samples} samples")
-        
+        self.is_playing = True
+
+        self.input_latency = sd.query_devices(
+            kind='input')['default_low_input_latency']  # Cache latency
+        # self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
+        self.latency_compensation_samples = int(0.18 * RATE)
+        print(
+            f"Measured Input Latency: {self.input_latency:.4f} sec, Compensation: {self.latency_compensation_samples} samples")
+
         self.stream = sd.Stream(
             samplerate=RATE,
             blocksize=CHUNK,
@@ -129,7 +139,7 @@ class LoopMachine:
         self._set_checkpoint_now()
         self.checkpoint_action = "NEW"
         self.click_is_muted = False
-        
+
     def stop_recording(self):
         """Stop recording and store the completed segment with latency compensation."""
         print("Recording stopped.")
@@ -137,13 +147,14 @@ class LoopMachine:
         self.checkpoint_action = "STOP"
 
     def _set_checkpoint_now(self):
-        self.checkpoint_position = (self.position + self.latency_compensation_samples) % self.frames_per_loop
+        self.checkpoint_position = (
+            self.position + self.latency_compensation_samples) % self.frames_per_loop
 
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
         # If paused, return nothing
-        if not self.is_playing:  
+        if not self.is_playing:
             outdata[:] = global_audio_out
             return
         # Handle checkpoint
@@ -152,7 +163,8 @@ class LoopMachine:
         if start < end:
             checkpoint_reached = (start <= self.checkpoint_position < end)
         else:
-            checkpoint_reached = (self.checkpoint_position >= start or self.checkpoint_position < end)
+            checkpoint_reached = (self.checkpoint_position >=
+                                  start or self.checkpoint_position < end)
         if checkpoint_reached:
             if self.checkpoint_action in ("STOP", "NEW"):
                 if self.current_track:
@@ -179,35 +191,38 @@ class LoopMachine:
                 self.current_track.raw_buffer[:remaining_samples] = indata[samples_until_end:]
             else:
                 self.current_track.raw_buffer[start_idx:end_idx] = indata
-        
+
         # Inject click track
         if not self.click_is_muted:
             click_position = self.position % len(self.click_track)
             click_segment = self.click_track[click_position:click_position + frames]
             if click_segment.shape[0] < frames:
-                padding = np.zeros((frames - click_segment.shape[0], 1), dtype=np.int16)
+                padding = np.zeros(
+                    (frames - click_segment.shape[0], 1), dtype=np.int16)
                 click_segment = np.vstack((click_segment, padding))
             global_audio_out += click_segment
-        
+
         # Inject tracks
         for track in self.tracks:
             if not track.is_muted and not track.is_recording:
-                playback_start = (self.position + self.latency_compensation_samples) % self.frames_per_loop
+                playback_start = (
+                    self.position + self.latency_compensation_samples) % self.frames_per_loop
                 loop_segment = track.buffer[playback_start:playback_start + frames]
                 if loop_segment.shape[0] < frames:
-                    padding = np.zeros((frames - loop_segment.shape[0], 1), dtype=np.int16)
+                    padding = np.zeros(
+                        (frames - loop_segment.shape[0], 1), dtype=np.int16)
                     loop_segment = np.vstack((loop_segment, padding))
                 global_audio_out += loop_segment
-        
+
         # Prevent clipping
         global_audio_out = np.clip(global_audio_out, -32768, 32767)
         outdata[:] = global_audio_out
-        
+
         # Move position forward
         self.position += frames
         if self.position >= self.frames_per_loop:
             self.position = 0
-    
+
     def stop(self):
         """Stops the loop machine and closes the audio stream."""
         self.is_recording = False
@@ -227,27 +242,29 @@ class LoopMachine:
         state['stream'] = None
         return state
 
-    def save(self):
+    def save(self, loop_name: str = ''):
         """Saves the loop as a Pickle, includes any linked Track objects.
 
         Ignores the stream to prevent need to close stream
         """
 
-        # date-time-uid.pkl:
-        filename = f'{self.time}-{self.uid}.pkl'
+        # date-time-uid-loopname.pkl:
+        if loop_name:
+            loop_name = f'_{loop_name}'
+        filename = f'{self.time}-{self.uid}{loop_name}.pkl'
         with open(os.path.join('loops', filename), 'wb') as file:
             pickle.dump(self, file)
-            
+
     def load(self, filename: str):
         """Loads a saved loop object using the filename.
-        
+
         Waits until end of loop to complete load
         Keeps stream open and replaces the list of tracks, and some other info
         Ignores loaded file's click status
-        
+
         Keyword arguments:
         filename -- example: "2025-02-08-T15-44-20-CxilTDgH.pkl"
-        """ 
+        """
         try:
             with open(os.path.join('loops', filename), 'rb') as file:
                 loaded = pickle.load(file)
@@ -279,13 +296,15 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
-    
+
+
 if __name__ == "__main__":
     tempo = int(input('Tempo: '))
     beats = int(input('Beats per Loop: '))
     loop_machine = LoopMachine(tempo, beats)
     print("== LoopMachine ==")
-    print(f"Loop duration: {loop_machine.frames_per_loop} samples ({loop_machine.beats_per_loop} beats at {loop_machine.bpm} BPM)")
+    print(
+        f"Loop duration: {loop_machine.frames_per_loop} samples ({loop_machine.beats_per_loop} beats at {loop_machine.bpm} BPM)")
     try:
         while True:
             cmd = input("> ").strip()
@@ -308,7 +327,7 @@ r           start recording
 s           stop recording
 y <i>       copy track by index
 yy          copy the most recent track
-save        save the loop machine object
+save <n>    save the loop machine object with optional name <n>
 load <f>    load a loop machine object with filename <f> 
 repr        print a dictionary representation of the loop
 -----------------------------------------------------------------------------------------------------------------------"""
@@ -357,13 +376,17 @@ repr        print a dictionary representation of the loop
                 track = loop_machine.tracks[track_index]
                 loop_machine.tracks.append(copy.copy(track))
             elif cmd.startswith('save'):
-                loop_machine.save()
+                args = shlex.split(cmd)
+                if len(args) == 1:
+                    loop_machine.save()
+                elif len(args) == 2:
+                    loop_machine.save(args[1])
             elif cmd.startswith('load'):
                 loop_machine.load(args[1])
                 print(loop_machine)
             elif cmd == 'repr':
                 loop_machine.repr_log()
                 print(repr(loop_machine))
-                
+
     except KeyboardInterrupt:
         loop_machine.stop()
