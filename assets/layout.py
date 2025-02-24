@@ -360,7 +360,8 @@ class Layout:
                             html.Div(
                                 className="pitch-container",
                                 children=[
-                                    self.generate_text_button("decrease-pitch-button", "decrease_track_pitch_button",
+                                    self.generate_text_button("decrease-pitch-button", 
+                                                              "decrease_track_pitch_button",
                                                               "▼", index=track_index),
                                     html.Span(
                                         className="pitch-text",
@@ -368,7 +369,8 @@ class Layout:
                                             "index": track_index},  
                                         children=f"Pitch {pitch_shift}"  
                                     ),
-                                    self.generate_text_button("increase-pitch-button", "increase_track_pitch_button",
+                                    self.generate_text_button("increase-pitch-button", 
+                                                              "increase_track_pitch_button",
                                                               "▲", index=track_index),
                                 ]
                             )
