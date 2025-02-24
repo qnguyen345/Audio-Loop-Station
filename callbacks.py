@@ -65,7 +65,7 @@ def button_callbacks(app):
             track_list = loop_machine.tracks
             print(track_list)
             # Update the tracks section after recorded track
-            updated_track_section = Layout().update_track_section(track_list)
+            updated_track_section = Layout().update_track_section(track_list, loop_machine.latency_compensation_samples)
             return "record-button", updated_track_section
         else:
             # Start recording
@@ -212,7 +212,7 @@ def button_callbacks(app):
         # copy track
         track_list.append(copy.copy(track))
         # Update the track sections
-        updated_track_section= Layout().update_track_section(track_list)
+        updated_track_section= Layout().update_track_section(track_list, loop_machine.latency_compensation_samples)
         return updated_track_section
 
     @app.callback(
@@ -352,4 +352,20 @@ def button_callbacks(app):
             track_list.clear()
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
-    
+   
+def playhead_callback(app):
+    @app.callback(
+        Output('playhead', 'style'),
+        Input('playhead-interval', 'n_intervals')
+    )
+    def playhead_update(n_intervals):
+        beats = loop_machine.beats_per_loop
+        # current beat / beats per loop:
+        playhead_position = int((loop_machine.position / loop_machine.frames_per_loop) * beats) / beats
+        if playhead_position == 0:
+            return {
+                "left": "120px"
+                }
+        return {
+            "left": f"calc(120px + ({playhead_position} * (100% - 120px)))"
+            }

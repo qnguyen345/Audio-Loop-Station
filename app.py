@@ -58,10 +58,17 @@ app_layout = html.Div(
                             children=[
                                 html.Div(
                                     id="track_section",
-                                    )
-                                ]
+                                    ),
+                                html.Div(
+                                    id='playhead',
+                                ),
+                                dcc.Interval(
+                                    id='playhead-interval',
+                                    interval=(6000 / callbacks.loop_machine.bpm),
+                                    n_intervals=0
+                                )
+                            ]
                         )
-
                     ]
                 ),
 
@@ -81,6 +88,7 @@ app.layout = app_layout
 
 # Get all callbacks
 callbacks.button_callbacks(app)
+callbacks.playhead_callback(app)
 
 if __name__ == "__main__":
     app.run(debug=True)

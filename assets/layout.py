@@ -1,6 +1,9 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
+import numpy as np
+import pandas as pd
+import plotly_express as px
 
 from LoopMachine import LoopMachine
 tempo = 120
@@ -340,7 +343,7 @@ class Layout:
 
         return right_layout
 
-    def update_track_section(self, track_list):
+    def update_track_section(self, track_list, input_latency=0):
         """
         Updates the track section for track layout.
         """
@@ -355,7 +358,7 @@ class Layout:
         for track_index, track in track_dict.items():
             track_name = track["track_name"]
             pitch_shift = track["pitch_shift"]
-            # track section outline
+            waveform_fig = self.create_waveform(track, input_latency)
             track_section = html.Div(
                 className="track-tabs-container",
                 children=[
@@ -427,6 +430,16 @@ class Layout:
                                 ]
                             )
                         ]
+                    ),
+                    # waveform placement:
+                    html.Div([
+                        dcc.Graph(id=f"waveform-{track_index}",
+                                  figure=waveform_fig,
+                                  style={"height": "100%", "width": "100%"},
+                                  config={"displayModeBar": False}
+                                  )
+                        ],
+                        className='track-waveform'
                     )
                 ]
             )
@@ -456,3 +469,39 @@ class Layout:
         # print("track_list", track_list)  # DEBUG_PRINT
         # print("track_dict", track_dict)  # DEBUG_PRINT
         return track_dict
+
+    
+    def create_waveform(self, track, latency_comp=0):
+        # grab buffered audio from track:
+        audio_data = track['track_name'].raw_buffer
+        shifted_audio = np.roll(audio_data, -latency_comp + 150)
+        # set x-axis:
+        time = np.linspace(0, len(shifted_audio), len(shifted_audio))
+        # create graph:
+        df = pd.DataFrame(
+            {"Time": time, "Amplitude": shifted_audio.flatten()})
+        fig = px.line(df, x="Time", y="Amplitude")
+        # remove interactive features:
+        fig.update_layout(
+            xaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            yaxis=dict(
+                showgrid=False,
+                showticklabels=False,
+                zeroline=False,
+                title_text='',
+                visible=False
+            ),
+            showlegend=False,
+            paper_bgcolor='#212529',
+            plot_bgcolor='#313539',
+            dragmode=False,
+            margin=dict(l=0, r=0, t=0, b=0),
+            hovermode=False,
+        )
+        return fig
