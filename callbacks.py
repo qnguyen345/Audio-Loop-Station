@@ -22,7 +22,6 @@ from assets.layout import Layout
 tempo = 120
 beats = 5
 loop_machine = LoopMachine(tempo, beats)
-layout = Layout(tempo, beats)
 
 def get_track_index_button_id():
     """Gets the index and button_id from a triggered dash callback that are indexed."""
@@ -72,56 +71,14 @@ def button_callbacks(app):
             # Start recording
             loop_machine.start_recording()
             return "record-button-pulsing pulse", dash.no_update
-
+        
     @app.callback(
-        Output("tempo_input", "value"),
-        [Input("tempo-", "n_clicks"),
-         Input("tempo+", "n_clicks"),
-         Input("tempo_input", "value")],
-        prevent_initial_call=True
-    )
-    def set_tempo(decrease_tempo, increase_tempo, set_tempo):
-        """
-        Sets the tempo if a user adds an input or if the user uses the "-" or
-        "+" button to decrease or increase the tempo.
-        """
-
-        # if buttons not clicked, retain current information
-        if not dash.callback_context.triggered:
-            raise PreventUpdate
-
-        # Get id of button clicked
-        button_id = get_button_id()
-
-        # If button is +, add 1, else if button is -, subtract 1
-        if decrease_tempo and button_id == "tempo-":
-            set_tempo -= 1
-        elif increase_tempo and button_id == "tempo+":
-            set_tempo += 1
-
-        return set_tempo
-
-    @app.callback(
-        Output("files_modal", "is_open"),
-        [Input("files_button", "n_clicks"),
-         Input("close_files_modal", "n_clicks")],
-        [State("files_modal", "is_open")],
-    )
-    def toggle_files_modal(n1, n2, is_open):
-        """
-        Opens a popup when files button is clicked.
-        """
-        if n1 or n2:
-            return not is_open
-        return is_open
-
-    @app.callback(
-        Output("checklist_container", "children"),
+        Output("pkl_files", "options"),
         Input("refresh_button", "n_clicks")
     )
-    def generate_pkl_files_checklist(n_clicks):
+    def generate_pkl_files_list(n_clicks):
         """
-        Generates a checlist with a list of audio files in the tracks
+        Generates a radio button list of audio files in the loops
         directory when the refresh button is clicked.
         """
         loop_file_path = "loops"
@@ -131,15 +88,34 @@ def button_callbacks(app):
         # Get file names of audio files without path
         filenames = [os.path.basename(file) for file in wave_files_list]
 
-        # Create a checklist
-        checklist = dbc.Checklist(
-            options=[{"label": file, "value": file} for file in filenames],
-            value=[],
-            inline=False,
-        )
+        # Create a radio button for each file
+        options=[{"label": file, "value": file} for file in filenames]
 
-        return checklist
-
+        return options
+    
+    @app.callback(
+        Output("files_modal", "is_open"),
+        [Input("files_button", "n_clicks"),
+        Input("close_files_modal", "n_clicks")],
+        [State("files_modal", "is_open"),
+        State("pkl_files", "value")],
+        prevent_initial_call=True
+    )
+    def toggle_files_modal(n1, n2, is_open, filename):
+        """
+        Opens and closes the modal.
+        Also loads the selected .pkl file.
+        """
+        button_id = get_button_id()
+        if button_id == "files_button":
+            return True # Open modal
+        # Load selected .pkl file if 'load and close' button is pressed
+        if button_id == "close_files_modal":
+            print("Loaded file: ", filename)
+            loop_machine.load(filename) 
+            return False # Close modal
+        return is_open
+    
     @app.callback(
         Output("play_pause_button", "children"),
         Input("play_pause_button", "n_clicks"),
@@ -232,7 +208,7 @@ def button_callbacks(app):
         # Remove the track from track_list
         track_list.pop(track_index)
         # Update the track sections
-        updated_track_section= layout.update_track_section(track_list)
+        updated_track_section= Layout().update_track_section(track_list)
         return updated_track_section
 
     @app.callback(
@@ -351,9 +327,36 @@ def button_callbacks(app):
         if "delete_loop_trash_button" == button_id or "delete_loop_button" == button_id:
             track_list = loop_machine.tracks
             track_list.clear()
-            updated_track_section = layout.update_track_section(track_list)
+            updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
-   
+
+    @app.callback(
+        Output("save_button", "children"),
+        Input("save_button", "n_clicks"),
+    )
+    def save_loop(n_clicks):
+        """Saves current loop in 'loops' directory."""
+        button_id = get_button_id()
+        if "save_button" == button_id:
+            loop_machine.save()
+        return dash.no_update
+    
+    @app.callback(
+        Output("track_section", "children", allow_duplicate=True),
+        Input("latency_input", "value"),
+        prevent_initial_call=True
+    )
+    def set_latency(latency_input):
+        """Manually sets the latency based on user input."""
+        if latency_input is None:
+            return dash.no_update
+        new_latency = int(float(latency_input) * loop_machine.rate)
+        print(f"Setting latency to {new_latency}...")    
+        loop_machine.latency_compensation_samples = new_latency
+        track_list = loop_machine.tracks
+        updated_track_section = Layout().update_track_section(track_list, new_latency)
+        return updated_track_section
+
 def playhead_callback(app):
     @app.callback(
         Output('playhead', 'style'),

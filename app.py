@@ -63,6 +63,7 @@ app_layout = html.Div(
                                     id="track_section",
                                     ),
                                 html.Div(
+                                    # className='playhead',
                                     id='playhead',
                                 ),
                                 dcc.Interval(

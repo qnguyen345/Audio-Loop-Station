@@ -1,5 +1,5 @@
 /*------Containers------*/
-.beats-container{
+.latency-container{
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -11,8 +11,7 @@
     background-color: #344079;
     border: 1px solid #435199;
     border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 20px; 
+    margin-top: 20px;
 }
 
 .right-first-second-row-container {
@@ -54,7 +53,7 @@
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 50px; 
+    margin-top: 30px; 
 }
 
 .right-fifth-row-container {
@@ -67,7 +66,7 @@
     margin-top: 50px; 
 }
 
-.tempo-container {
+.tempo-beats-container {
     display: flex;
     flex-direction: column;
     width: 176px; 
@@ -80,7 +79,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 9px 0px;
+    padding: 5px;
 }
 
 /*------Fonts; Texts------*/
@@ -92,9 +91,9 @@
     color: #f0f0f3;
 }
 
-.beats-text {
+.latency-text {
     color: #f0f0f3;
-    margin-right: 5px;
+    margin-right: 3px;
 }
 
 .pause-text {
@@ -127,12 +126,11 @@
     margin-left: 5px;
 }
 
-.tempo-text {
+.tempo-beats-text {
     font-size: 14px; 
     display: block;
     color: #f0f0f3;
     font-family: Arial, Helvetica, sans-serif;
-    margin-bottom: 8px; 
 }
 
 /*------Buttons------*/
@@ -293,20 +291,6 @@
     background-color: #283367;
 }
 
-.tempo-button {
-    font-size: 16px; 
-    width: 24px;
-    height: 24px; 
-    background-color: #a7aed0;
-    border: 1px solid #b0b8e4;
-    border-radius: 50%;
-    color: #404353;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    margin: 0px 8px; 
-}
-
 @-webkit-keyframes pulse {
     0% {
         color: #f0f0f3;
@@ -326,9 +310,9 @@
 }
 
 /*------Inputs------*/
-.beats-input{
+.latency-input{
     font-size: 14px; 
-    width: 60px; 
+    width: 40px; 
     height: 24px; 
     background-color: #f0f0f3;
     border: 1px solid #404353;
@@ -336,17 +320,6 @@
     color: #404353;
     border: 1px solid #435199;
 }
-
-.tempo-input {
-    font-size: 14px; 
-    width: 35px; 
-    height: 24px; 
-    background-color: #f0f0f3;
-    border: 1px solid #404353;
-    border-radius: 1px;
-    color: #404353;
-}
-
 /*------Scroll Bar Design------*/
 
 /*------Etc.------*/

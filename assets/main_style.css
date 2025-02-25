@@ -21,18 +21,19 @@
 
 .left-container{
     width: 88%;
-    height: 820px;
+    /*full_screen_height - top_container_height + 2*rightANDleft_container_padding*/
+    height: calc(100vh - (60px + 2*0.8vw));
     margin: 0.8vw;
     border-radius: 5px;
     background-color: rgba(135, 155, 226, 0.04);
     border: 1px solid rgba(135, 155, 226, 0.25);
     flex-direction: column;
-    overflow: hidden
 }
 
 .right-container{
     width: 15%;
-    height: 820px;
+    /*full_screen_height - top_container_height + 2*rightANDleft_container_padding*/
+    height: calc(100vh - (60px + 2*0.8vw));
     margin: 0.8vw;
     margin-left: 0px;
     border-radius: 5px;

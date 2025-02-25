@@ -101,6 +101,7 @@ class LoopMachine:
     def __init__(self, bpm: int, beats_per_loop: int):
         # Allocate memory for multiple loop layers
         self.bpm = bpm
+        self.rate = RATE
         self.beats_per_loop = beats_per_loop
         self.frames_per_loop = int(
             (60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames
@@ -269,6 +270,7 @@ class LoopMachine:
             with open(os.path.join('loops', filename), 'rb') as file:
                 loaded = pickle.load(file)
                 # adjust while current loop is finishing
+                loaded.__dict__['is_playing'] = self.is_playing
                 loaded.__dict__['click_is_muted'] = self.click_is_muted
                 loaded.__dict__['stream'] = self.stream
                 loaded.position = 0

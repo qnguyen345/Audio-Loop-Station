@@ -52,7 +52,6 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding-right: 10px;
     border-bottom: 1px solid rgba(135, 155, 226, 0.25);
     position: relative;
 }
@@ -66,6 +65,12 @@
     border: 1px solid #435199;
     border-radius: 4px;
 }
+
+.ticks-container{
+    padding: 0px;
+    margin: 0px
+}
+
 .track-container {
     overflow-y: auto; 
     max-height: calc(820px - 75px); /*bottom container height - loop container height*/
@@ -75,6 +80,7 @@
 div.track-waveform {
     height: 100%;
     width: 100%;
+    background-color: transparent;
 }
 div#playhead {
     height: 100%;
@@ -87,7 +93,6 @@ div#playhead {
     left: 120px;
 }
 
-
 .track-tabs-container {
     height: 120px;
     box-sizing: border-box;
@@ -95,7 +100,6 @@ div#playhead {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding-right: 10px;
     border-bottom: 1px solid rgba(135, 155, 226, 0.05);
     position: relative;
 }
@@ -214,4 +218,9 @@ div#playhead {
     border: 1px rgba(135, 155, 226, 0.04);
 }
 /*------Etc.------*/
+
+/*for plot background*/
+.nsewdrag.drag{
+    fill: #12141e !important
+}
 
