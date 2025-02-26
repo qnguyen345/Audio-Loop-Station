@@ -114,15 +114,9 @@ class LoopMachine:
         self.click_is_muted = True
         self.uid = uuid.uuid4()
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
-        self.is_playing = True
-
-        self.input_latency = sd.query_devices(
-            kind='input')['default_low_input_latency']  # Cache latency
-        # self.latency_compensation_samples = int(self.input_latency * RATE * ADJUSTMENT_FACTOR)
-        self.latency_compensation_samples = int(0.18 * RATE)
-        print(
-            f"Measured Input Latency: {self.input_latency:.4f} sec, Compensation: {self.latency_compensation_samples} samples")
-
+        self.is_playing= True
+        self.latency_compensation_samples = 8000
+        
         self.stream = sd.Stream(
             samplerate=RATE,
             blocksize=CHUNK,
@@ -318,7 +312,7 @@ d <i>       delete track by index
 dd          delete the most recent track
 h           help
 l           list tracks
-la <FLOAT>  set latency samples (seconds)
+la <FL>     set latency samples (seconds)
 m/u <i>     mute/unmute track by index
 n <i>       set name for track by index
 o <i> <FL>  set offset beats for track by index
