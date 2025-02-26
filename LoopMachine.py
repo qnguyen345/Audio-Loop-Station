@@ -57,6 +57,7 @@ class Track:
             (self.frames_per_loop, CHANNELS), dtype=np.int16)
         self.buffer = self.raw_buffer
         self.is_muted = False
+        self.offset_beats = 0
         self.pitch_shift = 0
         self.name = None
         self.is_recording = False
@@ -106,7 +107,6 @@ class LoopMachine:
             (60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames
         self.current_track = None  # Active buffer being recorded
         self.tracks = []  # List of recorded tracks
-        # self.is_recording = False
         self.position = 0  # Playback and recording position
         self.checkpoint_position = 0
         self.checkpoint_action = None  # Action to perform on reaching checkpoint
@@ -205,8 +205,8 @@ class LoopMachine:
         # Inject tracks
         for track in self.tracks:
             if not track.is_muted and not track.is_recording:
-                playback_start = (
-                    self.position + self.latency_compensation_samples) % self.frames_per_loop
+                offset_samples = int(track.offset_beats * (60 / self.bpm) * RATE)
+                playback_start = (self.position + self.latency_compensation_samples - offset_samples) % self.frames_per_loop
                 loop_segment = track.buffer[playback_start:playback_start + frames]
                 if loop_segment.shape[0] < frames:
                     padding = np.zeros(
@@ -321,6 +321,7 @@ l           list tracks
 la <FLOAT>  set latency samples (seconds)
 m/u <i>     mute/unmute track by index
 n <i>       set name for track by index
+o <i> <FL>  set offset beats for track by index
 p <i> <INT> set pitch shift for track by index
 q           quit
 r           start recording
@@ -361,6 +362,11 @@ repr        print a dictionary representation of the loop
                 loop_machine.start_recording()
             elif cmd == 's':
                 loop_machine.stop_recording()
+            elif cmd.startswith('o'):
+                track_index = int(args[1])
+                offset_beats = float(args[2])
+                track = loop_machine.tracks[track_index]
+                track.offset_beats = offset_beats
             elif cmd.startswith('p'):
                 track_index = int(args[1])
                 pitch_shift = int(args[2])
