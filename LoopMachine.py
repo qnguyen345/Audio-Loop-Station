@@ -51,7 +51,7 @@ def generate_clicks(bpm: int, beats_per_loop: int):
 
 
 class Track:
-    def __init__(self, frames_per_loop: int):
+    def __init__(self, frames_per_loop: int, bpm: float):
         self.frames_per_loop = frames_per_loop
         self.raw_buffer = np.zeros(
             (self.frames_per_loop, CHANNELS), dtype=np.int16)
@@ -62,44 +62,54 @@ class Track:
         self.name = None
         self.is_recording = False
         self.track_uid = uuid.uuid4()
+        self.original_bpm = bpm  # BPM at the time of recording
+        self.bpm = bpm           # Current target BPM
 
-    def apply_pitch_shift_async(self):
-        """Offload pitch shifting to a background thread and update immediately when done."""
+    def apply_effects_async(self):
+        """Offload pitch shifting and time stretching to a background thread and update the buffer when done."""
         def worker():
-            if self.pitch_shift == 0:
-                # No pitch shift needed; just copy the raw buffer.
+            # If no effects are needed, just copy the raw buffer.
+            if self.pitch_shift == 0 and (self.original_bpm == self.bpm):
                 self.buffer = self.raw_buffer.copy()
-            else:
-                # Normalize and perform pitch shifting.
-                buffer_float = self.raw_buffer.astype(
-                    np.float32) / 32767.0  # Normalize to [-1, 1]
-                buffer_shifted = librosa.effects.pitch_shift(
-                    buffer_float.flatten(), sr=RATE, n_steps=self.pitch_shift
-                )
-                self.buffer = (np.clip(buffer_shifted, -1, 1) *
-                               32767).astype(np.int16).reshape(-1, 1)
+                return
+
+            # Normalize and flatten the raw buffer.
+            y = self.raw_buffer.astype(np.float32) / 32767.0
+            y = y.flatten()
+
+            # Apply time stretching if BPM has changed.
+            if self.original_bpm != self.bpm:
+                # Calculate stretch factor: new BPM divided by original BPM.
+                # For example, if originally recorded at 120 BPM and now at 100 BPM,
+                # the factor will be 100/120 ≈ 0.833, which slows down the audio.
+                stretch_factor = self.bpm / self.original_bpm
+                y = librosa.effects.time_stretch(y, rate=stretch_factor)
+
+            # Apply pitch shifting if needed.
+            if self.pitch_shift != 0:
+                y = librosa.effects.pitch_shift(y, sr=RATE, n_steps=self.pitch_shift)
+
+            # Convert back to int16.
+            self.buffer = (np.clip(y, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
 
         threading.Thread(target=worker, daemon=True).start()
 
 
     def __str__(self):
         elements = []
-
         elements.append(self.name or "Untitled")
-
         if self.is_muted:
             elements.append("M")
-
         if self.pitch_shift > 0:
             elements.append("p+" + str(self.pitch_shift))
         elif self.pitch_shift < 0:
             elements.append("p" + str(self.pitch_shift))
-
         if self.offset_beats > 0:
             elements.append("o+" + str(self.offset_beats))
         elif self.offset_beats < 0:
             elements.append("o" + str(self.offset_beats))
-
+        if self.bpm != self.original_bpm:
+            elements.append(f"t*{self.bpm / self.original_bpm:.3f}")
         return "<" + " ".join(elements) + ">"
 
 
@@ -170,7 +180,7 @@ class LoopMachine:
                     self.current_track.is_recording = False
                     self.current_track = None
             if self.checkpoint_action == "NEW":
-                new_track = Track(self.frames_per_loop)
+                new_track = Track(self.frames_per_loop, self.bpm)
                 new_track.is_recording = True
                 self.current_track = new_track
                 self.tracks.append(new_track)
@@ -227,6 +237,17 @@ class LoopMachine:
         self.is_recording = False
         self.stream.stop()
         self.stream.close()
+
+    def set_bpm(self, new_bpm: int):
+        old_frames_per_loop = self.frames_per_loop
+
+        self.bpm = new_bpm
+        self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+        self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
+        self.position = int(self.position * self.frames_per_loop / old_frames_per_loop)
+        for track in self.tracks:
+            track.bpm = new_bpm
+            track.apply_effects_async()
 
     def _prewarm(self):
         def worker():
@@ -312,6 +333,7 @@ if __name__ == "__main__":
                 help_text = """-----------------------------------------------------------------------------------------------------------------------
 == LoopMachine ==
 
+b <INT>     set the bpm
 c           toggle click track
 d <i>       delete track by index
 dd          delete the most recent track
@@ -332,6 +354,8 @@ load <f>    load a loop machine object with filename <f>
 repr        print a dictionary representation of the loop
 -----------------------------------------------------------------------------------------------------------------------"""
                 print(help_text)
+            elif cmd.startswith('b'):
+                loop_machine.set_bpm(int(args[-1]))
             elif cmd == 'c':
                 loop_machine.click_is_muted = not loop_machine.click_is_muted
             elif cmd == 'dd':
@@ -371,7 +395,7 @@ repr        print a dictionary representation of the loop
                 pitch_shift = int(args[2])
                 track = loop_machine.tracks[track_index]
                 track.pitch_shift = pitch_shift
-                track.apply_pitch_shift_async()
+                track.apply_effects_async()
             elif cmd == 'yy':
                 track_index = -1
                 track = loop_machine.tracks[track_index]
