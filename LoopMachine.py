@@ -14,7 +14,6 @@ CHUNK = 1024  # Frames per buffer
 FORMAT = "int16"
 CHANNELS = 1  # Mono
 RATE = 44100  # Sample rate
-ADJUSTMENT_FACTOR = 0.75  # Fine-tune latency correction
 
 FIRST_CLICK_FREQ = 1500  # Frequency (Hz) for the first beat’s click
 REGULAR_CLICK_FREQ = 1000  # Frequency (Hz) for the rest of the clicks
