@@ -1,12 +1,13 @@
 import os
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-
+from assets.layout import Layout
 import callbacks
 
-from assets.layout import Layout
+bpm = callbacks.loop_machine.bpm
+tempo = callbacks.loop_machine.beats_per_loop
+layout = Layout(bpm, tempo)
 
 # Initialize Dash app
 # Note: external stylesheet is for moal/file popup styling
@@ -32,7 +33,7 @@ app_layout = html.Div(
         # Top section
         html.Div(
             className="top-container",
-            children=Layout.get_top_layout()
+            children=layout.get_top_layout()
         ),
 
 
@@ -49,7 +50,7 @@ app_layout = html.Div(
                         # Contains loop text, pitch button
                         html.Div(
                             className="loop-container",
-                            children=Layout.get_loop_layout()
+                            children=layout.get_loop_layout()
                         ),
 
                         # Get track layout
@@ -64,7 +65,7 @@ app_layout = html.Div(
                                 ),
                                 dcc.Interval(
                                     id='playhead-interval',
-                                    interval=(6000 / callbacks.loop_machine.bpm),
+                                    interval=(6000 / bpm),
                                     n_intervals=0
                                 )
                             ]
@@ -75,7 +76,7 @@ app_layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=Layout().get_right_tab_layout()
+                    children=layout.get_right_tab_layout()
                 ),
             ]
         )
@@ -88,6 +89,7 @@ app.layout = app_layout
 
 # Get all callbacks
 callbacks.button_callbacks(app)
+callbacks.offset_callbacks(app)
 callbacks.playhead_callback(app)
 
 if __name__ == "__main__":

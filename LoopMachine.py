@@ -119,6 +119,7 @@ class LoopMachine:
     def __init__(self, bpm: int, beats_per_loop: int):
         # Allocate memory for multiple loop layers
         self.bpm = bpm
+        self.rate = RATE
         self.beats_per_loop = beats_per_loop
         self.frames_per_loop = int(
             (60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames

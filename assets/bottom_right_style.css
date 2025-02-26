@@ -1,5 +1,20 @@
 /*------Containers------*/
-.duration-container{
+.set-bpm-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    align-items: center;
+    font-size: 14px; 
+    width: 176px; 
+    height: 32px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    padding-right: 9px
+}
+
+.latency-container{
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -11,30 +26,50 @@
     background-color: #344079;
     border: 1px solid #435199;
     border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 20px; 
 }
 
-.right-first-second-row-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 16px; 
-    box-sizing: border-box;
+.beats-offset-container{
+    display: flex;
+    flex-direction: row;
+}
+
+.beats-offset-track-container{
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    font-size: 14px; 
+    width: 176px; 
+    height: 65px; 
+    color: #f0f0f3;
+    background-color: #344079;
+    border: 1px solid #435199;
+    border-radius: 4px;
+    gap: 3px;
+}
+
+.right-first-row-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
-.right-first-second-row-container > :nth-child(odd) {
-    justify-self: end; /* Align first column to the right */
+.right-second-row-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    height: auto;
+    margin-top: 30px;
+    gap: 10px 
 }
 
-.right-first-second-row-container > :nth-child(even) {
-    justify-self: start; /* Align 2nd column to the left */
-}
 
 .right-third-row-container {
     display: flex;
@@ -44,7 +79,7 @@
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 30px; 
+    margin-top: 50px; 
 }
 
 .right-fourth-row-container {
@@ -53,8 +88,8 @@
     align-items: center;
     box-sizing: border-box;
     height: auto;
-    margin: 10px;
-    margin-top: 50px; 
+    margin-top: 50px;
+    gap: 10px
 }
 
 .right-fifth-row-container {
@@ -64,10 +99,10 @@
     box-sizing: border-box;
     height: auto;
     margin: 10px;
-    margin-top: 50px; 
+    margin-top: 80px; 
 }
 
-.tempo-container {
+.tempo-beats-container {
     display: flex;
     flex-direction: column;
     width: 176px; 
@@ -80,7 +115,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 9px 0px;
+    padding: 5px;
 }
 
 /*------Fonts; Texts------*/
@@ -88,13 +123,18 @@
     color: #f0f0f3;
 }
 
+.set-bpm-text {
+    color: #f0f0f3;
+    margin-right: 3px;
+}
+
 .delete-loop-text {
     color: #f0f0f3;
 }
 
-.duration-text {
+.latency-text {
     color: #f0f0f3;
-    margin-right: 5px;
+    margin-right: 3px;
 }
 
 .pause-text {
@@ -114,7 +154,7 @@
 
 .record-text {
     color: #f0f0f3;
-    margin-left: 5px;
+    margin-left: 10px;
 }
 
 .save-text {
@@ -127,35 +167,25 @@
     margin-left: 5px;
 }
 
-.tempo-text {
+.tempo-beats-text {
     font-size: 14px; 
     display: block;
     color: #f0f0f3;
     font-family: Arial, Helvetica, sans-serif;
-    margin-bottom: 8px; 
 }
 
-/*------Buttons------*/
-.auto-trim-button {
-    font-size: 14px; 
-    width: 176px; 
-    height: 32px; 
+.beats-offset-text {
     color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px; 
+    margin-right: 3px;
+    margin-left: 26px;
 }
 
-.auto-trim-button:hover {
-    background-color: #283367;
+.beats-offset-track-text{
+    color: #f0f0f3;
+    margin-left: 11px;
+    margin-right: 3px;
 }
-
-
+/*------Buttons------*/
 .delete-loop-button {
     font-size: 14px; 
     width: 128px; 
@@ -192,7 +222,7 @@
 
 .record-button {
     font-size: 14px;
-    width: 80px;
+    width: 176px; 
     height: 32px; 
     color: #f0f0f3;
     background-color: #cc0000;
@@ -228,7 +258,7 @@
 
 .record-button-pulsing {
     font-size: 14px; 
-    width: 80px; 
+    width: 176px; 
     height: 32px; 
     background-color: #cc0000;
     border: 1px solid #cc0000;
@@ -293,20 +323,6 @@
     background-color: #283367;
 }
 
-.tempo-button {
-    font-size: 16px; 
-    width: 24px;
-    height: 24px; 
-    background-color: #a7aed0;
-    border: 1px solid #b0b8e4;
-    border-radius: 50%;
-    color: #404353;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    margin: 0px 8px; 
-}
-
 @-webkit-keyframes pulse {
     0% {
         color: #f0f0f3;
@@ -326,25 +342,41 @@
 }
 
 /*------Inputs------*/
-.duration-input{
+
+.set-bpm-input{
     font-size: 14px; 
-    width: 60px; 
+    width: 40px; 
     height: 24px; 
     background-color: #f0f0f3;
     border: 1px solid #404353;
     border-radius: 1px;
     color: #404353;
     border: 1px solid #435199;
+    padding: 2px;
 }
 
-.tempo-input {
+.latency-input{
     font-size: 14px; 
-    width: 35px; 
+    width: 40px; 
     height: 24px; 
     background-color: #f0f0f3;
     border: 1px solid #404353;
     border-radius: 1px;
     color: #404353;
+    border: 1px solid #435199;
+    padding: 2px;
+}
+
+.beats-offset-input{
+    font-size: 14px; 
+    width: 40px; 
+    height: 24px; 
+    background-color: #f0f0f3;
+    border: 1px solid #404353;
+    border-radius: 1px;
+    color: #404353;
+    border: 1px solid #435199;
+    padding: 2px;
 }
 
 /*------Scroll Bar Design------*/

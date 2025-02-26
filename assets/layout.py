@@ -5,15 +5,12 @@ import numpy as np
 import pandas as pd
 import plotly_express as px
 
-from LoopMachine import LoopMachine
-tempo = 120
-beats = 5
-loop_machine = LoopMachine(tempo, beats)
+
 
 class Layout:
-    def __init__(self, duration=beats, tempo=tempo):
-        self.duration = duration
-        self.tempo = tempo
+    def __init__(self, bpm=120, beats_per_loop=5):
+        self.bpm = bpm
+        self.beats_per_loop = beats_per_loop
 
     @staticmethod
     def get_top_layout():
@@ -127,8 +124,7 @@ class Layout:
 
         return top_layout
 
-    @staticmethod
-    def get_loop_layout():
+    def get_loop_layout(self):
         """
         Generates the loop layout section."""
         loop_layout = [
@@ -142,38 +138,38 @@ class Layout:
                         children="Loop Period"
                     ),
 
-                    html.Div(
-                        className="left-loop-row-container",
+                    # Trash button
+                    html.Button(
+                        className="trash-button",
+                        id="delete_loop_trash_button",
                         children=[
-
-                            # Trash button
-                            html.Button(
-                                className="trash-button",
-                                id="delete_loop_trash_button",
-                                children=[
-                                    html.I(
-                                        className="fa-solid fa-trash"
-                                    )
-                                ]
+                            html.I(
+                                className="fa-solid fa-trash"
                             )
                         ]
                     )
+
                 ]
             ),
+
+            html.Div(
+                className="ticks-container",
+                children=self.create_loop_time_ticks()
+            )
         ]
         return loop_layout
 
     def get_right_tab_layout(self):
         """
         Generates the right tab layout with the main buttons.
-        This section has the record, play/pause, stop, tempo changes,
-        auto-trim, delete and save loop buttons.
+        This section has the record, play/pause, beat offset,
+        delete and save loop buttons.
         """
         right_layout = [
             # First row of right section
-            # Contains record, pause and stop buttons
+            # Contains record button
             html.Div(
-                className="right-first-second-row-container",
+                className="right-first-row-container",
                 children=[
 
                     # Record Button and text
@@ -187,6 +183,11 @@ class Layout:
                                       className="record-text")
                         ]
                     ),
+                ]
+            ),
+            html.Div(
+                className="right-second-row-container",
+                children=[
 
                     # Play/Pause Button and Text
                     html.Button(
@@ -208,61 +209,28 @@ class Layout:
                             html.Span(children="Click",
                                       className="mute-unmute-click-text")
                         ]
-                    ),
-
-                    # Stop Button and Text
-                    html.Button(
-                        className="stop-button",
-                        id="stop_button",
-                        children=[
-                            html.I(className="fa-solid fa-stop"),
-                            html.Span(children="Stop",
-                                      className="stop-text")
-                        ]
-                    ),
+                    )
 
                 ]
             ),
 
-            # Second row of right section
-            # Contains tempo selection, requirement buttons and
-            # save button
+            # Contains tempo and beats info in right section
             html.Div(
                 className="right-third-row-container",
                 children=[
 
-                    # Tempo selection with - + settings
+                    # Tempo & Beats info
                     html.Div(
-                        className="tempo-container",
-                        id="tempo_container",
+                        className="tempo-beats-container",
                         children=[
-                            html.Div(
-                                children=[
-                                    html.Span(className="tempo-text",
-                                              children="Tempo"),
-                                ]
-                            ),
-
-                            html.Div(
-                                children=[
-                                    html.Button(
-                                        className="tempo-button",
-                                        id="tempo-",
-                                        children="-"
-                                    ),
-                                    dcc.Input(
-                                        className="tempo-input",
-                                        id="tempo_input",
-                                        type="number",
-                                        value=self.tempo, step=None
-                                    ),
-                                    html.Button(
-                                        className="tempo-button",
-                                        id="tempo+",
-                                        children="+"
-                                    ),
-                                ]
-                            )
+                            # Tempo text
+                            html.Span(className="tempo-beats-text",
+                                    children=f"Beats Per Loop: {self.beats_per_loop}"),          
+                            # beats text
+                            html.Span(className="tempo-beats-text",
+                                      id = "tempo_beats_text",
+                                        children=f"BPM: {self.bpm}"),
+    
                         ]
                     ),
                 ]
@@ -272,44 +240,78 @@ class Layout:
             html.Div(
                 className="right-fourth-row-container",
                 children=[
-
-                    # Duration Input
+                    # Sets bpm
                     html.Div(
-                        className="duration-container",
+                        className="set-bpm-container",
                         children=[
-                            # Duration text
-                            html.Span(className="duration-text",
-                                      children="Duration (ms): "),
-                            # Duration Input
+                            # Set bpm text
+                            html.Span(className="set-bpm-text",
+                                      children="Set BPM:"),
+                            # set bpm Input
                             dcc.Input(
-                                className="duration-input",
-                                id="duration_input",
+                                className="set-bpm-input",
+                                id="set_bpm_input",
                                 type="number",
-                                value=self.duration,
-                                placeholder="Enter."),
+                                value=0,
+                                debounce=True),
                         ]
                     ),
 
-
-                    # Auto-trimming button
-                    html.Button(
-                        className="auto-trim-button",
-                        id="auto_trim_button",
-                        children="Auto-Trim"
+                    # Set latency 
+                    html.Div(
+                        className="latency-container",
+                        children=[
+                            # Set latency text
+                            html.Span(className="latency-text",
+                                      children="Set Latency (ms): "),
+                            # Latency Input
+                            dcc.Input(
+                                className="latency-input",
+                                id="latency_input",
+                                type="number",
+                                value=0,
+                                debounce=True),
+                        ]
                     ),
 
-                    # TO BE WORKED ON
-                    html.Button(
-                        className="auto-trim-button",
-                        children="Req.2 Button"
-                    ),
-                    html.Button(
-                        className="auto-trim-button",
-                        children="Req.3 Button"
+                    # Beat offset
+                    html.Div(
+                        className="beats-offset-track-container",
+                        children=[
+                            html.Div(
+                                className="beats-offset-container",
+                                children=[
+                                    # beats offset text
+                                    html.Span(className="beats-offset-text",
+                                            children="Beats Offset:"),
+                                    # beats offset Input
+                                    dcc.Input(
+                                        className="beats-offset-input",
+                                        id="beats_offset_input",
+                                        type="number",
+                                        value=0,
+                                        debounce=True),
+                                ]
+                            ),
+                        html.Div(
+                            className="beats-offset-container",
+                            children=[
+                                # beats offet track index text
+                                html.Span(className="beats-offset-track-text",
+                                        children="for Track Index:"),
+                                # beats offset track index Input
+                                dcc.Input(
+                                    className="beats-offset-input",
+                                    id="beats_offset_track_input",
+                                    type="number",
+                                    value=0,
+                                    debounce=True),
+                                ]
+                            )
+                        ]
                     )
                 ]
             ),
-
 
             html.Div(
                 className="right-fifth-row-container",
@@ -470,7 +472,6 @@ class Layout:
         # print("track_dict", track_dict)  # DEBUG_PRINT
         return track_dict
 
-    
     def create_waveform(self, track, latency_comp=0):
         # grab buffered audio from track:
         audio_data = track['track_name'].raw_buffer
@@ -505,3 +506,24 @@ class Layout:
             hovermode=False,
         )
         return fig
+
+    def create_loop_time_ticks(self):
+        """Generate ticks for each beat."""
+        ticks = []
+        for beat in range(int(self.beats_per_loop) + 1):
+            # Make tick marks
+            tick = html.Div(
+                style={
+                    'position': 'absolute',
+                    'left': f"calc(120px + ({beat/self.beats_per_loop} * (100% - 120px)))",
+                    'bottom': '0px',
+                    'width': '1px',
+                    'height': '15px',  
+                    'background-color': 'white', 
+                    'margin': '0px',
+                    'padding': '0px'
+                }
+            )
+            ticks.append(tick)
+
+        return ticks
