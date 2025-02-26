@@ -63,6 +63,7 @@ class Track:
         self.track_uid = uuid.uuid4()
         self.original_bpm = bpm  # BPM at the time of recording
         self.bpm = bpm           # Current target BPM
+        self._on_buffer_modified = None # Called after 'buffer' has been modified
 
     def apply_effects_async(self):
         """Offload pitch shifting and time stretching to a background thread and update the buffer when done."""
@@ -70,26 +71,28 @@ class Track:
             # If no effects are needed, just copy the raw buffer.
             if self.pitch_shift == 0 and (self.original_bpm == self.bpm):
                 self.buffer = self.raw_buffer.copy()
-                return
+            else:
+                # Normalize and flatten the raw buffer.
+                y = self.raw_buffer.astype(np.float32) / 32767.0
+                y = y.flatten()
 
-            # Normalize and flatten the raw buffer.
-            y = self.raw_buffer.astype(np.float32) / 32767.0
-            y = y.flatten()
+                # Apply time stretching if BPM has changed.
+                if self.original_bpm != self.bpm:
+                    # Calculate stretch factor: new BPM divided by original BPM.
+                    # For example, if originally recorded at 120 BPM and now at 100 BPM,
+                    # the factor will be 100/120 ≈ 0.833, which slows down the audio.
+                    stretch_factor = self.bpm / self.original_bpm
+                    y = librosa.effects.time_stretch(y, rate=stretch_factor)
 
-            # Apply time stretching if BPM has changed.
-            if self.original_bpm != self.bpm:
-                # Calculate stretch factor: new BPM divided by original BPM.
-                # For example, if originally recorded at 120 BPM and now at 100 BPM,
-                # the factor will be 100/120 ≈ 0.833, which slows down the audio.
-                stretch_factor = self.bpm / self.original_bpm
-                y = librosa.effects.time_stretch(y, rate=stretch_factor)
+                # Apply pitch shifting if needed.
+                if self.pitch_shift != 0:
+                    y = librosa.effects.pitch_shift(y, sr=RATE, n_steps=self.pitch_shift)
 
-            # Apply pitch shifting if needed.
-            if self.pitch_shift != 0:
-                y = librosa.effects.pitch_shift(y, sr=RATE, n_steps=self.pitch_shift)
+                # Convert back to int16.
+                self.buffer = (np.clip(y, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
 
-            # Convert back to int16.
-            self.buffer = (np.clip(y, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
+            if self._on_buffer_modified:
+                self._on_buffer_modified(self)
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -130,6 +133,7 @@ class LoopMachine:
         self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         self.is_playing= True
         self.latency_compensation_samples = 8000
+        self.on_track_buffer_modified = None # A callable handler which receives a single paramter of type 'Track'
         
         self.stream = sd.Stream(
             samplerate=RATE,
@@ -158,6 +162,10 @@ class LoopMachine:
         self.checkpoint_position = (
             self.position + self.latency_compensation_samples) % self.frames_per_loop
 
+    def _on_track_buffer_modified(self, track):
+        if self.on_track_buffer_modified:
+            self.on_track_buffer_modified(track)
+
     def audio_callback(self, indata, outdata, frames, time, status):
         """Handles real-time recording and playback with latency compensation."""
         global_audio_out = np.zeros((frames, 1), dtype=np.int16)
@@ -181,6 +189,7 @@ class LoopMachine:
             if self.checkpoint_action == "NEW":
                 new_track = Track(self.frames_per_loop, self.bpm)
                 new_track.is_recording = True
+                new_track._on_buffer_modified = self._on_track_buffer_modified
                 self.current_track = new_track
                 self.tracks.append(new_track)
             self.checkpoint_action = None
@@ -315,7 +324,6 @@ class LoopMachine:
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
-
 
 if __name__ == "__main__":
     tempo = int(input('Tempo: '))
