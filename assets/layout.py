@@ -214,7 +214,7 @@ class Layout:
                         className="mute-unmute-click-button",
                         id="mute_unmute_click_button",
                         children=[
-                            html.I(className="fa-solid fa-volume-high"),
+                            html.I(className="fa-solid fa-volume-xmark"),
                             html.Span(children="Click",
                                       className="mute-unmute-click-text")
                         ]
@@ -237,8 +237,8 @@ class Layout:
                                     children=f"Beats Per Loop: {self.beats_per_loop}"),          
                             # beats text
                             html.Span(className="tempo-beats-text",
-                                      id = "tempo_beats_text",
-                                        children=f"BPM: {self.bpm}"),
+                                    id = "bpm_text",
+                                    children=f"BPM: {self.bpm}"),
     
                         ]
                     ),

@@ -300,12 +300,15 @@ class LoopMachine:
                 # adjust while current loop is finishing
                 loaded.__dict__['click_is_muted'] = self.click_is_muted
                 loaded.__dict__['stream'] = self.stream
-                loaded.__dict__['is_playing'] = self.is_playing
                 loaded.position = 0
                 while self.position > 0:
                     continue
                 # O(1):
                 self.__dict__ = loaded.__dict__
+                self.is_playing = self.is_playing
+                self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+                # Reinitialize the click track
+                self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
 
         except FileNotFoundError:
             print(f'{filename} was not found.')

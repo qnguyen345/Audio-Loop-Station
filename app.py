@@ -90,6 +90,7 @@ app.layout = app_layout
 # Get all callbacks
 callbacks.button_callbacks(app)
 callbacks.offset_callbacks(app)
+callbacks.load_save(app)
 callbacks.playhead_callback(app)
 
 if __name__ == "__main__":

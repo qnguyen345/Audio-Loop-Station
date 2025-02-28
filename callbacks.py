@@ -93,28 +93,6 @@ def button_callbacks(app):
         options=[{"label": file, "value": file} for file in filenames]
 
         return options
-    
-    @app.callback(
-        Output("files_modal", "is_open"),
-        [Input("files_button", "n_clicks"),
-        Input("load_files_modal", "n_clicks")],
-        [State("files_modal", "is_open"),
-        State("pkl_files", "value")],
-        prevent_initial_call=True
-    )
-    def toggle_files_modal(n1, n2, is_open, filename):
-        """
-        Opens and closes the modal.
-        Also loads the selected .pkl file.
-        """
-        button_id = get_button_id()
-        if button_id == "files_button":
-            return True # Open modal
-        # Load selected .pkl file if 'load and close' button is pressed
-        if button_id == "load_files_modal":
-            loop_machine.load(filename) 
-            return False # Close modal
-        return is_open
 
     @app.callback(
         Output("play_pause_button", "children"),
@@ -238,37 +216,24 @@ def button_callbacks(app):
         Toggles between mute and unmute buttons for clicks.
         """
         button_id = get_button_id()
-        # For recording, clicking is on by default
+        unmute = [html.I(className="fa-solid fa-volume-high"),
+                html.Span(children="Click", className="mute-unmute-click-text")]
+        mute = [html.I(className="fa-solid fa-volume-xmark"),
+                html.Span(children="Click", className="mute-unmute-click-text")]
+        # For recording, clicking is initially on by default
         # Change this behavior to follow the mute/unmute button
         if button_id == "record_button" and record_n_clicks > 0:
-            if mute_unmute_n_clicks is None or mute_unmute_n_clicks % 2 == 0:
-                unmute = [
-                    html.I(className="fa-solid fa-volume-high"),
-                    html.Span(children="Click", className="mute-unmute-click-text")
-                ]
+            if mute_unmute_n_clicks is None or mute_unmute_n_clicks % 2 != 0:
                 loop_machine.click_is_muted = False 
                 return unmute
             else:
-                mute = [
-                    html.I(className="fa-solid fa-volume-xmark"),
-                    html.Span(children="Click", className="mute-unmute-click-text")
-                ]
-                loop_machine.click_is_muted = True  # Keep muted
+                loop_machine.click_is_muted = True
                 return mute
-
-        # Toggle unmute/mute if not recording
-        if mute_unmute_n_clicks is None or mute_unmute_n_clicks % 2 == 0:
-            unmute = [
-                html.I(className="fa-solid fa-volume-high"),
-                html.Span(children="Click", className="mute-unmute-click-text")
-            ]
+        # Toggle unmute/mute directly if not recording
+        if mute_unmute_n_clicks is None or mute_unmute_n_clicks % 2 != 0:
             loop_machine.click_is_muted = False 
             return unmute
         else:
-            mute = [
-                html.I(className="fa-solid fa-volume-xmark"),
-                html.Span(children="Click", className="mute-unmute-click-text")
-            ]
             loop_machine.click_is_muted = True  
             return mute
         
@@ -319,21 +284,10 @@ def button_callbacks(app):
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
 
-    @app.callback(
-        Output("save_button", "children"),
-        Input("save_button", "n_clicks"),
-    )
-    def save_loop(n_clicks):
-        """Saves current loop in 'loops' directory."""
-        button_id = get_button_id()
-        if "save_button" == button_id:
-            loop_machine.save()
-        return dash.no_update
-
 
 def offset_callbacks(app):
     @app.callback(
-        Output("tempo_beats_text", "children"),
+        Output("bpm_text", "children", allow_duplicate=True),
         Input("set_bpm_input", "value"),
         prevent_initial_call=True
     )
@@ -384,8 +338,50 @@ def offset_callbacks(app):
         loop_machine.tracks[track_index].offset_beats = offset_beats
         print(f"Beat Offset: {offset_beats} for Track {track_index}")
         return dash.no_update #####UPDATE WAVEFORM WITH NEW BEAT OFFSET
-        
-   
+
+
+def load_save(app):
+    @app.callback(
+    Output("save_button", "children"),
+    Input("save_button", "n_clicks"),
+    )
+    def save_loop(n_clicks):
+        """Saves current loop in 'loops' directory."""
+        button_id = get_button_id()
+        if "save_button" == button_id:
+            loop_machine.save()
+        return dash.no_update
+    
+    @app.callback(
+        [Output("track_section", "children", allow_duplicate=True),
+        Output("files_modal", "is_open"),
+        Output("bpm_text", "children", allow_duplicate=True)],
+        [Input("files_button", "n_clicks"),
+        Input("load_files_modal", "n_clicks")],
+        [State("files_modal", "is_open"),
+        State("pkl_files", "value")],
+        prevent_initial_call=True
+    )
+    def load_files(n1, n2, is_open, filename):
+        """
+        Opens and closes the files modal.
+        Also loads the selected .pkl file and displays the track
+        in track section.
+        """
+        button_id = get_button_id()
+        if button_id == "files_button":
+            # Open modal
+            return dash.no_update, True, dash.no_update
+        # Load selected .pkl file if 'load and close' button is pressed
+        if button_id == "load_files_modal":
+            loop_machine.load(filename)
+            # Get tracks from loaded file and update display
+            track_list = loop_machine.tracks
+            updated_track_section= Layout().update_track_section(track_list)
+            return updated_track_section, False, f"BPM: {loop_machine.bpm}"
+        return dash.no_update, is_open, dash.up_date
+
+
 def playhead_callback(app):
     @app.callback(
         Output('playhead', 'style'),
