@@ -3,7 +3,6 @@ venv/
 venv311/
 tracks/*.wav
 .DS_Store
-loops/*
 !loops/example.pkl
 repr_log.txt
 bin/
