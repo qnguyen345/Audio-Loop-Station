@@ -72,28 +72,14 @@ def button_callbacks(app):
             # Start recording
             loop_machine.start_recording()
             return "record-button-pulsing pulse", dash.no_update
-
+        
     @app.callback(
-        Output("files_modal", "is_open"),
-        [Input("files_button", "n_clicks"),
-         Input("close_files_modal", "n_clicks")],
-        [State("files_modal", "is_open")],
-    )
-    def toggle_files_modal(n1, n2, is_open):
-        """
-        Opens a popup when files button is clicked.
-        """
-        if n1 or n2:
-            return not is_open
-        return is_open
-
-    @app.callback(
-        Output("checklist_container", "children"),
+        Output("pkl_files", "options"),
         Input("refresh_button", "n_clicks")
     )
-    def generate_pkl_files_checklist(n_clicks):
+    def generate_pkl_files_list(n_clicks):
         """
-        Generates a checlist with a list of audio files in the tracks
+        Generates a radio button list of audio files in the loops
         directory when the refresh button is clicked.
         """
         loop_file_path = "loops"
@@ -103,14 +89,32 @@ def button_callbacks(app):
         # Get file names of audio files without path
         filenames = [os.path.basename(file) for file in wave_files_list]
 
-        # Create a checklist
-        checklist = dbc.Checklist(
-            options=[{"label": file, "value": file} for file in filenames],
-            value=[],
-            inline=False,
-        )
+        # Create a radio button for each file
+        options=[{"label": file, "value": file} for file in filenames]
 
-        return checklist
+        return options
+    
+    @app.callback(
+        Output("files_modal", "is_open"),
+        [Input("files_button", "n_clicks"),
+        Input("load_files_modal", "n_clicks")],
+        [State("files_modal", "is_open"),
+        State("pkl_files", "value")],
+        prevent_initial_call=True
+    )
+    def toggle_files_modal(n1, n2, is_open, filename):
+        """
+        Opens and closes the modal.
+        Also loads the selected .pkl file.
+        """
+        button_id = get_button_id()
+        if button_id == "files_button":
+            return True # Open modal
+        # Load selected .pkl file if 'load and close' button is pressed
+        if button_id == "load_files_modal":
+            loop_machine.load(filename) 
+            return False # Close modal
+        return is_open
 
     @app.callback(
         Output("play_pause_button", "children"),

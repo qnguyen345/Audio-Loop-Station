@@ -300,6 +300,7 @@ class LoopMachine:
                 # adjust while current loop is finishing
                 loaded.__dict__['click_is_muted'] = self.click_is_muted
                 loaded.__dict__['stream'] = self.stream
+                loaded.__dict__['is_playing'] = self.is_playing
                 loaded.position = 0
                 while self.position > 0:
                     continue

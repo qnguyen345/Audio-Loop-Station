@@ -1,5 +1,5 @@
 /*------Containers------*/
-.checklist-container{
+.pkl-list-container{
     flex-direction: column;
 }
 
@@ -102,7 +102,7 @@
 }
 
 /*------Popups------*/
-.close-files-modal.btn.btn-primary{
+.load-files-modal.btn.btn-primary{
     font-size: 16px;
     color: #f0f0f3;
     background-color: #344079;
@@ -111,7 +111,7 @@
     cursor: pointer;
 }
 
-.close-files-modal.btn.btn-primary:hover {
+.load-files-modal.btn.btn-primary:hover {
     background-color: #283367;
 }
 

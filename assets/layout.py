@@ -6,9 +6,11 @@ import pandas as pd
 import plotly_express as px
 
 
+BPM = 120
+BEATS_PER_LOOP = 5
 
 class Layout:
-    def __init__(self, bpm=120, beats_per_loop=5):
+    def __init__(self, bpm=BPM, beats_per_loop=BEATS_PER_LOOP):
         self.bpm = bpm
         self.beats_per_loop = beats_per_loop
 
@@ -76,16 +78,23 @@ class Layout:
                                     )
                                 ]
                             ),
-                            html.Div(className="checklist-container",
-                                     id="checklist_container")
+                            html.Div(className="pkl-list-container",
+                                     id="pkl_list_container",
+                                     children=[dbc.RadioItems(
+                                                id="pkl_files",
+                                                # Initialize .pkl list
+                                                options=[],  
+                                                value=None,
+                                                inline=False)]
+                            )
                         ]
                     ),
                     # Close popup button
                     dbc.ModalFooter(
                         dbc.Button(
-                            className="close-files-modal",
-                            id="close_files_modal",
-                            children="Close",
+                            className="load-files-modal",
+                            id="load_files_modal",
+                            children="Load & Close",
                         )
                     )
                 ]
