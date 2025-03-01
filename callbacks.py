@@ -72,27 +72,6 @@ def button_callbacks(app):
             # Start recording
             loop_machine.start_recording()
             return "record-button-pulsing pulse", dash.no_update
-        
-    @app.callback(
-        Output("pkl_files", "options"),
-        Input("refresh_button", "n_clicks")
-    )
-    def generate_pkl_files_list(n_clicks):
-        """
-        Generates a radio button list of audio files in the loops
-        directory when the refresh button is clicked.
-        """
-        loop_file_path = "loops"
-        # Get a list of .pkl files
-        wave_files_list = glob.glob(os.path.join(loop_file_path, "*.pkl"))
-
-        # Get file names of audio files without path
-        filenames = [os.path.basename(file) for file in wave_files_list]
-
-        # Create a radio button for each file
-        options=[{"label": file, "value": file} for file in filenames]
-
-        return options
 
     @app.callback(
         Output("play_pause_button", "children"),
@@ -351,11 +330,12 @@ def load_save(app):
         if "save_button" == button_id:
             loop_machine.save()
         return dash.no_update
-    
+  
     @app.callback(
         [Output("track_section", "children", allow_duplicate=True),
         Output("files_modal", "is_open"),
-        Output("bpm_text", "children", allow_duplicate=True)],
+        Output("bpm_text", "children", allow_duplicate=True),
+        Output("pkl_files", "options")],
         [Input("files_button", "n_clicks"),
         Input("load_files_modal", "n_clicks")],
         [State("files_modal", "is_open"),
@@ -370,17 +350,23 @@ def load_save(app):
         """
         button_id = get_button_id()
         if button_id == "files_button":
-            # Open modal
-            return dash.no_update, True, dash.no_update
+            # Get a list of .pkl files
+            wave_files_list = glob.glob(os.path.join("loops", "*.pkl"))
+            # Get file names of audio files without path
+            filenames = [os.path.basename(file) for file in wave_files_list]
+            # Create a radio button for each file
+            options=[{"label": file, "value": file} for file in filenames]
+            # Open modal with refreshed .pkl list
+            return dash.no_update, True, dash.no_update, options
         # Load selected .pkl file if 'load and close' button is pressed
         if button_id == "load_files_modal":
             loop_machine.load(filename)
             # Get tracks from loaded file and update display
             track_list = loop_machine.tracks
-            updated_track_section= Layout().update_track_section(track_list)
-            return updated_track_section, False, f"BPM: {loop_machine.bpm}"
-        return dash.no_update, is_open, dash.up_date
-
+            latency = loop_machine.latency_compensation_samples
+            updated_track_section= Layout().update_track_section(track_list, latency)
+            return updated_track_section, False, f"BPM: {loop_machine.bpm}", dash.no_update
+        return dash.no_update, is_open, dash.no_update, dash.no_update
 
 def playhead_callback(app):
     @app.callback(

@@ -131,7 +131,6 @@ class LoopMachine:
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
         self.click_is_muted = True
         self.uid = uuid.uuid4()
-        self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         self.is_playing= True
         self.latency_compensation_samples = 8000
         self.on_track_buffer_modified = None # A callable handler which receives a single paramter of type 'Track'
@@ -278,6 +277,7 @@ class LoopMachine:
         """
 
         # date-time-uid-loopname.pkl:
+        self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         if loop_name:
             loop_name = f'_{loop_name}'
         filename = f'{self.time}-{self.uid}{loop_name}.pkl'

@@ -57,27 +57,6 @@ class Layout:
                     # Modal Body
                     dbc.ModalBody(
                         children=[
-                            html.Div(
-                                className="text-refresh-container",
-                                children=[
-                                    html.Div(
-                                        "Select a loop file to enable/disable:"),
-                                    # Refresh Button to refresh tracks directory
-                                    # to generate loop checklist
-                                    html.Button(
-                                        className="refresh-button",
-                                        id="refresh_button",
-                                        children=[
-                                            html.I(className="fa-solid fa-arrows-rotate"
-                                                   ),
-                                            html.Span(
-                                                className="refresh-text",
-                                                children="Refresh"
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
                             html.Div(className="pkl-list-container",
                                      id="pkl_list_container",
                                      children=[dbc.RadioItems(
