@@ -45,7 +45,6 @@ def get_button_id():
 
 def button_callbacks(app):
     """Callbacks for button animations and interactions."""
-    # VARYING TEMPO/DURATION??????
     @app.callback(
         [Output("record_button", "className"),
          Output("track_section", "children", allow_duplicate=True)],
@@ -354,6 +353,7 @@ def load_save(app):
             wave_files_list = glob.glob(os.path.join("loops", "*.pkl"))
             # Get file names of audio files without path
             filenames = [os.path.basename(file) for file in wave_files_list]
+            filenames = sorted(filenames, reverse=True)
             # Create a radio button for each file
             options=[{"label": file, "value": file} for file in filenames]
             # Open modal with refreshed .pkl list
