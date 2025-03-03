@@ -1,52 +1,4 @@
 /*------Containers------*/
-.set-bpm-container{
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
-    align-items: center;
-    font-size: 14px; 
-    width: 176px; 
-    height: 32px; 
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
-    border-radius: 4px;
-    padding-right: 9px
-}
-
-.latency-container{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    font-size: 14px; 
-    width: 176px; 
-    height: 32px; 
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
-    border-radius: 4px;
-}
-
-.beats-offset-container{
-    display: flex;
-    flex-direction: row;
-}
-
-.beats-offset-track-container{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 14px; 
-    width: 176px; 
-    height: 65px; 
-    color: #f0f0f3;
-    background-color: #344079;
-    border: 1px solid #435199;
-    border-radius: 4px;
-    gap: 3px;
-}
 
 .right-first-row-container{
     display: flex;
@@ -88,21 +40,11 @@
     align-items: center;
     box-sizing: border-box;
     height: auto;
-    margin-top: 50px;
+    margin-top: 60px;
     gap: 10px
 }
 
-.right-fifth-row-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-sizing: border-box;
-    height: auto;
-    margin: 10px;
-    margin-top: 80px; 
-}
-
-.tempo-beats-container {
+.bpl-beats-latency-container {
     display: flex;
     flex-direction: column;
     width: 176px; 
@@ -113,9 +55,20 @@
     border-radius: 5px;
     box-sizing: border-box;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
     text-align: center;
     padding: 5px;
+    padding-left: 10px;
+}
+
+.bpl-container, .bpm-container, .latency-container{
+    flex-direction: row;
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center; 
+    text-align: right;
+    padding: 0px 5px 0px 5px;
+    width: 100%;
 }
 
 /*------Fonts; Texts------*/
@@ -167,24 +120,13 @@
     margin-left: 5px;
 }
 
-.tempo-beats-text {
+.bpl-beats-latency-text {
     font-size: 14px; 
     display: block;
     color: #f0f0f3;
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.beats-offset-text {
-    color: #f0f0f3;
-    margin-right: 3px;
-    margin-left: 26px;
-}
-
-.beats-offset-track-text{
-    color: #f0f0f3;
-    margin-left: 11px;
-    margin-right: 3px;
-}
 /*------Buttons------*/
 .delete-loop-button {
     font-size: 14px; 
@@ -343,53 +285,6 @@
 
 /*------Inputs------*/
 
-.set-bpm-input{
-    font-size: 14px; 
-    width: 40px; 
-    height: 24px; 
-    background-color: #f0f0f3;
-    border: 1px solid #404353;
-    border-radius: 1px;
-    color: #404353;
-    border: 1px solid #435199;
-    padding: 2px;
-}
-
-.latency-input{
-    font-size: 14px; 
-    width: 40px; 
-    height: 24px; 
-    background-color: #f0f0f3;
-    border: 1px solid #404353;
-    border-radius: 1px;
-    color: #404353;
-    border: 1px solid #435199;
-    padding: 2px;
-}
-
-.beats-offset-input{
-    font-size: 14px; 
-    width: 40px; 
-    height: 24px; 
-    background-color: #f0f0f3;
-    border: 1px solid #404353;
-    border-radius: 1px;
-    color: #404353;
-    border: 1px solid #435199;
-    padding: 2px;
-}
-
 /*------Scroll Bar Design------*/
 
 /*------Etc.------*/
-
-/* Hides up/down arrow in tempo input field */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type="number"] {
-    -moz-appearance: textfield;
-}

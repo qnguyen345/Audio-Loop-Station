@@ -257,6 +257,17 @@ class LoopMachine:
             track.bpm = new_bpm
             track.apply_effects_async()
 
+    def set_beats_per_loop(self, new_beats_per_loop: int):
+        old_frames_per_loop = self.frames_per_loop
+
+        self.beats_per_loop = new_beats_per_loop
+        self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+        self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
+        self.position = int(self.position * self.frames_per_loop / old_frames_per_loop)
+        for track in self.tracks:
+            track.frames_per_loop = self.frames_per_loop
+            track.apply_effects_async()
+
     def _prewarm(self):
         def worker():
             dummy_buffer = np.zeros(RATE, dtype=np.float32)

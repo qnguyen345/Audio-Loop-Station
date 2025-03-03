@@ -19,10 +19,10 @@ from assets.layout import Layout
 #     def call_back_function(Input, State):
 #         return Output
 
-tempo = 5
+bpl = 5
 beats = 120
-loop_machine = LoopMachine(bpm=beats, beats_per_loop=tempo)
-# layout = Layout(bpm=beats, beats_per_loop=tempo)
+loop_machine = LoopMachine(bpm=beats, beats_per_loop=bpl)
+# layout = Layout(bpm=beats, beats_per_loop=bpl)
 
 def get_track_index_button_id():
     """Gets the index and button_id from a triggered dash callback that are indexed."""
@@ -53,18 +53,15 @@ def button_callbacks(app):
     )
     def record_pulse(n_clicks):
         """
-        Makes the record buttons pulsing red to indicate recording.
-        Also stores the track uid in state after recording.
+        Records the audio when the "Record" button is pressed.
         """
         if n_clicks is None:
             raise PreventUpdate
         if n_clicks % 2 == 0:
             # Stop recording
             loop_machine.stop_recording()
-            # Get list of track
+            # Get list of track & update track section
             track_list = loop_machine.tracks
-            print(track_list)
-            # Update the tracks section after recorded track
             updated_track_section = Layout().update_track_section(track_list, loop_machine.latency_compensation_samples)
             return "record-button", updated_track_section
         else:
@@ -239,12 +236,12 @@ def button_callbacks(app):
         elif increase_pitch and button_id == "increase_track_pitch_button":
             pitch_shift += 1
 
-        # Apply the pitch shift to the selected track
+        # Set the new the pitch shift to the selected track
         track.pitch_shift = pitch_shift
         print(f"Track {track_index}: pitch_shift = {track.pitch_shift}")
         track.apply_effects_async()
 
-        new_pitch_text = f"Pitch {track.pitch_shift}"
+        new_pitch_text = f"Pitch: {track.pitch_shift}"
         return new_pitch_text
      
     @app.callback(
@@ -265,58 +262,128 @@ def button_callbacks(app):
 
 def offset_callbacks(app):
     @app.callback(
+        Output("bpl_text", "children", allow_duplicate=True),
+       [Input("increase_bpl_button", "n_clicks"),
+        Input("decrease_bpl_button", "n_clicks")],
+        prevent_initial_call=True
+    )
+    def set_bpl(increase_bpl, decrease_bpl):
+        """
+        Updates beats per loop (bpl) of the loop machine from
+        increase/decrease buttons.
+        """
+        if not dash.callback_context.triggered:
+            raise PreventUpdate
+
+        button_id = get_button_id()
+        # Get initial beats per loop
+        bpl  = loop_machine.beats_per_loop
+        # Decrease bpl by 1
+        if decrease_bpl and button_id == "decrease_bpl_button":
+            # If bpl goes to negative, set as 0
+            if bpl >= 0:
+                bpl -= 1
+            else:
+                bpl = 0
+        # Increase bpl by 1
+        elif increase_bpl and button_id == "increase_bpl_button":
+            bpl += 1
+
+        # Sets the new BPL in the loop machine
+        loop_machine.set_beats_per_loop(bpl)
+        print(f"Setting new BPL: {bpl}")
+        return f"Beats Per Loop: {bpl}"
+    
+    @app.callback(
         Output("bpm_text", "children", allow_duplicate=True),
-        Input("set_bpm_input", "value"),
+       [Input("increase_bpm_button", "n_clicks"),
+        Input("decrease_bpm_button", "n_clicks")],
         prevent_initial_call=True
     )
-    def update_bpm(new_bpm):
+    def update_bpm(increase_bpm, decrease_bpm):
         """
-        Updates the BPM of the loop machine from user input
-        and displays the updated BPM in tempo-beats-container.
+        Updates the BPM of the loop machine from increase/decrease buttons.
         """
-        if new_bpm is None:
-            return dash.no_update
+        if not dash.callback_context.triggered:
+            raise PreventUpdate
 
+        button_id = get_button_id()
+        # Get initial bpm
+        bpm  = loop_machine.bpm
+        # Decrease bpm by 10
+        if decrease_bpm and button_id == "decrease_bpm_button":
+            bpm -= 10
+        # Increase bpm offset by 0.5
+        elif increase_bpm and button_id == "increase_bpm_button":
+            bpm += 10
+      
         # Sets the new BPM in the loop machine
-        loop_machine.set_bpm(new_bpm)
-        print(f"Setting new BPM: {new_bpm}")
-        return f"BPM: {new_bpm}"
+        loop_machine.set_bpm(bpm)
+        print(f"Setting new BPM: {bpm}")
+        return f"BPM: {bpm}"
     
     @app.callback(
-        Output("track_section", "children", allow_duplicate=True),
-        Input("latency_input", "value"),
+        [Output("track_section", "children", allow_duplicate=True),
+         Output("latency_text", "children")],
+        [Input("increase_latency_button", "n_clicks"),
+        Input("decrease_latency_button", "n_clicks")],
         prevent_initial_call=True
     )
-    def set_latency(latency_input):
-        """Manually sets the latency based on user input."""
-        if latency_input is None:
-            return dash.no_update
-        new_latency = int(float(latency_input) * loop_machine.rate)
-        print(f"Setting latency to {new_latency}...")    
-        loop_machine.latency_compensation_samples = new_latency
-        track_list = loop_machine.tracks
-        updated_track_section = Layout().update_track_section(track_list, new_latency)
-        return updated_track_section
-    
-    @app.callback(
-        Output("track_section", "children", allow_duplicate=True),
-        [Input("beats_offset_input", "value"),
-        Input("beats_offset_track_input", "value")],
-        prevent_initial_call=True
-    )
-    def update_beats_offset(beats_offset, track_index):
+    def set_latency(increase_latency, decrease_latency):
         """
-        Offsets the beats for a specific track.
+        Sets the latency of the loop machine from increase/decrease buttons.
         """
-        if beats_offset is None or track_index is None:
-            return dash.no_update
-        
-        track_index = int(track_index)
-        offset_beats = float(beats_offset)
-        loop_machine.tracks[track_index].offset_beats = offset_beats
-        print(f"Beat Offset: {offset_beats} for Track {track_index}")
-        return dash.no_update #####UPDATE WAVEFORM WITH NEW BEAT OFFSET
+        if not dash.callback_context.triggered:
+            raise PreventUpdate
 
+        button_id = get_button_id()
+        # Get initial latency
+        latency_compensation_samples = loop_machine.latency_compensation_samples
+        latency = latency_compensation_samples / loop_machine.rate
+        # Decrease latency by 0.01
+        if decrease_latency and button_id == "decrease_latency_button":
+            latency -= 0.01
+        # Increase bpm offset by 0.01
+        elif increase_latency and button_id == "increase_latency_button":
+            latency += 0.01
+
+        new_latency_comp = int(float(latency) * loop_machine.rate)
+        print(f"Setting latency compensation samples to {new_latency_comp}...")    
+        loop_machine.latency_compensation_samples = new_latency_comp
+        track_list = loop_machine.tracks
+        updated_track_section = Layout().update_track_section(track_list, new_latency_comp)
+        return updated_track_section, "Latency (s) {:.2f}:".format(latency)
+    
+    @app.callback(
+        Output({"type": "offset_beats_text", "index": MATCH}, "children"),  
+        [Input({"type": "decrease_offset_beats_button", "index": MATCH}, "n_clicks"),
+        Input({"type": "increase_offset_beats_button", "index": MATCH}, "n_clicks")],
+        prevent_initial_call=True
+    )
+    def set_offset_beats(decrease_beats, increase_beats):
+        """
+        Increases/ decreases offsets the beats for a specific track.
+        """
+        if not dash.callback_context.triggered:
+            raise PreventUpdate
+
+        track_index, button_id = get_track_index_button_id()
+        # Get initial offset beats
+        track = loop_machine.tracks[track_index]
+        offset_beats  = track.offset_beats
+        # Decrease beats offset by 0.5
+        if decrease_beats and button_id == "decrease_offset_beats_button":
+            offset_beats -= 0.5
+        # Increase beats offset by 0.5
+        elif increase_beats and button_id == "increase_offset_beats_button":
+            offset_beats += 0.5
+
+        # Set the new beats offset to the selected track
+        track.offset_beats = offset_beats
+        print(f"Track {track_index}: offset_beats = {track.offset_beats}")
+        new_beats_text = f"Offset Beats: {track.offset_beats}"
+        return new_beats_text
+    
 
 def load_save(app):
     @app.callback(
@@ -333,7 +400,9 @@ def load_save(app):
     @app.callback(
         [Output("track_section", "children", allow_duplicate=True),
         Output("files_modal", "is_open"),
+        Output("bpl_text", "children", allow_duplicate=True),
         Output("bpm_text", "children", allow_duplicate=True),
+        Output("latency_text", "children", allow_duplicate=True),
         Output("pkl_files", "options")],
         [Input("files_button", "n_clicks"),
         Input("load_files_modal", "n_clicks")],
@@ -357,16 +426,19 @@ def load_save(app):
             # Create a radio button for each file
             options=[{"label": file, "value": file} for file in filenames]
             # Open modal with refreshed .pkl list
-            return dash.no_update, True, dash.no_update, options
+            return dash.no_update, True, dash.no_update, dash.no_update, dash.no_update, options
         # Load selected .pkl file if 'load and close' button is pressed
         if button_id == "load_files_modal":
             loop_machine.load(filename)
             # Get tracks from loaded file and update display
             track_list = loop_machine.tracks
-            latency = loop_machine.latency_compensation_samples
-            updated_track_section= Layout().update_track_section(track_list, latency)
-            return updated_track_section, False, f"BPM: {loop_machine.bpm}", dash.no_update
-        return dash.no_update, is_open, dash.no_update, dash.no_update
+            latency_comp = loop_machine.latency_compensation_samples
+            bpl = loop_machine.beats_per_loop
+            bpm = loop_machine.bpm
+            latency = latency_comp / loop_machine.rate
+            updated_track_section= Layout().update_track_section(track_list, latency_comp)
+            return updated_track_section, False, f"Beats Per Loop: {bpl}", f"BPM: {bpm}", "Latency (s) {:.2f}:".format(latency), dash.no_update
+        return dash.no_update, is_open, dash.no_update, dash.no_update, dash.no_update, dash.no_update,
 
 def playhead_callback(app):
     @app.callback(
@@ -374,13 +446,10 @@ def playhead_callback(app):
         Input('playhead-interval', 'n_intervals')
     )
     def playhead_update(n_intervals):
+        """Updates the playhead position."""
         beats = loop_machine.beats_per_loop
         # current beat / beats per loop:
         playhead_position = int((loop_machine.position / loop_machine.frames_per_loop) * beats) / beats
         if playhead_position == 0:
-            return {
-                "left": "120px"
-                }
-        return {
-            "left": f"calc(120px + ({playhead_position} * (100% - 120px)))",
-            }
+            return {"left": "260px"}
+        return {"left": f"calc(260px + ({playhead_position} * (100% - 260px)))"}

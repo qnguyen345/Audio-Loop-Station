@@ -7,7 +7,9 @@ import callbacks
 
 bpm = callbacks.loop_machine.bpm
 tempo = callbacks.loop_machine.beats_per_loop
-layout = Layout(bpm, tempo)
+latency = callbacks.loop_machine.latency_compensation_samples
+rate = callbacks.loop_machine.rate
+layout = Layout()
 
 # Initialize Dash app
 # Note: external stylesheet is for moal/file popup styling
@@ -29,7 +31,7 @@ app_layout = html.Div(
             rel="stylesheet",
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css",
         ),
-        
+
         # Top section
         html.Div(
             className="top-container",
@@ -61,6 +63,7 @@ app_layout = html.Div(
                                     id="track_section",
                                     ),
                                 html.Div(
+                                    className="playhead",
                                     id='playhead',
                                 ),
                                 dcc.Interval(
@@ -76,7 +79,9 @@ app_layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=layout.get_right_tab_layout()
+                    children=layout.get_right_tab_layout(bpm=bpm, beats_per_loop=tempo,
+                                                         latency_compensation_samples=latency, 
+                                                         rate=rate)
                 ),
             ]
         )
