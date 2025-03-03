@@ -2,6 +2,7 @@ __pycache__/
 venv/
 venv311/
 tracks/*.wav
+loops/*
 .DS_Store
 !loops/example.pkl
 repr_log.txt
