@@ -1,9 +1,8 @@
 /*------Containers------*/
-
 .left-loop-tab-section-container {
     margin: 0px;
-    width: 120px;
-    height: 75px;
+    width: 260px;
+    height: 65px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -11,14 +10,6 @@
     justify-content: center;
     text-align: center;
     border-right: 1px solid rgba(135, 155, 226, 0.25);
-}
-
-.left-loop-row-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
 }
 
 .left-row-container {
@@ -32,11 +23,11 @@
 
 .left-tab-section-container {
     margin: 0px;
-    width: 120px;
-    height: 120px;
+    width: 260px;
+    height: 100px;
     box-sizing: border-box;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     text-align: center;
@@ -45,30 +36,75 @@
     border-top: 1px solid rgba(135, 155, 226, 0.25);
 }
 
+.left-tab-left-inner-section-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100px;
+    height: 100px;
+    gap: 2px;
+}
+
+.left-tab-right-inner-section-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    width: 160px;
+    height: 100px;
+    gap: 3px;
+}
+
 .loop-container {
-    height: 75px;
+    height: 65px;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding-right: 10px;
     border-bottom: 1px solid rgba(135, 155, 226, 0.25);
     position: relative;
 }
 
-.pitch-container{
+.offset-beats-container{
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center; 
+    text-align: left;
+    padding: 0px 2px 2px 5px;
+    width: 100%;
+}
+
+.pitch-offset-beats-container{
+    flex-direction: column;
+    display: flex;
+    justify-content: center; 
+    align-items: flex-end; 
     background-color: #344079;
     border: 1px solid #435199;
     border-radius: 4px;
+    width: 150px;
+    height: auto;
 }
+
+.pitch-container{
+    flex-direction: row;
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center; 
+    text-align: right;
+    padding: 2px 2px 0px 5px;
+    width: 100%;
+}
+
 .track-container {
     overflow-y: auto; 
-    max-height: calc(820px - 75px); /*bottom container height - loop container height*/
+    /*full_screen_height - top_container_height + 2*rightANDleft_container_padding - loop container height -1px_padding*/
+    max-height: calc(100vh - (60px + 2*0.8vw) - 65px - 1px);
     position: relative;
 }
 
@@ -76,8 +112,7 @@ div.track-waveform {
     height: 100%;
     width: 100%;
 }
-div#playhead {
-    height: 100%;
+.playhead {
     width: 2px;
     background-color: yellow;
     position: absolute;
@@ -87,40 +122,41 @@ div#playhead {
     left: 120px;
 }
 
-
 .track-tabs-container {
-    height: 120px;
+    height: 100px;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding-right: 10px;
     border-bottom: 1px solid rgba(135, 155, 226, 0.05);
     position: relative;
 }
 
-
 /*------Fonts; Texts------*/
-.decrease-pitch-button{
+.offset-beats-text {
+    font-size: 13px;
+    color: #f0f0f3;
+}
+
+.decrease-button{
     color: #f0f0f3;
     background: transparent;
     border: transparent;
-    margin-right: 2px;
+    padding-left: 3px;
 }
 
-.decrease-pitch-button:hover{
+.decrease-button:hover{
     color: #f0f0f3a6;
 }
 
-.increase-pitch-button{
+.increase-button{
     color: #f0f0f3;
     background: transparent;
     border: transparent;
-    margin-left: 2px;
 }
 
-.increase-pitch-button:hover{
+.increase-button:hover{
     color: #f0f0f3a6;
 }
 
@@ -130,7 +166,7 @@ div#playhead {
 }
 
 .pitch-text {
-    font-size: 14px;
+    font-size: 13px;
     color: #f0f0f3;
 }
 
@@ -205,7 +241,7 @@ div#playhead {
 }
 /*------Inputs------*/
 .track-name-input{
-    width: 120px;
+    width: 100px;
     height: 14px;
     background-color: transparent;
     font-size: 12px;
@@ -215,3 +251,7 @@ div#playhead {
 }
 /*------Etc.------*/
 
+/*for plot background*/
+.nsewdrag.drag{
+    fill: #12141e !important
+}

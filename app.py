@@ -1,12 +1,15 @@
 import os
 import dash
 from dash import dcc, html
-from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-
+from assets.layout import Layout
 import callbacks
 
-from assets.layout import Layout
+bpm = callbacks.loop_machine.bpm
+tempo = callbacks.loop_machine.beats_per_loop
+latency = callbacks.loop_machine.latency_compensation_samples
+rate = callbacks.loop_machine.rate
+layout = Layout()
 
 # Initialize Dash app
 # Note: external stylesheet is for moal/file popup styling
@@ -28,11 +31,11 @@ app_layout = html.Div(
             rel="stylesheet",
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css",
         ),
-        
+
         # Top section
         html.Div(
             className="top-container",
-            children=Layout.get_top_layout()
+            children=layout.get_top_layout()
         ),
 
 
@@ -49,7 +52,7 @@ app_layout = html.Div(
                         # Contains loop text, pitch button
                         html.Div(
                             className="loop-container",
-                            children=Layout.get_loop_layout()
+                            children=layout.get_loop_layout()
                         ),
 
                         # Get track layout
@@ -60,11 +63,12 @@ app_layout = html.Div(
                                     id="track_section",
                                     ),
                                 html.Div(
+                                    className="playhead",
                                     id='playhead',
                                 ),
                                 dcc.Interval(
                                     id='playhead-interval',
-                                    interval=(6000 / callbacks.loop_machine.bpm),
+                                    interval=(6000 / bpm),
                                     n_intervals=0
                                 )
                             ]
@@ -75,7 +79,9 @@ app_layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=Layout().get_right_tab_layout()
+                    children=layout.get_right_tab_layout(bpm=bpm, beats_per_loop=tempo,
+                                                         latency_compensation_samples=latency, 
+                                                         rate=rate)
                 ),
             ]
         )
@@ -88,6 +94,8 @@ app.layout = app_layout
 
 # Get all callbacks
 callbacks.button_callbacks(app)
+callbacks.offset_callbacks(app)
+callbacks.load_save(app)
 callbacks.playhead_callback(app)
 
 if __name__ == "__main__":

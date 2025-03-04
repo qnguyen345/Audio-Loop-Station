@@ -119,6 +119,7 @@ class LoopMachine:
     def __init__(self, bpm: int, beats_per_loop: int):
         # Allocate memory for multiple loop layers
         self.bpm = bpm
+        self.rate = RATE
         self.beats_per_loop = beats_per_loop
         self.frames_per_loop = int(
             (60 / self.bpm) * self.beats_per_loop * RATE)  # Loop length in frames
@@ -130,7 +131,6 @@ class LoopMachine:
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
         self.click_is_muted = True
         self.uid = uuid.uuid4()
-        self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         self.is_playing= True
         self.latency_compensation_samples = 8000
         self.on_track_buffer_modified = None # A callable handler which receives a single paramter of type 'Track'
@@ -257,6 +257,17 @@ class LoopMachine:
             track.bpm = new_bpm
             track.apply_effects_async()
 
+    def set_beats_per_loop(self, new_beats_per_loop: int):
+        old_frames_per_loop = self.frames_per_loop
+
+        self.beats_per_loop = new_beats_per_loop
+        self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+        self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
+        self.position = int(self.position * self.frames_per_loop / old_frames_per_loop)
+        for track in self.tracks:
+            track.frames_per_loop = self.frames_per_loop
+            track.apply_effects_async()
+
     def _prewarm(self):
         def worker():
             dummy_buffer = np.zeros(RATE, dtype=np.float32)
@@ -277,6 +288,7 @@ class LoopMachine:
         """
 
         # date-time-uid-loopname.pkl:
+        self.time = f'{datetime.now().strftime("%Y-%m-%d-T%H-%M-%S")}'
         if loop_name:
             loop_name = f'_{loop_name}'
         filename = f'{self.time}-{self.uid}{loop_name}.pkl'
@@ -297,6 +309,7 @@ class LoopMachine:
             with open(os.path.join('loops', filename), 'rb') as file:
                 loaded = pickle.load(file)
                 # adjust while current loop is finishing
+                loaded.is_playing = self.is_playing
                 loaded.__dict__['click_is_muted'] = self.click_is_muted
                 loaded.__dict__['stream'] = self.stream
                 loaded.position = 0
@@ -304,6 +317,9 @@ class LoopMachine:
                     continue
                 # O(1):
                 self.__dict__ = loaded.__dict__
+                self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+                # Reinitialize the click track
+                self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
 
         except FileNotFoundError:
             print(f'{filename} was not found.')

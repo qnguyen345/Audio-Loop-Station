@@ -5,15 +5,9 @@ import numpy as np
 import pandas as pd
 import plotly_express as px
 
-from LoopMachine import LoopMachine
-tempo = 120
-beats = 5
-loop_machine = LoopMachine(tempo, beats)
-
 class Layout:
-    def __init__(self, duration=beats, tempo=tempo):
-        self.duration = duration
-        self.tempo = tempo
+    def __init__(self):
+        pass
 
     @staticmethod
     def get_top_layout():
@@ -58,37 +52,23 @@ class Layout:
                     # Modal Body
                     dbc.ModalBody(
                         children=[
-                            html.Div(
-                                className="text-refresh-container",
-                                children=[
-                                    html.Div(
-                                        "Select a loop file to enable/disable:"),
-                                    # Refresh Button to refresh tracks directory
-                                    # to generate loop checklist
-                                    html.Button(
-                                        className="refresh-button",
-                                        id="refresh_button",
-                                        children=[
-                                            html.I(className="fa-solid fa-arrows-rotate"
-                                                   ),
-                                            html.Span(
-                                                className="refresh-text",
-                                                children="Refresh"
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                            html.Div(className="checklist-container",
-                                     id="checklist_container")
+                            html.Div(className="pkl-list-container",
+                                     id="pkl_list_container",
+                                     children=[dbc.RadioItems(
+                                                id="pkl_files",
+                                                # Initialize .pkl list
+                                                options=[],  
+                                                value=None,
+                                                inline=False)]
+                            )
                         ]
                     ),
                     # Close popup button
                     dbc.ModalFooter(
                         dbc.Button(
-                            className="close-files-modal",
-                            id="close_files_modal",
-                            children="Close",
+                            className="load-files-modal",
+                            id="load_files_modal",
+                            children="Load & Close",
                         )
                     )
                 ]
@@ -127,8 +107,7 @@ class Layout:
 
         return top_layout
 
-    @staticmethod
-    def get_loop_layout():
+    def get_loop_layout(self):
         """
         Generates the loop layout section."""
         loop_layout = [
@@ -142,38 +121,37 @@ class Layout:
                         children="Loop Period"
                     ),
 
-                    html.Div(
-                        className="left-loop-row-container",
+                    # Trash button
+                    html.Button(
+                        className="trash-button",
+                        id="delete_loop_trash_button",
                         children=[
-
-                            # Trash button
-                            html.Button(
-                                className="trash-button",
-                                id="delete_loop_trash_button",
-                                children=[
-                                    html.I(
-                                        className="fa-solid fa-trash"
-                                    )
-                                ]
+                            html.I(
+                                className="fa-solid fa-trash"
                             )
                         ]
                     )
+
                 ]
-            ),
+            )
         ]
         return loop_layout
 
-    def get_right_tab_layout(self):
+    def get_right_tab_layout(self, beats_per_loop, bpm,
+                             latency_compensation_samples,
+                             rate):
         """
         Generates the right tab layout with the main buttons.
-        This section has the record, play/pause, stop, tempo changes,
-        auto-trim, delete and save loop buttons.
+        This section has the record, play/pause, beat offset,
+        delete and save loop buttons.
         """
+        latency = latency_compensation_samples / rate
+
         right_layout = [
             # First row of right section
-            # Contains record, pause and stop buttons
+            # Contains record button
             html.Div(
-                className="right-first-second-row-container",
+                className="right-first-row-container",
                 children=[
 
                     # Record Button and text
@@ -187,6 +165,11 @@ class Layout:
                                       className="record-text")
                         ]
                     ),
+                ]
+            ),
+            html.Div(
+                className="right-second-row-container",
+                children=[
 
                     # Play/Pause Button and Text
                     html.Button(
@@ -204,115 +187,88 @@ class Layout:
                         className="mute-unmute-click-button",
                         id="mute_unmute_click_button",
                         children=[
-                            html.I(className="fa-solid fa-volume-high"),
+                            html.I(className="fa-solid fa-volume-xmark"),
                             html.Span(children="Click",
                                       className="mute-unmute-click-text")
                         ]
-                    ),
-
-                    # Stop Button and Text
-                    html.Button(
-                        className="stop-button",
-                        id="stop_button",
-                        children=[
-                            html.I(className="fa-solid fa-stop"),
-                            html.Span(children="Stop",
-                                      className="stop-text")
-                        ]
-                    ),
+                    )
 
                 ]
             ),
 
-            # Second row of right section
-            # Contains tempo selection, requirement buttons and
-            # save button
+            # Contains beats per loop (bpl), beats, and latency info in right section
             html.Div(
                 className="right-third-row-container",
                 children=[
 
-                    # Tempo selection with - + settings
+                    # Beats per loop, Beats, and latency
                     html.Div(
-                        className="tempo-container",
-                        id="tempo_container",
+                        className="bpl-beats-latency-container",
                         children=[
+                            # Set bpl
                             html.Div(
+                                className="bpl-container",
                                 children=[
-                                    html.Span(className="tempo-text",
-                                              children="Tempo"),
-                                ]
-                            ),
-
+                                     # bpl text
+                                    html.Span(
+                                        className="bpl-beats-latency-text",
+                                        id = "bpl_text",
+                                        children=f"Beats Per Loop: {beats_per_loop}"),     
+                                    html.Button(
+                                        className="decrease-button",
+                                        id="decrease_bpl_button",
+                                        children="▼"),
+                                    html.Button(
+                                        className="increase-button",
+                                        id= "increase_bpl_button",
+                                        children="▲"),
+                                    ]
+                                ),
+                            # Set bpm
                             html.Div(
+                                className="bpm-container",
                                 children=[
+                                     # Bpm text
+                                    html.Span(
+                                        className="bpl-beats-latency-text",
+                                        id = "bpm_text",
+                                        children=f"BPM: {bpm}"),     
                                     html.Button(
-                                        className="tempo-button",
-                                        id="tempo-",
-                                        children="-"
-                                    ),
-                                    dcc.Input(
-                                        className="tempo-input",
-                                        id="tempo_input",
-                                        type="number",
-                                        value=self.tempo, step=None
-                                    ),
+                                        className="decrease-button",
+                                        id="decrease_bpm_button",
+                                        children="▼"),
                                     html.Button(
-                                        className="tempo-button",
-                                        id="tempo+",
-                                        children="+"
-                                    ),
-                                ]
-                            )
+                                        className="increase-button",
+                                        id= "increase_bpm_button",
+                                        children="▲"),
+                                    ]
+                                ),
+                             # Set latency
+                            html.Div(
+                                className="latency-container",
+                                children=[
+                                     # Latency text
+                                    html.Span(
+                                        className="bpl-beats-latency-text",
+                                        id = "latency_text",
+                                        children="Latency (s) {:.2f}".format(latency)),     
+                                    html.Button(
+                                        className="decrease-button",
+                                        id="decrease_latency_button",
+                                        children="▼"),
+                                    html.Button(
+                                        className="increase-button",
+                                        id= "increase_latency_button",
+                                        children="▲"),
+                                    ]
+                                ),
                         ]
                     ),
                 ]
             ),
 
-            # 3 Requirements Buttons
             html.Div(
                 className="right-fourth-row-container",
-                children=[
-
-                    # Duration Input
-                    html.Div(
-                        className="duration-container",
-                        children=[
-                            # Duration text
-                            html.Span(className="duration-text",
-                                      children="Duration (ms): "),
-                            # Duration Input
-                            dcc.Input(
-                                className="duration-input",
-                                id="duration_input",
-                                type="number",
-                                value=self.duration,
-                                placeholder="Enter."),
-                        ]
-                    ),
-
-
-                    # Auto-trimming button
-                    html.Button(
-                        className="auto-trim-button",
-                        id="auto_trim_button",
-                        children="Auto-Trim"
-                    ),
-
-                    # TO BE WORKED ON
-                    html.Button(
-                        className="auto-trim-button",
-                        children="Req.2 Button"
-                    ),
-                    html.Button(
-                        className="auto-trim-button",
-                        children="Req.3 Button"
-                    )
-                ]
-            ),
-
-
-            html.Div(
-                className="right-fifth-row-container",
                 children=[
 
                     # Save button to save loop
@@ -358,75 +314,113 @@ class Layout:
         for track_index, track in track_dict.items():
             track_name = track["track_name"]
             pitch_shift = track["pitch_shift"]
+            offset_beats = float(track["offset_beats"])
             waveform_fig = self.create_waveform(track, input_latency)
             track_section = html.Div(
                 className="track-tabs-container",
                 children=[
-                    html.Div(
-                        className="left-tab-section-container",
-                        children=[
-                            html.Span(className="track-text",
-                                      children=f"Track {track_index}:"),
-                            # Edit track name 
-                            dcc.Input(
-                                className="track-name-input",
-                                id={"type": "track_name_input",
-                                    "index": track_index}, 
-                                # Default to original <Untitled> track name
-                                value= f"{track_name}", 
-                                type="text",
-                                debounce=True,
-                                autoComplete="off"
-                            ),
+                    html.Div(className="left-tab-section-container",
+                            children=[
                             html.Div(
-                                className="left-row-container",
+                                className="left-tab-left-inner-section-container",
                                 children=[
-                                    # Mute/unmute icon button
-                                    html.Button(
-                                        className="left-mute-icon-button",
-                                        id={"type": "left_mute_icon_button",
-                                            "index": track_index},
-                                        children = [
-                                            html.I(className="fa-solid fa-volume-xmark")],
+                                    html.Span(className="track-text",
+                                            children=f"Track {track_index}:"),
+                                    # Edit track name 
+                                    dcc.Input(
+                                        className="track-name-input",
+                                        id={"type": "track_name_input",
+                                            "index": track_index}, 
+                                        # Default to original <Untitled> track name
+                                        value= f"{track_name}", 
+                                        type="text",
+                                        debounce=True,
+                                        autoComplete="off"
                                     ),
-                                    # Copy icon button
-                                    html.Button(
-                                        className="copy-button",
-                                        id={"type": "copy_button",
-                                            "index": track_index},
+                                    html.Div(
+                                        className="left-row-container",
                                         children=[
-                                            html.I(className="fa-solid fa-copy")],
-                                    ),
-                                    # Trash button
-                                    html.Button(
-                                        className="trash-button",
-                                        id={"type": "trash_button",
-                                            "index": track_index},
-                                        children = [
-                                            html.I(className="fa-solid fa-trash")],
+                                            # Mute/unmute icon button
+                                            html.Button(
+                                                className="left-mute-icon-button",
+                                                id={"type": "left_mute_icon_button",
+                                                    "index": track_index},
+                                                children = [
+                                                    html.I(className="fa-solid fa-volume-xmark")],
+                                            ),
+                                            # Copy icon button
+                                            html.Button(
+                                                className="copy-button",
+                                                id={"type": "copy_button",
+                                                    "index": track_index},
+                                                children=[
+                                                    html.I(className="fa-solid fa-copy")],
+                                            ),
+                                            # Trash button
+                                            html.Button(
+                                                className="trash-button",
+                                                id={"type": "trash_button",
+                                                    "index": track_index},
+                                                children = [
+                                                    html.I(className="fa-solid fa-trash")],
+                                            )
+                                        ]
                                     )
                                 ]
                             ),
-                            # Pitch buttons
                             html.Div(
-                                className="pitch-container",
+                                className="left-tab-right-inner-section-container",
                                 children=[
-                                    html.Button(
-                                        className="decrease-pitch-button",
-                                        id={"type": "decrease_track_pitch_button",
-                                            "index": track_index},
-                                        children="▼"),
-                                    html.Span(
-                                        className="pitch-text",
-                                        id={"type": "pitch_track_text",
-                                            "index": track_index},  
-                                        children=f"Pitch {pitch_shift}"  
-                                    ),
-                                    html.Button(
-                                        className="increase-pitch-button",
-                                        id={"type": "increase_track_pitch_button",
-                                            "index": track_index},
-                                        children="▲"),
+                                    html.Div(
+                                        className="pitch-offset-beats-container",
+                                        children=[
+                                        # Pitch buttons
+                                        html.Div(
+                                            className="pitch-container",
+                                            children=[
+                                                html.Span(
+                                                    className="pitch-text",
+                                                    id={"type": "pitch_track_text",
+                                                        "index": track_index},  
+                                                    children=f"Pitch: {pitch_shift}"  
+                                                ),
+                                                html.Button(
+                                                    className="decrease-button",
+                                                    id={"type": "decrease_track_pitch_button",
+                                                        "index": track_index},
+                                                    children="▼"),
+                                                html.Button(
+                                                    className="increase-button",
+                                                    id={"type": "increase_track_pitch_button",
+                                                        "index": track_index},
+                                                    children="▲"),
+                                                ]
+                                            ),
+
+                                        # Beats offset
+                                        html.Div(
+                                            className="offset-beats-container",
+                                            children=[
+                                                html.Span(
+                                                    className="offset-beats-text",
+                                                    id={"type": "offset_beats_text",
+                                                        "index": track_index},  
+                                                    children=f"Offset Beats: {offset_beats}"  
+                                                ),
+                                                html.Button(
+                                                    className="decrease-button",
+                                                    id={"type": "decrease_offset_beats_button",
+                                                        "index": track_index},
+                                                    children="▼"),
+                                                html.Button(
+                                                    className="increase-button",
+                                                    id={"type": "increase_offset_beats_button",
+                                                        "index": track_index},
+                                                    children="▲"),
+                                                ]
+                                            ),
+                                        ]
+                                    )
                                 ]
                             )
                         ]
@@ -463,14 +457,11 @@ class Layout:
         for index, track in enumerate(track_list):
             track_dict[index] = {
             'track_name': track,
-            'pitch_shift': track.pitch_shift
+            'pitch_shift': track.pitch_shift,
+            'offset_beats': track.offset_beats
         }
-
-        # print("track_list", track_list)  # DEBUG_PRINT
-        # print("track_dict", track_dict)  # DEBUG_PRINT
         return track_dict
 
-    
     def create_waveform(self, track, latency_comp=0):
         # grab buffered audio from track:
         audio_data = track['track_name'].raw_buffer
