@@ -5,6 +5,7 @@ import dash_bootstrap_components as dbc
 from assets.layout import Layout
 import callbacks
 
+
 bpm = callbacks.loop_machine.bpm
 tempo = callbacks.loop_machine.beats_per_loop
 latency = callbacks.loop_machine.latency_compensation_samples
@@ -97,6 +98,9 @@ callbacks.button_callbacks(app)
 callbacks.offset_callbacks(app)
 callbacks.load_save(app)
 callbacks.playhead_callback(app)
+
+def run_program():
+    app.run('127.0.0.1', port=8050)
 
 if __name__ == "__main__":
     app.run(debug=True)
