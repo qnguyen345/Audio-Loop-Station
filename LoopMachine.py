@@ -133,7 +133,8 @@ class LoopMachine:
         self.uid = uuid.uuid4()
         self.is_playing= True
         self.latency_compensation_samples = 8000
-        self.on_track_buffer_modified = None # A callable handler which receives a single paramter of type 'Track'
+        # A callable handler which receives a single paramter of type 'Track'
+        self.on_track_buffer_modified = None 
         
         self.stream = sd.Stream(
             samplerate=RATE,

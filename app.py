@@ -13,7 +13,7 @@ rate = callbacks.loop_machine.rate
 layout = Layout()
 
 # Initialize Dash app
-# Note: external stylesheet is for moal/file popup styling
+# Note: external stylesheet is for modal/file popup styling
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -103,4 +103,4 @@ def run_program():
     app.run('127.0.0.1', port=8050)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

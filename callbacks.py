@@ -437,7 +437,7 @@ def load_save(app):
             bpm = loop_machine.bpm
             latency = latency_comp / loop_machine.rate
             updated_track_section= Layout().update_track_section(track_list, latency_comp)
-            return updated_track_section, False, f"Beats Per Loop: {bpl}", f"BPM: {bpm}", "Latency (s) {:.2f}:".format(latency), dash.no_update
+            return updated_track_section, False, f"Beats Per Loop: {bpl}", f"BPM: {bpm}", "Latency (s): {:.2f}".format(latency), dash.no_update
         return dash.no_update, is_open, dash.no_update, dash.no_update, dash.no_update, dash.no_update,
 
 def playhead_callback(app):
