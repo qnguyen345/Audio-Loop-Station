@@ -7,19 +7,29 @@ The straightforward and intuitive user interface ensures basic functionality can
 
 <img src="docs/README_imgs/app_example.png" width="100%" height="100%" />
 
+## Table of Contents
+
+- [Installation Guide](#installation-guide)
+- [Features](#core-features)
+- [Button Functions](#button-functions)
+    - [Track-Related Buttons](#track-related-buttons)
+    - [Loop-Related Buttons](#loop-related-buttons)
+
 ## Installation Guide
 
 **macOS**
-1) Create a virtual environment:<br> ```python3 -m venv venv```
-2) Activate virtual environment:<br>```source venv/bin/activate```
-3) Install dependecies from requirements.txt: <br>```pip3 install -r requirements.txt```
-4) Run the app by running: <br>```python3 launch.py```
+1) Git clone the repository: <br> ```git clone https://github.com/qnguyen345/Audio-Loop-Station.git```
+2) Create a virtual environment:<br> ```python3 -m venv venv```
+3) Activate virtual environment:<br>```source venv/bin/activate```
+4) Install dependecies from requirements.txt: <br>```pip3 install -r requirements.txt```
+5) Run the app by running: <br>```python3 launch.py```
 
 **Windows**
-1) Create a virtual environment:<br> ```python3 -m venv venv```
+1) Git clone the repository: <br> ```git clone https://github.com/qnguyen345/Audio-Loop-Station.git```
+2) Create a virtual environment:<br> ```python3 -m venv venv```
 3) Activate virtual environment:<br>```venv\Scripts\activate```
 4) Install dependecies from requirements.txt: <br>```pip3 install -r requirements.txt```
-6) Run the app by running: <br>```python3 launch.py```
+5) Run the app by running: <br>```python3 launch.py```
 
 After running ```python3 launch.py``` in the terminal, the app will automatically launch in an external window, and users do not need to enter a URL as the app will open directly in the WebKit-based window. The app is configured to run on localhost:8050.
 
