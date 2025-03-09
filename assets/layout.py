@@ -464,7 +464,7 @@ class Layout:
 
     def create_waveform(self, track, latency_comp=0):
         # grab buffered audio from track:
-        audio_data = track['track_name'].raw_buffer
+        audio_data = track['track_name'].buffer
         shifted_audio = np.roll(audio_data, -latency_comp + 150)
         # set x-axis:
         time = np.linspace(0, len(shifted_audio), len(shifted_audio))
