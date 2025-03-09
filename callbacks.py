@@ -259,6 +259,25 @@ def button_callbacks(app):
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
 
+    @app.callback(
+        Output("track_section", "children", allow_duplicate=True),
+        Input("track_buffer_poll", "n_intervals"),
+        prevent_initial_call=True
+    )
+    def refresh_ui(*_):
+        """Refreshes the track section"""
+        if app.layout['track_buffer_modified'].data:
+            app.layout['track_buffer_modified'].data = False
+            updated_track_section = Layout().update_track_section(loop_machine.tracks, loop_machine.latency_compensation_samples)
+            return updated_track_section
+        else:
+            return dash.no_update
+
+    def trigger_on_track_buffer_modified(track):
+        current_value = app.layout['track_buffer_modified'].data
+        app.layout['track_buffer_modified'].data = True
+
+    loop_machine.on_track_buffer_modified = trigger_on_track_buffer_modified
 
 def offset_callbacks(app):
     @app.callback(
@@ -380,6 +399,7 @@ def offset_callbacks(app):
 
         # Set the new beats offset to the selected track
         track.offset_beats = offset_beats
+        track.apply_effects_async()
         print(f"Track {track_index}: offset_beats = {track.offset_beats}")
         new_beats_text = f"Offset Beats: {track.offset_beats}"
         return new_beats_text

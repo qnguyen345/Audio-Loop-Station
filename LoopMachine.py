@@ -69,7 +69,7 @@ class Track:
         """Offload pitch shifting and time stretching to a background thread and update the buffer when done."""
         def worker():
             # If no effects are needed, just copy the raw buffer.
-            if self.pitch_shift == 0 and (self.original_bpm == self.bpm):
+            if self.offset_beats == 0 and self.pitch_shift == 0 and (self.original_bpm == self.bpm):
                 self.buffer = self.raw_buffer.copy()
             else:
                 # Normalize and flatten the raw buffer.
@@ -87,6 +87,11 @@ class Track:
                 # Apply pitch shifting if needed.
                 if self.pitch_shift != 0:
                     y = librosa.effects.pitch_shift(y, sr=RATE, n_steps=self.pitch_shift)
+
+                # Apply offset if needed.
+                if self.offset_beats != 0:
+                    offset_samples = int(self.offset_beats * (60 / self.bpm) * RATE)
+                    y = np.roll(y, -offset_samples)
 
                 # Convert back to int16.
                 self.buffer = (np.clip(y, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
@@ -223,8 +228,7 @@ class LoopMachine:
         # Inject tracks
         for track in self.tracks:
             if not track.is_muted and not track.is_recording:
-                offset_samples = int(track.offset_beats * (60 / self.bpm) * RATE)
-                playback_start = (self.position + self.latency_compensation_samples - offset_samples) % self.frames_per_loop
+                playback_start = (self.position + self.latency_compensation_samples) % self.frames_per_loop
                 loop_segment = track.buffer[playback_start:playback_start + frames]
                 if loop_segment.shape[0] < frames:
                     padding = np.zeros(
