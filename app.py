@@ -21,6 +21,10 @@ app_layout = html.Div(
     className="app-container",
     children=[
 
+        # Data store and poll interval, used to trigger UI update programmatically
+        dcc.Store(id='track_buffer_modified', data=False), # data = is_dirty, i.e. 'True' indicates refresh is needed
+        dcc.Interval(id='track_buffer_poll', interval=100, n_intervals=0),
+
         # Links css style file
         html.Link(rel="stylesheet", href=os.path.join("assets", "main_style.css")),
         html.Link(rel="stylesheet", href=os.path.join("assets", "top_style.css")),
