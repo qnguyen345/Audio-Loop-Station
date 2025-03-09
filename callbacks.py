@@ -380,6 +380,7 @@ def offset_callbacks(app):
 
         # Set the new beats offset to the selected track
         track.offset_beats = offset_beats
+        track.apply_effects_async()
         print(f"Track {track_index}: offset_beats = {track.offset_beats}")
         new_beats_text = f"Offset Beats: {track.offset_beats}"
         return new_beats_text
