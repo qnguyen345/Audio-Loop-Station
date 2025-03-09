@@ -293,6 +293,17 @@ class Layout:
                         ]
                     ),
 
+                    # Refresh the UI
+                    html.Button(
+                        className="save-button",
+                        id="refresh_button",
+                        children=[
+                            html.Span(className="save-text",
+                                      children="Refresh"
+                                      )
+                        ]
+                    ),
+
                 ]
             ),
         ]

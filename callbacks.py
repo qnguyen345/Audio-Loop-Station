@@ -259,6 +259,16 @@ def button_callbacks(app):
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
 
+    @app.callback(
+        Output("track_section", "children", allow_duplicate=True),
+        Input("refresh_button", "n_clicks"),
+        prevent_initial_call=True
+    )
+    def refresh_ui(*_):
+        """Refreshes the track section"""
+        updated_track_section = Layout().update_track_section(loop_machine.tracks, loop_machine.latency_compensation_samples)
+        return updated_track_section
+
 
 def offset_callbacks(app):
     @app.callback(
