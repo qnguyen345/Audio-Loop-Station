@@ -293,6 +293,8 @@ class LoopMachine:
         if loop_name:
             loop_name = f'_{loop_name}'
         filename = f'{self.time}-{self.uid}{loop_name}.pkl'
+        if not os.path.exists('loops'):
+            os.mkdir('loops')
         with open(os.path.join('loops', filename), 'wb') as file:
             pickle.dump(self, file)
 
