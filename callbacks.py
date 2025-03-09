@@ -261,8 +261,7 @@ def button_callbacks(app):
 
     @app.callback(
         Output("track_section", "children", allow_duplicate=True),
-        [Input("refresh_button", "n_clicks"),
-        Input("track_buffer_poll", "n_intervals")],
+        Input("track_buffer_poll", "n_intervals"),
         prevent_initial_call=True
     )
     def refresh_ui(*_):
