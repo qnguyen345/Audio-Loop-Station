@@ -22,15 +22,21 @@ app_layout = html.Div(
     className="app-container",
     children=[
 
-        # Data store and poll interval, used to trigger UI update programmatically
-        dcc.Store(id='track_buffer_modified', data=False), # data = is_dirty, i.e. 'True' indicates refresh is needed
+        # Data store and poll interval, used to trigger UI update
+        # programmatically
+        # data = is_dirty, i.e. 'True' indicates refresh is needed
+        dcc.Store(id='track_buffer_modified', data=False),
         dcc.Interval(id='track_buffer_poll', interval=100, n_intervals=0),
 
         # Links css style file
-        html.Link(rel="stylesheet", href=os.path.join("assets", "main_style.css")),
-        html.Link(rel="stylesheet", href=os.path.join("assets", "top_style.css")),
-        html.Link(rel="stylesheet", href=os.path.join("assets", "bottom_right_style.css")),
-        html.Link(rel="stylesheet", href=os.path.join("assets", "bottom_left_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join(
+            "assets", "main_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join(
+            "assets", "top_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join(
+            "assets", "bottom_right_style.css")),
+        html.Link(rel="stylesheet", href=os.path.join(
+            "assets", "bottom_left_style.css")),
         # Link font awesome file to use icons
         html.Link(
             rel="stylesheet",
@@ -66,7 +72,7 @@ app_layout = html.Div(
                             children=[
                                 html.Div(
                                     id="track_section",
-                                    ),
+                                ),
                                 html.Div(
                                     className="playhead",
                                     id='playhead',
@@ -84,8 +90,9 @@ app_layout = html.Div(
                 # Bottom right section
                 html.Div(
                     className="right-container",
-                    children=layout.get_right_tab_layout(bpm=bpm, beats_per_loop=tempo,
-                                                         latency_compensation_samples=latency, 
+                    children=layout.get_right_tab_layout(bpm=bpm,
+                                                         beats_per_loop=tempo,
+                                                         latency_compensation_samples=latency,
                                                          rate=rate)
                 ),
             ]
@@ -103,8 +110,10 @@ callbacks.offset_callbacks(app)
 callbacks.load_save(app)
 callbacks.playhead_callback(app)
 
+
 def run_program():
     app.run('127.0.0.1', port=8050)
+
 
 if __name__ == "__main__":
     app.run(debug=False)

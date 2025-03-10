@@ -1,9 +1,9 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-import dash
 import numpy as np
 import pandas as pd
 import plotly_express as px
+
 
 class Layout:
     def __init__(self):
@@ -18,7 +18,6 @@ class Layout:
         top_layout = [
 
             # Files section
-            # File button popup here: https://dash-bootstrap-components.opensource.faculty.ai/docs/components/modal/
             html.Div(
                 className="files-container",
                 children=[
@@ -55,12 +54,12 @@ class Layout:
                             html.Div(className="pkl-list-container",
                                      id="pkl_list_container",
                                      children=[dbc.RadioItems(
-                                                id="pkl_files",
-                                                # Initialize .pkl list
-                                                options=[],  
-                                                value=None,
-                                                inline=False)]
-                            )
+                                         id="pkl_files",
+                                         # Initialize .pkl list
+                                         options=[],
+                                         value=None,
+                                         inline=False)]
+                                     )
                         ]
                     ),
                     # Close popup button
@@ -97,7 +96,7 @@ class Layout:
                     ),
                     html.P(
                         className="member-class-text",
-                        children="Arthur Tripp | Quyen Nguyen | Matthew Pennington",
+                        children="Arthur Tripp | Quyen Nguyen |Matthew Pennington",
                         style={"padding": "0px",
                                "margin": "0px"}
                     ),
@@ -108,8 +107,7 @@ class Layout:
         return top_layout
 
     def get_loop_layout(self):
-        """
-        Generates the loop layout section."""
+        """Generates the loop layout section."""
         loop_layout = [
             html.Div(
                 className="left-loop-tab-section-container",
@@ -142,8 +140,8 @@ class Layout:
                              rate):
         """
         Generates the right tab layout with the main buttons.
-        This section has the record, play/pause, beat offset,
-        delete and save loop buttons.
+        This section has the record, play/pause, beats per loop changes,
+        bpm changes, latency changes, delete and save loop buttons.
         """
         latency = latency_compensation_samples / rate
 
@@ -196,7 +194,8 @@ class Layout:
                 ]
             ),
 
-            # Contains beats per loop (bpl), beats, and latency info in right section
+            # Contains beats per loop (bpl), beats, and latency in
+            # right section
             html.Div(
                 className="right-third-row-container",
                 children=[
@@ -209,59 +208,59 @@ class Layout:
                             html.Div(
                                 className="bpl-container",
                                 children=[
-                                     # bpl text
+                                    # bpl text
                                     html.Span(
                                         className="bpl-beats-latency-text",
-                                        id = "bpl_text",
-                                        children=f"Beats Per Loop: {beats_per_loop}"),     
+                                        id="bpl_text",
+                                        children=f"Beats Per Loop: {beats_per_loop}"),
                                     html.Button(
                                         className="decrease-button",
                                         id="decrease_bpl_button",
                                         children="▼"),
                                     html.Button(
                                         className="increase-button",
-                                        id= "increase_bpl_button",
+                                        id="increase_bpl_button",
                                         children="▲"),
-                                    ]
-                                ),
+                                ]
+                            ),
                             # Set bpm
                             html.Div(
                                 className="bpm-container",
                                 children=[
-                                     # Bpm text
+                                    # Bpm text
                                     html.Span(
                                         className="bpl-beats-latency-text",
-                                        id = "bpm_text",
-                                        children=f"BPM: {bpm}"),     
+                                        id="bpm_text",
+                                        children=f"BPM: {bpm}"),
                                     html.Button(
                                         className="decrease-button",
                                         id="decrease_bpm_button",
                                         children="▼"),
                                     html.Button(
                                         className="increase-button",
-                                        id= "increase_bpm_button",
+                                        id="increase_bpm_button",
                                         children="▲"),
-                                    ]
-                                ),
-                             # Set latency
+                                ]
+                            ),
+                            # Set latency
                             html.Div(
                                 className="latency-container",
                                 children=[
-                                     # Latency text
+                                    # Latency text
                                     html.Span(
                                         className="bpl-beats-latency-text",
-                                        id = "latency_text",
-                                        children="Latency (s) {:.2f}".format(latency)),     
+                                        id="latency_text",
+                                        children="Latency (s) {:.2f}".format(latency)),
                                     html.Button(
                                         className="decrease-button",
                                         id="decrease_latency_button",
                                         children="▼"),
                                     html.Button(
                                         className="increase-button",
-                                        id= "increase_latency_button",
+                                        id="increase_latency_button",
                                         children="▲"),
-                                    ]
-                                ),
+                                ]
+                            ),
                         ]
                     ),
                 ]
@@ -303,12 +302,11 @@ class Layout:
         """
         Updates the track section for track layout.
         """
-        
         # All track section list
         all_tracks_list = []
 
         # Get mapping of tracks
-        track_dict= self.map_tracks(track_list)
+        track_dict = self.map_tracks(track_list)
 
         # Generate track section for each track in track_list
         for track_index, track in track_dict.items():
@@ -320,111 +318,112 @@ class Layout:
                 className="track-tabs-container",
                 children=[
                     html.Div(className="left-tab-section-container",
-                            children=[
-                            html.Div(
-                                className="left-tab-left-inner-section-container",
-                                children=[
-                                    html.Span(className="track-text",
-                                            children=f"Track {track_index}:"),
-                                    # Edit track name 
-                                    dcc.Input(
-                                        className="track-name-input",
-                                        id={"type": "track_name_input",
-                                            "index": track_index}, 
-                                        # Default to original <Untitled> track name
-                                        value= f"{track_name}", 
-                                        type="text",
-                                        debounce=True,
-                                        autoComplete="off"
-                                    ),
-                                    html.Div(
-                                        className="left-row-container",
-                                        children=[
-                                            # Mute/unmute icon button
-                                            html.Button(
-                                                className="left-mute-icon-button",
-                                                id={"type": "left_mute_icon_button",
-                                                    "index": track_index},
-                                                children = [
-                                                    html.I(className="fa-solid fa-volume-xmark")],
-                                            ),
-                                            # Copy icon button
-                                            html.Button(
-                                                className="copy-button",
-                                                id={"type": "copy_button",
-                                                    "index": track_index},
-                                                children=[
-                                                    html.I(className="fa-solid fa-copy")],
-                                            ),
-                                            # Trash button
-                                            html.Button(
-                                                className="trash-button",
-                                                id={"type": "trash_button",
-                                                    "index": track_index},
-                                                children = [
-                                                    html.I(className="fa-solid fa-trash")],
-                                            )
-                                        ]
-                                    )
-                                ]
-                            ),
-                            html.Div(
-                                className="left-tab-right-inner-section-container",
-                                children=[
-                                    html.Div(
-                                        className="pitch-offset-beats-container",
-                                        children=[
-                                        # Pitch buttons
-                                        html.Div(
-                                            className="pitch-container",
-                                            children=[
-                                                html.Span(
-                                                    className="pitch-text",
-                                                    id={"type": "pitch_track_text",
-                                                        "index": track_index},  
-                                                    children=f"Pitch: {pitch_shift}"  
-                                                ),
-                                                html.Button(
-                                                    className="decrease-button",
-                                                    id={"type": "decrease_track_pitch_button",
-                                                        "index": track_index},
-                                                    children="▼"),
-                                                html.Button(
-                                                    className="increase-button",
-                                                    id={"type": "increase_track_pitch_button",
-                                                        "index": track_index},
-                                                    children="▲"),
-                                                ]
-                                            ),
+                             children=[
+                                 html.Div(
+                                     className="left-tab-left-inner-section-container",
+                                     children=[
+                                         html.Span(className="track-text",
+                                                   children=f"Track {track_index}:"),
+                                         # Edit track name
+                                         dcc.Input(
+                                             className="track-name-input",
+                                             id={"type": "track_name_input",
+                                                 "index": track_index},
+                                             # Default to original <Untitled>
+                                             # track name
+                                             value=f"{track_name}",
+                                             type="text",
+                                             debounce=True,
+                                             autoComplete="off"
+                                         ),
+                                         html.Div(
+                                             className="left-row-container",
+                                             children=[
+                                                 # Mute/unmute icon button
+                                                 html.Button(
+                                                     className="left-mute-icon-button",
+                                                     id={"type": "left_mute_icon_button",
+                                                         "index": track_index},
+                                                     children=[
+                                                         html.I(className="fa-solid fa-volume-xmark")],
+                                                 ),
+                                                 # Copy icon button
+                                                 html.Button(
+                                                     className="copy-button",
+                                                     id={"type": "copy_button",
+                                                         "index": track_index},
+                                                     children=[
+                                                         html.I(className="fa-solid fa-copy")],
+                                                 ),
+                                                 # Trash button
+                                                 html.Button(
+                                                     className="trash-button",
+                                                     id={"type": "trash_button",
+                                                         "index": track_index},
+                                                     children=[
+                                                         html.I(className="fa-solid fa-trash")],
+                                                 )
+                                             ]
+                                         )
+                                     ]
+                                 ),
+                                 html.Div(
+                                     className="left-tab-right-inner-section-container",
+                                     children=[
+                                         html.Div(
+                                             className="pitch-offset-beats-container",
+                                             children=[
+                                                 # Pitch buttons
+                                                 html.Div(
+                                                     className="pitch-container",
+                                                     children=[
+                                                         html.Span(
+                                                             className="pitch-text",
+                                                             id={"type": "pitch_track_text",
+                                                                 "index": track_index},
+                                                             children=f"Pitch: {pitch_shift}"
+                                                         ),
+                                                         html.Button(
+                                                             className="decrease-button",
+                                                             id={"type": "decrease_track_pitch_button",
+                                                                 "index": track_index},
+                                                             children="▼"),
+                                                         html.Button(
+                                                             className="increase-button",
+                                                             id={"type": "increase_track_pitch_button",
+                                                                 "index": track_index},
+                                                             children="▲"),
+                                                     ]
+                                                 ),
 
-                                        # Beats offset
-                                        html.Div(
-                                            className="offset-beats-container",
-                                            children=[
-                                                html.Span(
-                                                    className="offset-beats-text",
-                                                    id={"type": "offset_beats_text",
-                                                        "index": track_index},  
-                                                    children=f"Offset Beats: {offset_beats}"  
-                                                ),
-                                                html.Button(
-                                                    className="decrease-button",
-                                                    id={"type": "decrease_offset_beats_button",
-                                                        "index": track_index},
-                                                    children="▼"),
-                                                html.Button(
-                                                    className="increase-button",
-                                                    id={"type": "increase_offset_beats_button",
-                                                        "index": track_index},
-                                                    children="▲"),
-                                                ]
-                                            ),
-                                        ]
-                                    )
-                                ]
-                            )
-                        ]
-                    ),
+                                                 # Beats offset
+                                                 html.Div(
+                                                     className="offset-beats-container",
+                                                     children=[
+                                                         html.Span(
+                                                             className="offset-beats-text",
+                                                             id={"type": "offset_beats_text",
+                                                                 "index": track_index},
+                                                             children=f"Offset Beats: {offset_beats}"
+                                                         ),
+                                                         html.Button(
+                                                             className="decrease-button",
+                                                             id={"type": "decrease_offset_beats_button",
+                                                                 "index": track_index},
+                                                             children="▼"),
+                                                         html.Button(
+                                                             className="increase-button",
+                                                             id={"type": "increase_offset_beats_button",
+                                                                 "index": track_index},
+                                                             children="▲"),
+                                                     ]
+                                                 ),
+                                             ]
+                                         )
+                                     ]
+                                 )
+                             ]
+                             ),
                     # waveform placement:
                     html.Div([
                         dcc.Graph(id=f"waveform-{track_index}",
@@ -432,7 +431,7 @@ class Layout:
                                   style={"height": "100%", "width": "100%"},
                                   config={"displayModeBar": False}
                                   )
-                        ],
+                    ],
                         className='track-waveform'
                     )
                 ]
@@ -440,7 +439,7 @@ class Layout:
 
             # Add track section to list
             all_tracks_list.append(track_section)
-        
+
         # Make it so that the newest track is on the top and oldest track
         # section is on the bottom. Reverse the list to do this.
         return list(reversed(all_tracks_list))
@@ -449,20 +448,23 @@ class Layout:
         """
         Maps track to a track index/number.
         """
-
         # track number keys with track values
         track_dict = {}
 
-        # Make a track dictionary that maps the track to a track number and pitch
+        # Make a track dictionary that maps the track to a track number
+        # and pitch
         for index, track in enumerate(track_list):
             track_dict[index] = {
-            'track_name': track,
-            'pitch_shift': track.pitch_shift,
-            'offset_beats': track.offset_beats
-        }
+                'track_name': track,
+                'pitch_shift': track.pitch_shift,
+                'offset_beats': track.offset_beats
+            }
         return track_dict
 
     def create_waveform(self, track, latency_comp=0):
+        """
+        Creates the audio waveform for the track section.
+        """
         # grab buffered audio from track:
         audio_data = track['track_name'].buffer
         shifted_audio = np.roll(audio_data, -latency_comp + 150)

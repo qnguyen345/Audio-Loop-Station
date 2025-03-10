@@ -28,7 +28,8 @@ def generate_click(sample_rate=RATE, duration_ms=50, *, frequency):
 
 
 def generate_clicks(bpm: int, beats_per_loop: int):
-    """Generate a full click track matching the loop length, with the first click pitched differently."""
+    """Generate a full click track matching the loop length, with the first
+    click pitched differently."""
     samples_per_beat = int((60 / bpm) * RATE)
 
     # Generate the first click using a different frequency.
@@ -63,10 +64,11 @@ class Track:
         self.track_uid = uuid.uuid4()
         self.original_bpm = bpm  # BPM at the time of recording
         self.bpm = bpm           # Current target BPM
-        self._on_buffer_modified = None # Called after 'buffer' has been modified
+        self._on_buffer_modified = None  # Called after 'buffer' has been modified
 
     def apply_effects_async(self):
-        """Offload pitch shifting and time stretching to a background thread and update the buffer when done."""
+        """Offload pitch shifting and time stretching to a background thread
+        and update the buffer when done."""
         def worker():
             # If no effects are needed, just copy the raw buffer.
             if self.offset_beats == 0 and self.pitch_shift == 0 and (self.original_bpm == self.bpm):
@@ -86,15 +88,18 @@ class Track:
 
                 # Apply pitch shifting if needed.
                 if self.pitch_shift != 0:
-                    y = librosa.effects.pitch_shift(y, sr=RATE, n_steps=self.pitch_shift)
+                    y = librosa.effects.pitch_shift(
+                        y, sr=RATE, n_steps=self.pitch_shift)
 
                 # Apply offset if needed.
                 if self.offset_beats != 0:
-                    offset_samples = int(self.offset_beats * (60 / self.bpm) * RATE)
+                    offset_samples = int(
+                        self.offset_beats * (60 / self.bpm) * RATE)
                     y = np.roll(y, -offset_samples)
 
                 # Convert back to int16.
-                self.buffer = (np.clip(y, -1, 1) * 32767).astype(np.int16).reshape(-1, 1)
+                self.buffer = (np.clip(y, -1, 1) *
+                               32767).astype(np.int16).reshape(-1, 1)
 
             if self._on_buffer_modified:
                 self._on_buffer_modified(self)
@@ -102,12 +107,15 @@ class Track:
         threading.Thread(target=worker, daemon=True).start()
 
     def __getstate__(self):
+        """Creates a snapshot of the current state of object for pkl
+        to access object data."""
         # Pickle uses this dunder method to access object data
         state = self.__dict__.copy()
         state['_on_buffer_modified'] = None
         return state
 
     def __str__(self):
+        """Provides a string representation of the object."""
         elements = []
         elements.append(self.name or "Untitled")
         if self.is_muted:
@@ -141,11 +149,11 @@ class LoopMachine:
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
         self.click_is_muted = True
         self.uid = uuid.uuid4()
-        self.is_playing= True
+        self.is_playing = True
         self.latency_compensation_samples = 8000
         # A callable handler which receives a single paramter of type 'Track'
-        self.on_track_buffer_modified = None 
-        
+        self.on_track_buffer_modified = None
+
         self.stream = sd.Stream(
             samplerate=RATE,
             blocksize=CHUNK,
@@ -233,7 +241,8 @@ class LoopMachine:
         # Inject tracks
         for track in self.tracks:
             if not track.is_muted and not track.is_recording:
-                playback_start = (self.position + self.latency_compensation_samples) % self.frames_per_loop
+                playback_start = (
+                    self.position + self.latency_compensation_samples) % self.frames_per_loop
                 loop_segment = track.buffer[playback_start:playback_start + frames]
                 if loop_segment.shape[0] < frames:
                     padding = np.zeros(
@@ -257,28 +266,36 @@ class LoopMachine:
         self.stream.close()
 
     def set_bpm(self, new_bpm: int):
+        """Sets new bpm."""
         old_frames_per_loop = self.frames_per_loop
 
         self.bpm = new_bpm
-        self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+        self.frames_per_loop = int(
+            (60 / self.bpm) * self.beats_per_loop * RATE)
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
-        self.position = int(self.position * self.frames_per_loop / old_frames_per_loop)
+        self.position = int(
+            self.position * self.frames_per_loop / old_frames_per_loop)
         for track in self.tracks:
             track.bpm = new_bpm
             track.apply_effects_async()
 
     def set_beats_per_loop(self, new_beats_per_loop: int):
+        """Sets new beats per loop."""
         old_frames_per_loop = self.frames_per_loop
 
         self.beats_per_loop = new_beats_per_loop
-        self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+        self.frames_per_loop = int(
+            (60 / self.bpm) * self.beats_per_loop * RATE)
         self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
-        self.position = int(self.position * self.frames_per_loop / old_frames_per_loop)
+        self.position = int(
+            self.position * self.frames_per_loop / old_frames_per_loop)
         for track in self.tracks:
             track.frames_per_loop = self.frames_per_loop
             track.apply_effects_async()
 
     def _prewarm(self):
+        """Prepares (or "prewarms") the system by running an initial operation
+        in a background thread."""
         def worker():
             dummy_buffer = np.zeros(RATE, dtype=np.float32)
             _ = librosa.effects.pitch_shift(dummy_buffer, sr=RATE, n_steps=1)
@@ -286,6 +303,8 @@ class LoopMachine:
         threading.Thread(target=worker, daemon=True).start()
 
     def __getstate__(self):
+        """Creates a snapshot of the current state of object for pkl
+        to access object data."""
         # Pickle uses this dunder method to access object data
         state = self.__dict__.copy()
         state['on_track_buffer_modified'] = None
@@ -330,14 +349,17 @@ class LoopMachine:
                     continue
                 # O(1):
                 self.__dict__ = loaded.__dict__
-                self.frames_per_loop = int((60 / self.bpm) * self.beats_per_loop * RATE)
+                self.frames_per_loop = int(
+                    (60 / self.bpm) * self.beats_per_loop * RATE)
                 # Reinitialize the click track
-                self.click_track = generate_clicks(self.bpm, self.beats_per_loop)
+                self.click_track = generate_clicks(
+                    self.bpm, self.beats_per_loop)
 
         except FileNotFoundError:
             print(f'{filename} was not found.')
 
     def repr_log(self):
+        """Logs the string representation of the object to 'repr_log.txt'."""
         with open('repr_log.txt', 'a') as log:
             log.write('\n')
             log.write('___________________\n')
@@ -346,13 +368,17 @@ class LoopMachine:
                 log.write(f'{key}: {self.__dict__[key]} \n')
 
     def __repr__(self):
+        """Prints an object with its class name and attributes."""
         return f'{self.__class__.__name__}: {self.__dict__}'
 
     def __str__(self):
+        """Formats a summary of the `tracks` attribute, showing the number
+        of tracks and a list of their string representations."""
         result = f"Tracks ({len(self.tracks)}):"
         for i, track in enumerate(self.tracks):
             result += f"\n  {i}: {track}"
         return result
+
 
 if __name__ == "__main__":
     tempo = int(input('Tempo: '))
