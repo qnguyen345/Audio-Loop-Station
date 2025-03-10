@@ -101,6 +101,11 @@ class Track:
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def __getstate__(self):
+        # Pickle uses this dunder method to access object data
+        state = self.__dict__.copy()
+        state['_on_buffer_modified'] = None
+        return state
 
     def __str__(self):
         elements = []
@@ -283,6 +288,7 @@ class LoopMachine:
     def __getstate__(self):
         # Pickle uses this dunder method to access object data
         state = self.__dict__.copy()
+        state['on_track_buffer_modified'] = None
         state['stream'] = None
         return state
 
