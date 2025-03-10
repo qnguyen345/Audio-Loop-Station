@@ -29,7 +29,7 @@ The straightforward and intuitive user interface ensures basic functionality can
 ### Windows
 1) Git clone the repository: <br> ```git clone https://github.com/qnguyen345/Audio-Loop-Station.git```
 2) Create a virtual environment:<br> ```python3 -m venv venv```
-3) Activate virtual environment:<br>```venv\Scripts\activate```
+3) Activate virtual environment:<br>```venv\bin\activate```
 4) Install dependecies from requirements.txt: <br>```pip3 install -r requirements.txt```
 5) Run the app by running: <br>```python3 launch.py```
 
@@ -52,7 +52,7 @@ After running ```python3 launch.py``` in the terminal, the app will automaticall
 ## Button Functions
 
 ### Track-Related Buttons
-<img src="docs/README_imgs/record.png" width="100px"/> *Record*: Record one track audio.
+<img src="docs/README_imgs/record.png" width="100px"/> *Record:* Record one track audio.
 <br> 
 <img src="docs/README_imgs/track_num_name.png" width="80px"/> *Track Number and Name:* The track number is displayed above the track name. The default track name is "< Untitled >", which can be renamed by clicking on it and entering a new name.
 <br> 
@@ -74,9 +74,9 @@ After running ```python3 launch.py``` in the terminal, the app will automaticall
 <br>
 <img src="docs/README_imgs/beats_per_loop.png" width="100px"/> *Beats Per Loop:* Decrease (down arrow) or increase (up arrow) the beats per loop by 1.
 <br>
-<img src="docs/README_imgs/bpm.png" width="75px"/> *Beats per Minute (BPM)* Decrease (down arrow) or increase (up arrow) the loop bpm by 10.
+<img src="docs/README_imgs/bpm.png" width="75px"/> *Beats per Minute (BPM):* Decrease (down arrow) or increase (up arrow) the loop bpm by 10.
 <br>
-<img src="docs/README_imgs/latency.png" width="100px"/> *Latency (s)* Decrease (down arrow) or increase (up arrow) the loop latency by 0.1s.
+<img src="docs/README_imgs/latency.png" width="100px"/> *Latency (s):* Decrease (down arrow) or increase (up arrow) the loop latency by 0.1s.
 <br>
 <img src="docs/README_imgs/delete_loop_2.png" width="80px"/> <img src="docs/README_imgs/delete_loop_1.png" width="80px"/> *Delete Loop:* Delete the loop along with all its tracks.
 <br>
@@ -84,4 +84,4 @@ After running ```python3 launch.py``` in the terminal, the app will automaticall
 <br>
 <img src="docs/README_imgs/files.png" width="50px"/> *Files:* Opens a files popup displaying a list of .pkl files in the "loops" folder.
 <br>
-<img src="docs/README_imgs/load_files.png" width="300px"/> *Load Loop Files* Loads the selected .pkl loop file into the application and displays the tracks within it.
+<img src="docs/README_imgs/load_files.png" width="300px"/> *Load Loop Files:* Loads the selected .pkl loop file into the application and displays the tracks within it.
