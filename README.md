@@ -23,14 +23,14 @@ The straightforward and intuitive user interface ensures basic functionality can
 1) Git clone the repository: <br> ```git clone https://github.com/qnguyen345/Audio-Loop-Station.git```
 2) Create a virtual environment:<br> ```python3 -m venv venv```
 3) Activate virtual environment:<br>```source venv/bin/activate```
-4) Install dependecies from requirements.txt: <br>```pip3 install -r requirements.txt```
+4) Install dependencies from requirements.txt: <br>```pip3 install -r requirements.txt```
 5) Run the app by running: <br>```python3 launch.py```
 
 ### Windows
 1) Git clone the repository: <br> ```git clone https://github.com/qnguyen345/Audio-Loop-Station.git```
 2) Create a virtual environment:<br> ```python -m venv venv```
 3) Activate virtual environment:<br>```venv\Scripts\activate```
-4) Install dependecies from requirements.txt: <br>```pip install -r requirements.txt```
+4) Install dependencies from requirements.txt: <br>```pip install -r requirements.txt```
 5) Run the app by running: <br>```python launch.py```
 
 After running ```launch.py``` in the terminal, the app will automatically launch in an external window, and users do not need to enter a URL as the app will open directly in the WebKit-based window. The app is configured to run on localhost:8050.
