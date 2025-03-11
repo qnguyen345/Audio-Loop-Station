@@ -59,9 +59,9 @@ Note: The app Input and Output Audio is based on the computer's Input and Output
 <br> 
 <img src="docs/README_imgs/copy_track.png" width="30px"/> *Duplicate Track*: Duplicates the selected track audio.
 <br> 
-<img src="docs/README_imgs/delete_track.png" width="25px"/> *Duplicate Track*: Delete the selected track.
+<img src="docs/README_imgs/delete_track.png" width="25px"/> *Delete Track*: Delete the selected track.
 <br> 
-<img src="docs/README_imgs/pitch.png" width="70px"/> *Pitch Changes*: Decrease (down arrow) or increase (up arrow) the track's picth by 1.
+<img src="docs/README_imgs/pitch.png" width="70px"/> *Pitch Changes*: Decrease (down arrow) or increase (up arrow) the track's pitch by 1.
 <br> 
 <img src="docs/README_imgs/offset_beats.png" width="100px"/> *Offset Beats*: Decrease (down arrow) or increase (up arrow) the track's beats by 0.1.
 
