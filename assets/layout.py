@@ -165,6 +165,8 @@ class Layout:
                     ),
                 ]
             ),
+            # Second row
+            # Contains Play/Pause, Mute/unmute clicks
             html.Div(
                 className="right-second-row-container",
                 children=[
@@ -194,21 +196,20 @@ class Layout:
                 ]
             ),
 
+            # Third row
             # Contains beats per loop (bpl), beats, and latency in
-            # right section
             html.Div(
                 className="right-third-row-container",
                 children=[
 
-                    # Beats per loop, Beats, and latency
+                    # Beats per loop, Beats, and latency container
                     html.Div(
                         className="bpl-beats-latency-container",
                         children=[
-                            # Set bpl
                             html.Div(
                                 className="bpl-container",
                                 children=[
-                                    # bpl text
+                                    # bpl text and buttons
                                     html.Span(
                                         className="bpl-beats-latency-text",
                                         id="bpl_text",
@@ -227,7 +228,7 @@ class Layout:
                             html.Div(
                                 className="bpm-container",
                                 children=[
-                                    # Bpm text
+                                    # bpm text and buttons
                                     html.Span(
                                         className="bpl-beats-latency-text",
                                         id="bpm_text",
@@ -246,7 +247,7 @@ class Layout:
                             html.Div(
                                 className="latency-container",
                                 children=[
-                                    # Latency text
+                                    # Latency text and buttons
                                     html.Span(
                                         className="bpl-beats-latency-text",
                                         id="latency_text",
@@ -266,11 +267,13 @@ class Layout:
                 ]
             ),
 
+            # Fourth row
+            # Contains save and delete buttons
             html.Div(
                 className="right-fourth-row-container",
                 children=[
 
-                    # Save button to save loop
+                    # Delete button to delete current loop
                     html.Button(
                         className="delete-loop-button",
                         id="delete_loop_button",
@@ -281,7 +284,7 @@ class Layout:
                         ]
                     ),
 
-                    # Save button to save loop
+                    # Save button to save current loop
                     html.Button(
                         className="save-button",
                         id="save_button",
@@ -321,6 +324,7 @@ class Layout:
                              children=[
                                  html.Div(
                                      className="left-tab-left-inner-section-container",
+                                     # Track number
                                      children=[
                                          html.Span(className="track-text",
                                                    children=f"Track {track_index}:"),
@@ -329,8 +333,7 @@ class Layout:
                                              className="track-name-input",
                                              id={"type": "track_name_input",
                                                  "index": track_index},
-                                             # Default to original <Untitled>
-                                             # track name
+                                             # Default to original <Untitled> track name
                                              value=f"{track_name}",
                                              type="text",
                                              debounce=True,
@@ -367,13 +370,14 @@ class Layout:
                                          )
                                      ]
                                  ),
+                                 # Pitch and offset beats container
                                  html.Div(
                                      className="left-tab-right-inner-section-container",
                                      children=[
                                          html.Div(
                                              className="pitch-offset-beats-container",
                                              children=[
-                                                 # Pitch buttons
+                                                 # Pitch text and buttons
                                                  html.Div(
                                                      className="pitch-container",
                                                      children=[
@@ -396,7 +400,7 @@ class Layout:
                                                      ]
                                                  ),
 
-                                                 # Beats offset
+                                                 # Beats offset text and buttons
                                                  html.Div(
                                                      className="offset-beats-container",
                                                      children=[

@@ -1,5 +1,7 @@
 import sounddevice as sd
 
+# Lists the available audio input devices in the system
+# and displays their name and latency (s)
 devices = sd.query_devices()
 print("Available Audio Input Devices:")
 for i, device in enumerate(devices):

@@ -250,6 +250,7 @@ def button_callbacks(app):
         button_id = get_button_id()
         if "delete_loop_trash_button" == button_id or "delete_loop_button" == button_id:
             track_list = loop_machine.tracks
+            # Deletes everything in the list by clearing it
             track_list.clear()
             updated_track_section = Layout().update_track_section(track_list)
             return updated_track_section
@@ -330,7 +331,7 @@ def offset_callbacks(app):
         # Decrease bpm by 10
         if decrease_bpm and button_id == "decrease_bpm_button":
             bpm -= 10
-        # Increase bpm offset by 0.5
+        # Increase bpm by 10
         elif increase_bpm and button_id == "increase_bpm_button":
             bpm += 10
 
@@ -362,7 +363,8 @@ def offset_callbacks(app):
         # Increase bpm offset by 0.01
         elif increase_latency and button_id == "increase_latency_button":
             latency += 0.01
-
+        
+        # Calculate new latency compensation samples with new latency
         new_latency_comp = int(float(latency) * loop_machine.rate)
         loop_machine.latency_compensation_samples = new_latency_comp
         track_list = loop_machine.tracks
